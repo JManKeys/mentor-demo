@@ -216,7 +216,7 @@ function StrongNote({ text }) {
 
 // Placeholder-only — no real video source. This demo never plays an
 // actual embed; the point is to show where it lives in the flow.
-function VideoCardPlaceholder({ label, desc }) {
+function VideoCard({ label, desc, src }) {
   return (
     <div className="slide-in" style={{
       background: B.darkBlue, borderRadius: 14, overflow: "hidden", marginBottom: 16,
@@ -231,21 +231,18 @@ function VideoCardPlaceholder({ label, desc }) {
         <div style={{ fontSize: 12, color: "rgba(255,255,255,0.65)", lineHeight: 1.5, marginBottom: 14 }}>
           {desc}
         </div>
-        <div style={{
-          background: "rgba(255,255,255,0.08)", borderRadius: 10, height: 52,
-          display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
-        }}>
-          <div style={{
-            width: 0, height: 0,
-            borderTop: "9px solid transparent", borderBottom: "9px solid transparent",
-            borderLeft: `15px solid ${B.copper}`, marginLeft: 3,
-          }} />
-          <span style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", letterSpacing: 0.5 }}>
-            Placeholder for surgeon video
-          </span>
-        </div>
+        <video
+          src={src}
+          controls
+          preload="metadata"
+          style={{
+            width: "100%", borderRadius: 10, display: "block",
+            background: "#000",
+          }}
+        />
       </div>
     </div>
+  
   );
 }
 
@@ -488,7 +485,7 @@ function DemoBeatScreen({ onDone, scrollRef }) {
             </div>
           ) : (
             <div>
-              <VideoCardPlaceholder label={DEMO_BEAT.videoLabel} desc={DEMO_BEAT.videoDesc} />
+              <VideoCard label={DEMO_BEAT.videoLabel} desc={DEMO_BEAT.videoDesc} src="Adams_2.2.mp4" />
               <div className="slide-in-delay" style={{ marginBottom: 12 }}>
                 <PrimaryBtn onClick={onDone}>Finish the consultation →</PrimaryBtn>
               </div>
