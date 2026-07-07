@@ -38,6 +38,7 @@
   @media (min-width: 900px) {
     .app-shell { max-width: 760px; }
     .desktop-row { display: flex; gap: 20px; align-items: flex-start; }
+    .video-frame { max-width: 340px; margin: 0 auto; }
     .desktop-row > * { flex: 1; }
   }
 </style>
@@ -434,7 +435,7 @@ function VideoCard({ label, desc, isSecond = false, animClass = "slide-in", vime
 
         {localSrc ? (
           // ── Native video (GitHub-hosted mp4, portrait 9:16) ──
-          <div style={{ position: "relative", paddingBottom: "177.78%", borderRadius: 10, overflow: "hidden", background: "#000" }}>
+          <div className="video-frame" style={{ position: "relative", paddingBottom: "177.78%", borderRadius: 10, overflow: "hidden", background: "#000" }}>
             <video
               src={localSrc}
               controls
@@ -446,7 +447,7 @@ function VideoCard({ label, desc, isSecond = false, animClass = "slide-in", vime
           </div>
         ) : vimeoId ? (
           // ── Vimeo embed (portrait 9:16) ──
-          <div style={{ position: "relative", paddingBottom: "177.78%", borderRadius: 10, overflow: "hidden" }}>
+          <div className="video-frame" style={{ position: "relative", paddingBottom: "177.78%", borderRadius: 10, overflow: "hidden" }}>
             <iframe
               src={`https://player.vimeo.com/video/${vimeoId}?badge=0&autopause=0&player_id=0&app_id=58479`}
               frameBorder="0"
@@ -458,7 +459,7 @@ function VideoCard({ label, desc, isSecond = false, animClass = "slide-in", vime
           </div>
         ) : brightcoveUrl ? (
           // ── Brightcove embed (portrait 9:16) ──
-          <div style={{ position: "relative", paddingBottom: "177.78%", borderRadius: 10, overflow: "hidden", background: "#000" }}>
+          <div className="video-frame" style={{ position: "relative", paddingBottom: "177.78%", borderRadius: 10, overflow: "hidden", background: "#000" }}>
             <iframe
               src={brightcoveUrl}
               allowFullScreen
