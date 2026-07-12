@@ -3,9 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>MENTOR™ Residency · Module 4 Prototype</title>
+<title>MENTOR™ Residency · Module 1 Prototype</title>
 <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<!-- Babel CDN — pinned per project standard. Unpinned unpkg.com serves "latest",
+     which silently broke Module 1 and 2's original prototypes when Babel 7.29.0
+     shipped a regression (Jan 2026). Never remove this version pin. -->
 <script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -33,13 +36,16 @@
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: #C0C8D4; border-radius: 4px; }
 
-  /* Desktop breakpoint — widens the column and allows side-by-side cards past 900px */
+  /* Desktop breakpoint — matches Module 4 / shared components reference */
   .app-shell { max-width: 480px; }
   @media (min-width: 900px) {
     .app-shell { max-width: 760px; }
     .desktop-row { display: flex; gap: 20px; align-items: flex-start; }
-    .video-frame { max-width: 340px; margin: 0 auto; }
     .desktop-row > * { flex: 1; }
+    /* Video-frame desktop cap — independent of .app-shell width. Paired with
+       VideoCard's aspectRatio property below (NOT paddingBottom percentage —
+       see MENTOR_Residency_Pitfalls.md #8 for why that trick breaks here). */
+    .video-frame { max-width: 340px; margin: 0 auto; }
   }
 </style>
 </head>
@@ -51,11 +57,11 @@ const { useState, useRef, useEffect } = React;
 
 // ── Brand tokens ──────────────────────────────────────────────────────────────
 const B = {
-  darkBlue:  "#002334",
-  blue:      "#004B8D",
+  darkBlue:  "#002756",
+  blue:      "#004DAC",
   lightBlue: "#E4EFF7",
   copper:    "#E0B183",
-  cream:     "#FFFBF4",
+  cream:     "#f8f2ed",
   white:     "#FFFFFF",
   midGrey:   "#8A8A8A",
   softGrey:  "#F5F7FA",
@@ -69,177 +75,175 @@ const B = {
 };
 
 // ── Beat data ─────────────────────────────────────────────────────────────────
-// Source: Module_04_Beats_Working_Draft.md (all four beats SETTLED) and
-// Module_04_Sarah_Revisited.docx v2. Video selection per Residency_Video_Tracker.xlsx:
-// 4.1 Primary Adams / Secondary Mosharrafa
-// 4.2 Primary Adams / Secondary Mosharrafa
-// 4.3 Primary Mosharrafa / Secondary Mohan
-// 4.4 Primary Adams / Secondary Mosharrafa
-// GITHUB PAGES DEMO COPY — video sources point to local mp4 files hosted
-// in this same repo (jmankeys.github.io/mentor-demo/), via VideoCard's
-// localSrc/localSrc2 props. This is separate from the Brightcove URLs the
-// real LMS build will use — do not carry localSrc into the SCORM package.
-// Miss positions: Beat1=B, Beat2=A, Beat3=B, Beat4=? (see options below for actual per-beat quality assignment; not a fixed pattern).
+// Source: Module_01_Beats_Working_Draft.md (all four beats DRAFT, option lengths
+// rebalanced July 7 — see Pitfall #10) and Module_01_Maya.docx. Video selection
+// per Residency_Video_Tracker.xlsx:
+// 1.1 Primary Mosharrafa / Secondary Yates
+// 1.2 Primary Mosharrafa / Secondary Mohan
+// 1.3 Primary Adams / Secondary Mosharrafa
+// 1.4 Primary Mohan / Secondary Mosharrafa
+// No video assets are hosted yet for Module 1 — VideoCard renders its placeholder
+// state (no localSrc/brightcoveUrl/vimeoId/streamSrc) until real clips are edited
+// and hosted.
+// Copy-approval note (Beat 1, per Section 8.2): Mosharrafa's video includes the
+// line "we know that silicone implants are safe and do not cause any form of
+// human disease" — the BIA-ALCL black-box disclosure-adjacent claim. Resolved:
+// Laura doesn't see this as a concern; standard copy approval will flag it
+// downstream if reviewers disagree. No special handling needed in this build.
+// Strong-option position varies per beat (Beat1=A, Beat2=B, Beat3=C, Beat4=B) so
+// the strong answer isn't reliably in one letter position.
 const BEATS = [
   {
     id: 1,
-    topicQuestion: `"A friend told me her recovery was uncomfortable — how bad is it really?"`,
-    videoLabel: "What Recovery Actually Looks Like",
-    videoLabel2: "The Week-by-Week Breakdown",
-    videoDesc: "How a modern, well-executed approach to breast augmentation is built around fast functional recovery — same-day activity, quick return to normal life.",
-    videoDesc2: "A more detailed week-by-week recovery timeline — what's normal at 72 hours, at two weeks, and at six weeks.",
-    localSrc: "Adams_4.1.mp4",
-    localSrc2: "Mosh_4.1.mp4",
-    predictionPrompt: "Before the video plays: what do you think an experienced surgeon says when a patient asks whether her own recovery was normal?",
-    sarahOpen: `"Honestly, the first couple weeks were harder than I expected — nobody really tells you what day three feels like. I'm doing so much better now, but it kind of made me realize I never really asked what 'normal' recovery actually looks like. Was what I went through normal, or should I have called someone?"`,
-    sarahMood: "open",
+    topicQuestion: `"I keep hearing about saline versus silicone — honestly, what's the difference? Which one is better?"`,
+    videoLabel: `Saline vs. Silicone: What the Difference Actually Means`,
+    videoLabel2: `A Fuller Picture of the Implant Portfolio`,
+    videoDesc: "Covers the shell/fill distinction, rippling and wrinkling differences (more pronounced in saline, especially on leaner builds), and silicone's lower palpability — closing with a direct recommendation of silicone for most patients.",
+    videoDesc2: "Frames the choice around the broader Mentor portfolio rather than a binary — his go-to is Memory Gel Boost for most patients, but flags saline's specific appeal to patients who want peace of mind about what's inside if a rupture occurs.",
+    predictionPrompt: "Before the video plays: what do you think an experienced surgeon says when a patient who's already decided on silicone asks him to walk her through the difference anyway?",
+    mayaOpen: `"I've done a ton of research — probably more than I should have, honestly. I know I want silicone, but I keep reading things that make me second-guess myself. Can you just walk me through the difference so I know I'm making the right call?"`,
+    mayaMood: "open",
     options: [
       {
         label: "A",
-        text: "Tell her that recovery varies a lot from patient to patient, and that as long as she's feeling better now, there's nothing to worry about.",
-        quality: "miss",
-        sarahReact: `"...Okay."`,
-        sarahMood: "quiet",
-        missNote: "This never confirms whether what she went through was normal. She's still holding the same question she walked in with.",
+        text: "They're both safe, well-studied devices — but they behave differently on the body, especially depending on your own tissue coverage. Let me walk you through what that difference actually means for your build specifically.",
+        quality: "strong",
+        mayaReact: `"Okay — good, that's what I'm here for. I don't want the sales pitch version. I want to actually understand what I'm choosing."`,
+        mayaMoodReact: "engaged",
+        strongNote: "Direct, doesn't dodge a real recommendation, and ties the explanation to her specific anatomy instead of a generic pitch — matches what the persona doc identifies as making her consultation go well.",
       },
       {
         label: "B",
-        text: "Reassure her that the first two weeks are always the hardest part for everyone, and that she's clearly through the worst of it now.",
-        quality: "weak",
-        sarahReact: `"Right, yeah. I guess so."`,
-        sarahMood: "quiet",
-        missNote: "General reassurance, but nothing specific to what she experienced. She still doesn't know if day three was normal or something worth calling about.",
+        text: "Silicone is what most of my patients choose, and for good reason. You're probably going to end up there — let me explain why it's a great option.",
+        quality: "miss",
+        mayaReact: `"I mean, sure, but that's kind of what I already said, right? I was hoping you'd actually walk me through why — not just tell me I'm right."`,
+        mayaMoodReact: "challenging",
+        missNote: "This validates her conclusion without validating her research. She came in prepared and got treated like she hadn't done the work.",
       },
       {
         label: "C",
-        text: "Frame her recovery around a modern approach to breast augmentation built for fast recovery — same-day light activity, quick return to normal life — and confirm that what she went through lines up with that.",
-        quality: "strong",
-        sarahReact: `"Oh, okay — so I wasn't doing anything wrong by feeling back to normal that fast, that's actually just how it's supposed to go now?"`,
-        sarahMood: "engaged",
-        strongNote: "This directly answers the question she actually asked — was it normal — instead of just sympathizing with the first two weeks.",
+        text: "Saline and silicone are both fine, safe options — a lot of it really comes down to personal preference and what feels right to you once you've tried them on.",
+        quality: "weak",
+        mayaReact: `"Okay, but that's not really an answer. I've read that silicone feels more natural and saline ripples more — is that not true, or does it just not matter as much as people online make it sound?"`,
+        mayaMoodReact: "challenging",
+        missNote: "Technically true but content-free. Maya already has this level of information; she's asking for something more specific and she notices the gap immediately.",
       },
     ],
   },
   {
     id: 2,
-    topicQuestion: `"How long will implants last? Am I going to need to replace them?"`,
-    videoLabel: "Implant Longevity: The Current Generation",
-    videoLabel2: "A Different Angle on the 'Ten Years' Question",
-    videoDesc: "What the current generation of devices actually shows for long-term rupture rates, and why ongoing ultrasound surveillance — not a fixed expiration date — is the responsible way to track it.",
-    videoDesc2: "A second surgeon directly names and corrects the 'ten years' myth patients often hear.",
-    localSrc: "Adams_4.2.mp4",
-    localSrc2: "Mosh_4.2.mp4",
-    predictionPrompt: "Before the video plays: what do you think an experienced surgeon says when a patient repeats a 'ten years and you need to replace them' claim she heard secondhand?",
-    sarahOpen: `"I read somewhere — or maybe it was my sister, actually — that implants only last like ten years and then you have to get them redone. Is that true? Because nobody mentioned anything like that to me before the surgery, and now I'm wondering if I missed something."`,
-    sarahMood: "open",
+    topicQuestion: `"What does 'natural' mean? Because everyone I talk to says they want to look natural but then shows me pictures that look pretty done."`,
+    videoLabel: `Defining "Natural" as a Clinical Goal`,
+    videoLabel2: `Using Inspiration Photos to Decode "Natural"`,
+    videoDesc: "His definition centers on upper-pole slope and takeoff rather than roundness, plus the distinction between how a breast looks in vs. out of a bra — natural at rest, adjustable with support.",
+    videoDesc2: "Her approach: patients use the same word to mean different, sometimes opposite things (natural slope vs. proportionate/augmented), and inspiration photos are the tool for surfacing which one a given patient actually means.",
+    predictionPrompt: "Before the video plays: what do you think an experienced surgeon means by 'natural,' clinically, when a patient shows him a photo that's clearly augmented?",
+    mayaOpen: `"Okay — so I have this picture. [She turns her phone toward you. The result is clearly augmented — fuller upper pole, visible projection.] This is kind of the look I'm going for. Is that natural? Because when I say natural, I think I mean something specific, but everyone looks at me weird when I show them this."`,
+    mayaMood: "open",
     options: [
       {
         label: "A",
-        text: "Cite the long-term rupture rate data directly, but don't mention any ongoing monitoring or checkup plan.",
+        text: "That photo is a fuller, more augmented look than what most people mean by 'natural' — it usually points to something a bit more subtle. Did you want to look at some more natural options too?",
         quality: "weak",
-        sarahReact: `"Oh — so there's still a real chance it could happen, then?"`,
-        sarahMood: "uncertain",
-        missNote: "A number without any follow-up plan can sound more alarming than reassuring. She's left with a statistic and no sense of what happens next.",
+        mayaReact: `"I mean, maybe? But I feel like you're kind of telling me what I actually want instead of asking me."`,
+        mayaMoodReact: "challenging",
+        missNote: `Correctly identifies the photo as augmented, but pivots to redirecting her preference rather than first understanding what she means by "natural" — reads as managing her instead of engaging her.`,
       },
       {
         label: "B",
-        text: "Explain that the devices used today are a different generation from the ones behind that old claim, cite the actual long-term rupture data, and describe the ongoing ultrasound checkups that monitor implants over time.",
+        text: "I want to be honest with you — that result is augmented, not subtle. 'Natural' means different things to different people, though, so before we go further, I want to understand what you actually mean by it.",
         quality: "strong",
-        sarahReact: `"Okay — so it's not like there's some hard cutoff, and you'd actually catch it if something changed? That actually helps."`,
-        sarahMood: "engaged",
-        strongNote: "She wasn't just asking if the number was true — she wanted to know what happens if it does fail, and how anyone would catch it. This covers both.",
+        mayaReact: `"Yeah, I know it's augmented — I'm not trying to pretend it's not. I just mean it looks intentional, like it fits her. That's what I want. Not the fake round thing."`,
+        mayaMoodReact: "engaged",
+        strongNote: `Honest about what the photo actually shows, doesn't correct her taste, and asks the clarifying question that actually gets at her real goal — matches the persona doc's "help her understand that natural is a clinical conversation, not a vague preference."`,
       },
       {
         label: "C",
-        text: "Tell her that implants can last a long time and there's no need to worry about a fixed replacement schedule.",
+        text: "We can absolutely work toward a result like that — it's a great reference point, and honestly a lot of patients bring in photos just like it, so you're definitely not alone there.",
         quality: "miss",
-        sarahReact: `"...Okay."`,
-        sarahMood: "quiet",
-        missNote: "This corrects the myth in the vaguest way possible — no number, no plan. She still doesn't know what happens if something changes.",
+        mayaReact: `"Okay, but what does that actually mean for me, specifically? Like, will it look like that on my body? I'm not the same as whoever that is in the photo."`,
+        mayaMoodReact: "challenging",
+        missNote: `Agrees without defining anything. Maya's actual question — what does "natural" mean, clinically — goes unanswered, and she notices the dodge immediately.`,
       },
     ],
   },
   {
     id: 3,
-    topicQuestion: `"Is breast augmentation safe?"`,
-    videoLabel: "Reframing Risk: The 99.9% Conversation",
-    videoLabel2: "A Second Perspective on Documenting the Safety Conversation",
-    videoDesc: "How to have an honest, non-alarming conversation about real but low surgical risk — using a positive-framing technique rather than a flat reassurance.",
-    videoDesc2: "A second surgeon's approach to making sure the safety conversation is documented as having happened.",
-    localSrc: "Mosh_4.3.mp4",
-    localSrc2: "Mohan_4.3.mp4",
-    predictionPrompt: "Before the video plays: what do you think an experienced surgeon says when a patient asks, in the abstract, whether the surgery she already had was actually safe?",
-    sarahOpen: `"Can I ask something kind of random? I never really let myself think about this before surgery — I was so focused on just getting through it — but now I keep wondering... is this actually safe? Like, long-term, am I going to be okay?"`,
-    sarahMood: "vulnerable",
+    topicQuestion: `"I've seen round ones and teardrop-shaped ones online — does the shape of the implant actually matter?"`,
+    videoLabel: `Round vs. Shaped: What Actually Determines the Look`,
+    videoLabel2: `How Profile and Volume Distribution Actually Work`,
+    videoDesc: `His position: the "only teardrop looks natural" claim is flawed — a well-fitted round implant can look just as natural, and round is more versatile across patient anatomy. Fit to the breast, not implant shape alone, drives the result.`,
+    videoDesc2: "More technical companion: base diameter and desired volume determine profile (not the reverse), and round implants typically retain more upper-pole volume than teardrop — relevant to patients who want fuller upper pole vs. those who don't.",
+    predictionPrompt: "Before the video plays: what do you think an experienced surgeon says when a patient repeats a belief she picked up online — that round implants look fake?",
+    mayaOpen: `"Someone I follow just got the teardrop ones and said they're more natural-looking. Is that true? Because I've seen people say round ones look fake, and I really don't want that round-ball thing at the top."`,
+    mayaMood: "open",
     options: [
       {
         label: "A",
-        text: "Tell her there's essentially zero risk at this point, since she's already six weeks out and doing well.",
-        quality: "weak",
-        sarahReact: `"Oh — okay, that's good to hear I guess."`,
-        sarahMood: "quiet",
-        missNote: "Zero risk isn't accurate, and it skips the honest conversation her question was actually asking for.",
+        text: "Teardrop implants are a great choice for a lot of patients, and a lot of people love how they look — let's go ahead and talk through getting you fitted for one.",
+        quality: "miss",
+        mayaReact: `"Wait, I thought I was just asking a question, not deciding right now. I still don't really know why — you're just agreeing with what I already said."`,
+        mayaMoodReact: "challenging",
+        missNote: "Takes her stated preference at face value and skips straight to a plan, without addressing whether her round-implant belief is actually accurate.",
       },
       {
         label: "B",
-        text: "Reassure her that it's very safe and she doesn't need to worry about it at this point.",
-        quality: "miss",
-        sarahReact: `"...Okay."`,
-        sarahMood: "quiet",
-        missNote: "Reassuring, but vague. Nothing here actually addresses what she's asking.",
+        text: "Shape isn't really the main thing that determines the final look — there's a lot more going on underneath the surface that most patients don't think to ask about before their consult.",
+        quality: "weak",
+        mayaReact: `"Okay, but then what actually determines it? That feels like a bit of a non-answer."`,
+        mayaMoodReact: "challenging",
+        missNote: "Correctly complicates her assumption but doesn't finish the thought — leaves her with less certainty and no new information to replace it.",
       },
       {
         label: "C",
-        text: "Give a direct yes, name the real but low risks in concrete terms, and reframe them positively — for example, a 99.9% chance of no negative impact, rather than a 0.1% chance of harm.",
+        text: "The teardrop-versus-round debate is mostly driven by what's trending online. For most patients, a well-chosen round implant looks just as natural, sometimes more so. Let me show you why that's true for your anatomy.",
         quality: "strong",
-        sarahReact: `"Okay — put that way, it actually sounds a lot less scary than I was making it in my head."`,
-        sarahMood: "relieved",
-        strongNote: "A real number, framed constructively, answers the question directly instead of talking around it.",
+        mayaReact: `"Really? That surprises me — the before-and-afters I've seen looked pretty different. What makes you say that?"`,
+        mayaMoodReact: "engaged",
+        strongNote: `Directly and confidently corrects a belief she arrived with, without dismissing what she saw online — she pushes back, but she's still in the conversation, which is the version of "challenge" the persona doc frames as productive. (Ends on her own follow-up question rather than a settled reaction — intentional, matches her "tests whether the surgeon actually knows what they're talking about" trait.)`,
       },
     ],
   },
   {
     id: 4,
-    topicQuestion: `"What happens if something goes wrong down the road — who handles that?"`,
-    videoLabel: "The Actual Numbers, and What To Do",
-    videoLabel2: "The Mentor Warranty: A Second Perspective",
-    videoDesc: "A concrete look at real complication rates and a clear, direct next step: what to do and who to call if something feels wrong.",
-    videoDesc2: "A second surgeon's fuller answer, including how the Mentor warranty factors into what happens if something goes wrong.",
-    localSrc: "Adams_4.4.mp4",
-    localSrc2: "Mosh_4.4.mp4",
-    predictionPrompt: "Before the video plays: what do you think an experienced surgeon actually tells a patient who asks a calm, practical 'what's the process' question about long-term complications?",
-    sarahOpen: `"Okay, last thing — and I promise this isn't me trying to find something to worry about. But if something did go wrong down the road, like years from now, what actually happens? Do I just call you? Is there a process?"`,
-    sarahMood: "open",
+    topicQuestion: `"A friend told me her implants feel completely real — is that actually possible?"`,
+    videoLabel: `Cohesivity and What It Actually Feels Like`,
+    videoLabel2: `Matching Implant to Tissue for a Natural Feel`,
+    videoDesc: `Her framing: thicker gel (e.g., Boost) reads firmer and more upright; softer gel (classic Memory Gel) has more natural slope and give. Directly explains the "firm" sensation Maya described at her fitting.`,
+    videoDesc2: "Complementary: soft-tissue evaluation and cohesivity matching are what make an implant undetectable by feel — framed as the explicit goal of the surgery, not just a possible outcome.",
+    predictionPrompt: "Before the video plays: what do you think an experienced surgeon says determines whether an implant actually feels real?",
+    mayaOpen: `"Last thing — my friend said hers feel completely real. Like, she says people can't tell unless she tells them. Is that actually possible? Because I've touched some at like a fitting thing and they felt… firm. Not bad, just not what I expected."`,
+    mayaMood: "vulnerable",
     options: [
       {
         label: "A",
-        text: "Give her the actual complication-rate numbers alongside a clear next step — call the office, come back in to be seen, sooner rather than later if something feels off.",
-        quality: "strong",
-        sarahReact: `"Okay, good — that's easy enough to remember."`,
-        sarahMood: "engaged",
-        strongNote: "She asked a logistics question, and this gives her a logistics answer — the number and the actual next step.",
+        text: "Honestly, most patients are really happy with how they feel these days. Modern implants are a huge improvement from even ten years ago, so you're probably in good shape.",
+        quality: "miss",
+        mayaReact: `"Okay, but that's kind of a general answer. I'm asking about what I actually felt — can you be more specific about what determines that?"`,
+        mayaMoodReact: "challenging",
+        missNote: "Reassures in the abstract without engaging her specific, concrete observation. She notices she's been redirected away from her actual question.",
       },
       {
         label: "B",
-        text: "Cite the low complication rate to reassure her that this is unlikely to ever come up.",
-        quality: "miss",
-        sarahReact: `"...Okay."`,
-        sarahMood: "quiet",
-        missNote: "This never actually answers who she calls or what the process is. The reassurance lands, but her actual question doesn't get answered.",
+        text: "Your friend is probably telling the truth — it depends on the gel type, how much of your own tissue covers the implant, and where it's placed. What you felt at that fitting — do you know what type they were?",
+        quality: "strong",
+        mayaReact: `"Honestly, I don't know. They were silicone, I think? They just felt more firm than I expected. Is that normal, or did I just feel the wrong ones?"`,
+        mayaMoodReact: "engaged",
+        strongNote: "Confirms her friend's experience is real (not dismissing it), explains the actual variables, and asks a specific follow-up that uses the detail she gave — the combination the persona doc identifies as the difference between managing her and engaging her.",
       },
       {
         label: "C",
-        text: "Tell her not to worry about it — these things almost never happen, and she can cross that bridge if she ever gets to it.",
+        text: "Every implant feels a little different — it really depends on the specific device, the brand, and honestly a bit on the individual patient's anatomy too, so it's hard to generalize.",
         quality: "weak",
-        sarahReact: `"Right, okay. I guess I'll just figure it out if it comes up."`,
-        sarahMood: "quiet",
-        missNote: "She asked a practical question and got a dismissal instead of a plan.",
+        mayaReact: `"Sure, but that's true of basically anything. What determines it for me?"`,
+        mayaMoodReact: "challenging",
+        missNote: "Accurate but generic — doesn't use the detail she gave (firm at a fitting) to say anything concrete about her situation.",
       },
     ],
   },
 ];
 
-const CLOSING_PROMPT = "Sarah came back six weeks post-op with four different questions — recovery, longevity, safety, and what happens if something goes wrong. Looking back at this consultation, what's the one thing you did — or could have done — to answer what she was actually asking, instead of just reassuring her?";
+const CLOSING_PROMPT = "Maya came in confident and prepared — she had a photo, a belief about implant shape, and a friend's account she was measuring her own experience against. Looking back at this consultation, what's one place you'd go further than just answering her question — and why?";
 
 // ── Utility ───────────────────────────────────────────────────────────────────
 // Second-perspective nudge phrasing — same message, varied wording per beat so it
@@ -319,7 +323,7 @@ function Header() {
         fontSize: 11, padding: "3px 10px",
         borderRadius: 20, letterSpacing: 1,
         flexShrink: 0, whiteSpace: "nowrap",
-      }}>Module 4 · Prototype</div>
+      }}>Module 1 · Prototype</div>
     </div>
   );
 }
@@ -340,16 +344,18 @@ function ProgressDots({ beatIndex, total }) {
   );
 }
 
-// ── Sarah bubble ──────────────────────────────────────────────────────────────
-function SarahBubble({ text, mood, animClass = "slide-in" }) {
+// ── Maya bubble ───────────────────────────────────────────────────────────────
+// Maya's tell (per persona doc) is distinct from Sarah's: when something
+// surprises or under-delivers for her, she doesn't go quiet — she challenges.
+// "challenging" is a real mood state here, not a fallback, and gets its own
+// color story (assertive amber/orange, not the quiet/uncertain amber Module 2
+// uses for withdrawal).
+function MayaBubble({ text, mood, animClass = "slide-in" }) {
   const moodStyles = {
-    open:       { bg: B.lightBlue,   border: B.blue },
-    engaged:    { bg: "#EAF5EB",     border: "#6DBF79" },
-    quiet:      { bg: B.amber,       border: B.amberBorder },
-    anxious:    { bg: B.warning,     border: B.warningBorder },
-    vulnerable: { bg: "#FEF6FF",     border: "#C9A8D4" },
-    relieved:   { bg: "#EAF5EB",     border: "#6DBF79" },
-    uncertain:  { bg: B.amber,       border: B.amberBorder },
+    open:        { bg: B.lightBlue,   border: B.blue },
+    engaged:     { bg: "#EAF5EB",     border: "#6DBF79" },
+    challenging: { bg: B.warning,     border: B.warningBorder },
+    vulnerable:  { bg: "#FEF6FF",     border: "#C9A8D4" },
   };
   const s = moodStyles[mood] || { bg: B.cream, border: "#D0D0D0" };
 
@@ -366,8 +372,8 @@ function SarahBubble({ text, mood, animClass = "slide-in" }) {
           background: `linear-gradient(135deg, ${B.copper} 0%, #C49060 100%)`,
           display: "flex", alignItems: "center", justifyContent: "center",
           fontSize: 12, fontWeight: 700, color: B.white, flexShrink: 0,
-        }}>S</div>
-        <span style={{ fontSize: 12, fontWeight: 700, color: B.darkBlue, letterSpacing: 0.3 }}>SARAH</span>
+        }}>M</div>
+        <span style={{ fontSize: 12, fontWeight: 700, color: B.darkBlue, letterSpacing: 0.3 }}>MAYA</span>
       </div>
       <p style={{ fontSize: 15, color: B.text, lineHeight: 1.55, fontStyle: "italic" }}>{text}</p>
     </div>
@@ -408,8 +414,12 @@ function StrongNote({ text }) {
   );
 }
 
-// ── Video card — real embed or placeholder ────────────────────────────────────
-function VideoCard({ label, desc, isSecond = false, animClass = "slide-in", vimeoId = null, streamSrc = null, brightcoveUrl = null, localSrc = null }) {
+// ── Video card — matches MENTOR_Shared_Components_Reference.html exactly ──────
+// Uses the CSS `aspectRatio` property (not paddingBottom percentage) so the
+// 9:16 box stays correct once .video-frame's max-width caps it on desktop.
+// See Pitfall #8. localSrc is included for GitHub-demo parity but unused in
+// this build (no local mp4s here) — do not carry into the SCORM package.
+function VideoCard({ label, desc, isSecond = false, animClass = "slide-in", localSrc = null, brightcoveUrl = null, vimeoId = null, streamSrc = null }) {
   return (
     <div className={animClass} style={{
       background: B.darkBlue, borderRadius: 14,
@@ -434,7 +444,6 @@ function VideoCard({ label, desc, isSecond = false, animClass = "slide-in", vime
         </div>
 
         {localSrc ? (
-          // ── Native video (GitHub-hosted mp4, portrait 9:16) ──
           <div className="video-frame" style={{ position: "relative", aspectRatio: "9 / 16", borderRadius: 10, overflow: "hidden", background: "#000" }}>
             <video
               src={localSrc}
@@ -445,20 +454,7 @@ function VideoCard({ label, desc, isSecond = false, animClass = "slide-in", vime
               title={label}
             />
           </div>
-        ) : vimeoId ? (
-          // ── Vimeo embed (portrait 9:16) ──
-          <div className="video-frame" style={{ position: "relative", aspectRatio: "9 / 16", borderRadius: 10, overflow: "hidden" }}>
-            <iframe
-              src={`https://player.vimeo.com/video/${vimeoId}?badge=0&autopause=0&player_id=0&app_id=58479`}
-              frameBorder="0"
-              allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
-              referrerPolicy="strict-origin-when-cross-origin"
-              style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
-              title={label}
-            />
-          </div>
         ) : brightcoveUrl ? (
-          // ── Brightcove embed (portrait 9:16) ──
           <div className="video-frame" style={{ position: "relative", aspectRatio: "9 / 16", borderRadius: 10, overflow: "hidden", background: "#000" }}>
             <iframe
               src={brightcoveUrl}
@@ -469,9 +465,19 @@ function VideoCard({ label, desc, isSecond = false, animClass = "slide-in", vime
               title={label}
             />
           </div>
+        ) : vimeoId ? (
+          <div className="video-frame" style={{ position: "relative", aspectRatio: "9 / 16", borderRadius: 10, overflow: "hidden" }}>
+            <iframe
+              src={`https://player.vimeo.com/video/${vimeoId}?badge=0&autopause=0&player_id=0&app_id=58479`}
+              frameBorder="0"
+              allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
+              style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
+              title={label}
+            />
+          </div>
         ) : streamSrc ? (
-          // ── Stream embed (landscape 16:9) ──
-          <div style={{ position: "relative", paddingBottom: "56.25%", borderRadius: 10, overflow: "hidden", background: "#000" }}>
+          <div className="video-frame" style={{ position: "relative", aspectRatio: "16 / 9", borderRadius: 10, overflow: "hidden", background: "#000" }}>
             <iframe
               src={streamSrc}
               width="640" height="360"
@@ -483,7 +489,6 @@ function VideoCard({ label, desc, isSecond = false, animClass = "slide-in", vime
             />
           </div>
         ) : (
-          // ── Placeholder (video not yet available) ──
           <div style={{
             background: "rgba(255,255,255,0.08)",
             borderRadius: 10, height: 52,
@@ -507,12 +512,58 @@ function VideoCard({ label, desc, isSecond = false, animClass = "slide-in", vime
   );
 }
 
+// ── Patient card ──────────────────────────────────────────────────────────────
+// Per Standard 6.1/6.2: name → "Age [N] · Occupation · First consultation" →
+// italic quote box (her real opening line) → exactly 2 situational tags. No
+// archetype label, no behavioral tell in the tags.
+function PatientCard({ name, age, occupation, quote, tags }) {
+  return (
+    <div style={{
+      background: B.white, borderRadius: 16,
+      border: `1.5px solid #E2E8F0`,
+      padding: "18px", marginBottom: 24,
+      boxShadow: "0 2px 12px rgba(0,0,50,0.06)",
+    }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
+        <div style={{
+          width: 44, height: 44, borderRadius: "50%",
+          background: `linear-gradient(135deg, ${B.copper} 0%, #B87840 100%)`,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          fontSize: 18, fontWeight: 800, color: B.white,
+        }}>{name[0]}</div>
+        <div>
+          <div style={{ fontWeight: 700, color: B.darkBlue, fontSize: 16 }}>{name}</div>
+          <div style={{ fontSize: 12, color: B.midGrey }}>Age {age} · {occupation} · First consultation</div>
+        </div>
+      </div>
+      <div style={{
+        background: B.softGrey, borderRadius: 10,
+        padding: "12px 14px", marginBottom: 12,
+        borderLeft: `3px solid ${B.copper}`,
+      }}>
+        <p style={{ fontSize: 13, color: B.text, lineHeight: 1.55, fontStyle: "italic" }}>
+          "{quote}"
+        </p>
+      </div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+        {tags.map(tag => (
+          <span key={tag} style={{
+            background: B.lightBlue, color: B.blue,
+            fontSize: 11, fontWeight: 600, padding: "3px 9px",
+            borderRadius: 20, letterSpacing: 0.3,
+          }}>{tag}</span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ── Shell ─────────────────────────────────────────────────────────────────────
 function Shell({ children, scrollRef }) {
   return (
     <div style={{
       minHeight: "100vh",
-      background: "linear-gradient(160deg, #FFFBF4 0%, #F0F4F8 100%)",
+      background: "linear-gradient(160deg, #f8f2ed 0%, #F0F4F8 100%)",
       display: "flex", justifyContent: "center",
       fontFamily: "'Segoe UI', system-ui, sans-serif",
     }}>
@@ -550,61 +601,28 @@ function IntroScreen({ onStart }) {
         padding: "5px 12px", marginBottom: 20,
       }}>
         <span style={{ fontSize: 11, fontWeight: 700, color: B.blue, letterSpacing: 0.8 }}>
-          MODULE 4
+          MODULE 1
         </span>
       </div>
 
-      {/* Title — the module's actual name, in the slot the generic "consultation simulation" heading used to occupy */}
       <h1 style={{ fontSize: 26, fontWeight: 400, color: B.darkBlue, lineHeight: 1.25, marginBottom: 12 }}>
-        Recovery, Longevity &amp; Patient Readiness
+        Foundations: Implants &amp; Expectations
       </h1>
       <p style={{ fontSize: 14, color: B.copper, lineHeight: 1.5, marginBottom: 10, fontWeight: 400 }}>
-        {/* Confirmed July 11 against the actual built Module 3 — Claire's closing deliberately doesn't mention Sarah (no-spoiler rule), so this line is the correct place for the reveal, not a duplicate of anything upstream. */}
-        Module 3 introduced Claire, working through her own decision. Now Sarah's back — the same patient from Module 2, further into hers.
+        The first of five modules in the Residency Learning Journey — each one built around a single patient consultation.
       </p>
       <p style={{ fontSize: 15, color: "#4A5568", lineHeight: 1.6, marginBottom: 24 }}>
-        Sarah is back for a scheduled follow-up, six to eight weeks post-op. She's happy with her results. She also has a few questions she's been holding onto.
+        You're about to meet Maya — a 26-year-old patient in her first breast augmentation consultation. She's done months of research and already knows what she wants. She's here to have that decision confirmed, not reopened.
       </p>
 
       <div className="desktop-row">
-      {/* Sarah card */}
-      <div style={{
-        background: B.white, borderRadius: 16,
-        border: `1.5px solid #E2E8F0`,
-        padding: "18px", marginBottom: 24,
-        boxShadow: "0 2px 12px rgba(0,0,50,0.06)",
-      }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
-          <div style={{
-            width: 44, height: 44, borderRadius: "50%",
-            background: `linear-gradient(135deg, ${B.copper} 0%, #B87840 100%)`,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 18, fontWeight: 800, color: B.white,
-          }}>S</div>
-          <div>
-            <div style={{ fontWeight: 700, color: B.darkBlue, fontSize: 16 }}>Sarah</div>
-            <div style={{ fontSize: 12, color: B.midGrey }}>Age 36 · 6–8 weeks post-op · Scheduled follow-up</div>
-          </div>
-        </div>
-        <div style={{
-          background: B.softGrey, borderRadius: 10,
-          padding: "12px 14px", marginBottom: 12,
-          borderLeft: `3px solid ${B.copper}`,
-        }}>
-          <p style={{ fontSize: 13, color: B.text, lineHeight: 1.55, fontStyle: "italic" }}>
-            "Honestly, the first couple weeks were harder than I expected — nobody really tells you what day three feels like. I'm doing so much better now, but it kind of made me realize I never really asked what 'normal' recovery actually looks like."
-          </p>
-        </div>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-          {["Practical", "Follow-up questions"].map(tag => (
-            <span key={tag} style={{
-              background: B.lightBlue, color: B.blue,
-              fontSize: 11, fontWeight: 600, padding: "3px 9px",
-              borderRadius: 20, letterSpacing: 0.3,
-            }}>{tag}</span>
-          ))}
-        </div>
-      </div>
+      <PatientCard
+        name="Maya"
+        age={26}
+        occupation="Marketing Professional"
+        quote="I've done a ton of research — probably more than I should have, honestly. I know I want silicone, but I keep reading things that make me second-guess myself. Can you just walk me through the difference so I know I'm making the right call?"
+        tags={["Already chose silicone", "Wants validation"]}
+      />
 
       {/* How it works */}
       <div style={{
@@ -615,9 +633,9 @@ function IntroScreen({ onStart }) {
           HOW THIS WORKS
         </div>
         {[
-          "Sarah speaks. Read carefully — not just what she says, but how she says it.",
+          "Maya speaks. Read carefully — not just what she says, but how she says it.",
           "Choose your response. Three options are available.",
-          "See how Sarah reacts, then make your best guess before the surgeon video plays.",
+          "See how Maya reacts, then make your best guess before the surgeon video plays.",
           "Hear from experienced surgeons, then continue the consultation.",
         ].map((step, i) => (
           <div key={i} style={{ display: "flex", gap: 12, marginBottom: i < 3 ? 10 : 0 }}>
@@ -678,11 +696,11 @@ function BeatScreen({ beat, beatIndex, total, onChosen, onBack, scrollRef }) {
     <div>
       <ProgressDots beatIndex={beatIndex} total={total} />
       <div style={{ fontSize: 11, color: B.midGrey, textAlign: "center", marginBottom: 20 }}>
-        Topic {beatIndex + 1} of {total} · Module 4
+        Topic {beatIndex + 1} of {total} · Module 1
       </div>
 
-      {/* Sarah opens */}
-      <SarahBubble text={beat.sarahOpen} mood={beat.sarahMood} animClass="slide-in" />
+      {/* Maya opens */}
+      <MayaBubble text={beat.mayaOpen} mood={beat.mayaMood} animClass="slide-in" />
 
       {/* Options or reaction */}
       {chosen === null ? (
@@ -742,8 +760,8 @@ function BeatScreen({ beat, beatIndex, total, onChosen, onBack, scrollRef }) {
             </div>
           </div>
 
-          {/* Sarah's reaction */}
-          <SarahBubble text={opt.sarahReact} mood={opt.sarahMood} animClass="slide-in" />
+          {/* Maya's reaction */}
+          <MayaBubble text={opt.mayaReact} mood={opt.mayaMoodReact} animClass="slide-in" />
 
           {/* Miss note */}
           {isMiss && opt.missNote && <MissNote text={opt.missNote} />}
@@ -819,10 +837,10 @@ function BeatScreen({ beat, beatIndex, total, onChosen, onBack, scrollRef }) {
                 <VideoCard
                   label={beat.videoLabel}
                   desc={beat.videoDesc}
+                  localSrc={beat.localSrc || null}
                   vimeoId={beat.vimeoId || null}
                   streamSrc={beat.streamSrc || null}
                   brightcoveUrl={beat.brightcoveUrl || null}
-                  localSrc={beat.localSrc || null}
                   animClass="slide-in"
                 />
               )}
@@ -850,15 +868,15 @@ function BeatScreen({ beat, beatIndex, total, onChosen, onBack, scrollRef }) {
                 <VideoCard
                   label={beat.videoLabel2}
                   desc={beat.videoDesc2}
+                  localSrc={beat.localSrc2 || null}
                   vimeoId={beat.vimeoId2 || null}
                   brightcoveUrl={beat.brightcoveUrl2 || null}
-                  localSrc={beat.localSrc2 || null}
                   isSecond={true}
                   animClass="slide-in"
                 />
               )}
 
-              {/* Nudge if a second perspective exists but hasn't been watched yet — same visual weight as the miss/strong callouts, since this matters as much as they do */}
+              {/* Nudge if a second perspective exists but hasn't been watched yet */}
               {hasTwoVideos && showVideo && !showVideo2 && (
                 <div className="slide-in" style={{
                   background: "#FFF8EE", border: `1.5px solid ${B.amberBorder}`,
@@ -916,9 +934,9 @@ function ClosingScreen({ onFinish, onBack, scrollRef }) {
           borderLeft: `3px solid ${B.copper}`,
         }}>
           <p style={{ fontSize: 14, color: "rgba(255,255,255,0.85)", lineHeight: 1.55, fontStyle: "italic" }}>
-            "Okay — I think that covers everything I was going to ask about. It helps to actually know instead of just guessing."
+            "Okay — I think I actually get it now. Not just what I already decided, but why it's actually right for me."
           </p>
-          <div style={{ fontSize: 12, color: B.copper, marginTop: 6, fontWeight: 600 }}>— Sarah</div>
+          <div style={{ fontSize: 12, color: B.copper, marginTop: 6, fontWeight: 600 }}>— Maya</div>
         </div>
       </div>
 
@@ -950,7 +968,7 @@ function ClosingScreen({ onFinish, onBack, scrollRef }) {
       </div>
 
       <PrimaryBtn onClick={onFinish} disabled={response.trim().length < 3}>
-        Finish Module 4 →
+        Finish Module 1 →
       </PrimaryBtn>
       <div style={{ marginTop: 10 }}>
         <SecondaryBtn onClick={onBack}>Back to previous topic</SecondaryBtn>
@@ -962,10 +980,10 @@ function ClosingScreen({ onFinish, onBack, scrollRef }) {
 // ── Complete screen ───────────────────────────────────────────────────────────
 function CompleteScreen({ onReplay }) {
   const topics = [
-    "Confirming a normal recovery instead of just reassuring her",
-    "Correcting the 'ten years' claim with real data and a monitoring plan",
-    "Reframing safety honestly, using a real number instead of a flat reassurance",
-    "Answering a practical logistics question with an actual next step",
+    "Confirming her silicone choice with a direct, anatomy-specific explanation instead of just agreeing",
+    "Defining \"natural\" as a clinical goal, not just a vague preference",
+    "Correcting a belief about round vs. shaped implants without dismissing what she'd seen online",
+    "Explaining what actually determines whether an implant feels real, using the detail she gave",
   ];
 
   return (
@@ -982,10 +1000,10 @@ function CompleteScreen({ onReplay }) {
           fontSize: 22,
         }}>✓</div>
         <h2 style={{ fontSize: 22, fontWeight: 400, color: B.white, marginBottom: 8 }}>
-          Module 4 complete
+          Module 1 complete
         </h2>
         <p style={{ fontSize: 14, color: "rgba(255,255,255,0.7)", lineHeight: 1.5 }}>
-          Recovery, Longevity &amp; Patient Readiness
+          Foundations: Implants &amp; Expectations
         </p>
       </div>
 
@@ -1015,18 +1033,18 @@ function CompleteScreen({ onReplay }) {
         padding: "14px 16px", marginBottom: 24,
       }}>
         <div style={{ fontSize: 12, fontWeight: 700, color: B.blue, letterSpacing: 0.5, marginBottom: 6 }}>
-          COMING UP IN MODULE 5
+          COMING UP IN MODULE 2
         </div>
         <p style={{ fontSize: 13, color: B.text, lineHeight: 1.5 }}>
-          Becoming Practice-Ready — stepping back from a single patient to build your own practice.
+          Anatomy, Measurements &amp; Decision Making — you'll meet Sarah next, working through her own decision from a cc number in her head toward what's actually right for her anatomy.
         </p>
       </div>
 
       {/* Full-width bottom button, not a small text link — per the Module 1/2 audit */}
-      <SecondaryBtn onClick={onReplay}>Replay Module 4</SecondaryBtn>
+      <SecondaryBtn onClick={onReplay}>Replay Module 1</SecondaryBtn>
 
       <div style={{ fontSize: 11, color: B.midGrey, textAlign: "center", marginTop: 20, letterSpacing: 0.5 }}>
-        MENTOR™ Residency: The Consultation Series · Module 4 · Prototype
+        MENTOR™ Residency: The Consultation Series · Module 1 · Prototype
       </div>
     </div>
   );

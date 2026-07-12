@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>MENTOR™ Residency · Module 4 Prototype</title>
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #F0F4F8; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+  textarea, input { font-family: inherit; }
+  button { font-family: inherit; cursor: pointer; }
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes pulseRing {
+    0%   { box-shadow: 0 0 0 0 rgba(224,177,131,0.4); }
+    70%  { box-shadow: 0 0 0 8px rgba(224,177,131,0); }
+    100% { box-shadow: 0 0 0 0 rgba(224,177,131,0); }
+  }
+  .fade-in  { animation: fadeIn 0.4s ease forwards; }
+  .slide-in { animation: fadeSlideIn 0.4s ease forwards; }
+  .slide-in-delay { animation: fadeSlideIn 0.4s ease 0.15s both; }
+  .slide-in-delay2 { animation: fadeSlideIn 0.4s ease 0.3s both; }
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #C0C8D4; border-radius: 4px; }
+
+  /* Desktop breakpoint — widens the column and allows side-by-side cards past 900px */
+  .app-shell { max-width: 480px; }
+  @media (min-width: 900px) {
+    .app-shell { max-width: 760px; }
+    .desktop-row { display: flex; gap: 20px; align-items: flex-start; }
+    .video-frame { max-width: 340px; margin: 0 auto; }
+    .desktop-row > * { flex: 1; }
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+
+const { useState, useRef, useEffect } = React;
+
+// ── Brand tokens ──────────────────────────────────────────────────────────────
+const B = {
+  darkBlue:  "#002756",
+  blue:      "#004DAC",
+  lightBlue: "#E4EFF7",
+  copper:    "#E0B183",
+  cream:     "#f8f2ed",
+  white:     "#FFFFFF",
+  midGrey:   "#8A8A8A",
+  softGrey:  "#F5F7FA",
+  text:      "#1A1A1A",
+  green:     "#EDF7EE",
+  greenBorder: "#A8D5B0",
+  amber:     "#FFF8EE",
+  amberBorder: "#E8C87A",
+  warning:   "#FFF3E0",
+  warningBorder: "#E0A040",
+};
+
+// ── Beat data ─────────────────────────────────────────────────────────────────
+// Source: Module_04_Beats_Working_Draft.md (all four beats SETTLED) and
+// Module_04_Sarah_Revisited.docx v2. Video selection per Residency_Video_Tracker.xlsx:
+// 4.1 Primary Adams / Secondary Mosharrafa
+// 4.2 Primary Adams / Secondary Mosharrafa
+// 4.3 Primary Mosharrafa / Secondary Mohan
+// 4.4 Primary Adams / Secondary Mosharrafa
+// GITHUB PAGES DEMO COPY — video sources point to local mp4 files hosted
+// in this same repo (jmankeys.github.io/mentor-demo/), via VideoCard's
+// localSrc/localSrc2 props. This is separate from the Brightcove URLs the
+// real LMS build will use — do not carry localSrc into the SCORM package.
+// Miss positions: Beat1=B, Beat2=A, Beat3=B, Beat4=? (see options below for actual per-beat quality assignment; not a fixed pattern).
+const BEATS = [
+  {
+    id: 1,
+    topicQuestion: `"A friend told me her recovery was uncomfortable — how bad is it really?"`,
+    videoLabel: "What Recovery Actually Looks Like",
+    videoLabel2: "The Week-by-Week Breakdown",
+    videoDesc: "How a modern, well-executed approach to breast augmentation is built around fast functional recovery — same-day activity, quick return to normal life.",
+    videoDesc2: "A more detailed week-by-week recovery timeline — what's normal at 72 hours, at two weeks, and at six weeks.",
+    localSrc: "Adams_4.1.mp4",
+    localSrc2: "Mosh_4.1.mp4",
+    predictionPrompt: "Before the video plays: what do you think an experienced surgeon says when a patient asks whether her own recovery was normal?",
+    sarahOpen: `"Honestly, the first couple weeks were harder than I expected — nobody really tells you what day three feels like. I'm doing so much better now, but it kind of made me realize I never really asked what 'normal' recovery actually looks like. Was what I went through normal, or should I have called someone?"`,
+    sarahMood: "open",
+    options: [
+      {
+        label: "A",
+        text: "Tell her that recovery varies a lot from patient to patient, and that as long as she's feeling better now, there's nothing to worry about.",
+        quality: "miss",
+        sarahReact: `"...Okay."`,
+        sarahMood: "quiet",
+        missNote: "This never confirms whether what she went through was normal. She's still holding the same question she walked in with.",
+      },
+      {
+        label: "B",
+        text: "Reassure her that the first two weeks are always the hardest part for everyone, and that she's clearly through the worst of it now.",
+        quality: "weak",
+        sarahReact: `"Right, yeah. I guess so."`,
+        sarahMood: "quiet",
+        missNote: "General reassurance, but nothing specific to what she experienced. She still doesn't know if day three was normal or something worth calling about.",
+      },
+      {
+        label: "C",
+        text: "Frame her recovery around a modern approach to breast augmentation built for fast recovery — same-day light activity, quick return to normal life — and confirm that what she went through lines up with that.",
+        quality: "strong",
+        sarahReact: `"Oh, okay — so I wasn't doing anything wrong by feeling back to normal that fast, that's actually just how it's supposed to go now?"`,
+        sarahMood: "engaged",
+        strongNote: "This directly answers the question she actually asked — was it normal — instead of just sympathizing with the first two weeks.",
+      },
+    ],
+  },
+  {
+    id: 2,
+    topicQuestion: `"How long will implants last? Am I going to need to replace them?"`,
+    videoLabel: "Implant Longevity: The Current Generation",
+    videoLabel2: "A Different Angle on the 'Ten Years' Question",
+    videoDesc: "What the current generation of devices actually shows for long-term rupture rates, and why ongoing ultrasound surveillance — not a fixed expiration date — is the responsible way to track it.",
+    videoDesc2: "A second surgeon directly names and corrects the 'ten years' myth patients often hear.",
+    localSrc: "Adams_4.2.mp4",
+    localSrc2: "Mosh_4.2.mp4",
+    predictionPrompt: "Before the video plays: what do you think an experienced surgeon says when a patient repeats a 'ten years and you need to replace them' claim she heard secondhand?",
+    sarahOpen: `"I read somewhere — or maybe it was my sister, actually — that implants only last like ten years and then you have to get them redone. Is that true? Because nobody mentioned anything like that to me before the surgery, and now I'm wondering if I missed something."`,
+    sarahMood: "open",
+    options: [
+      {
+        label: "A",
+        text: "Cite the long-term rupture rate data directly, but don't mention any ongoing monitoring or checkup plan.",
+        quality: "weak",
+        sarahReact: `"Oh — so there's still a real chance it could happen, then?"`,
+        sarahMood: "uncertain",
+        missNote: "A number without any follow-up plan can sound more alarming than reassuring. She's left with a statistic and no sense of what happens next.",
+      },
+      {
+        label: "B",
+        text: "Explain that the devices used today are a different generation from the ones behind that old claim, cite the actual long-term rupture data, and describe the ongoing ultrasound checkups that monitor implants over time.",
+        quality: "strong",
+        sarahReact: `"Okay — so it's not like there's some hard cutoff, and you'd actually catch it if something changed? That actually helps."`,
+        sarahMood: "engaged",
+        strongNote: "She wasn't just asking if the number was true — she wanted to know what happens if it does fail, and how anyone would catch it. This covers both.",
+      },
+      {
+        label: "C",
+        text: "Tell her that implants can last a long time and there's no need to worry about a fixed replacement schedule.",
+        quality: "miss",
+        sarahReact: `"...Okay."`,
+        sarahMood: "quiet",
+        missNote: "This corrects the myth in the vaguest way possible — no number, no plan. She still doesn't know what happens if something changes.",
+      },
+    ],
+  },
+  {
+    id: 3,
+    topicQuestion: `"Is breast augmentation safe?"`,
+    videoLabel: "Reframing Risk: The 99.9% Conversation",
+    videoLabel2: "A Second Perspective on Documenting the Safety Conversation",
+    videoDesc: "How to have an honest, non-alarming conversation about real but low surgical risk — using a positive-framing technique rather than a flat reassurance.",
+    videoDesc2: "A second surgeon's approach to making sure the safety conversation is documented as having happened.",
+    localSrc: "Mosh_4.3.mp4",
+    localSrc2: "Mohan_4.3.mp4",
+    predictionPrompt: "Before the video plays: what do you think an experienced surgeon says when a patient asks, in the abstract, whether the surgery she already had was actually safe?",
+    sarahOpen: `"Can I ask something kind of random? I never really let myself think about this before surgery — I was so focused on just getting through it — but now I keep wondering... is this actually safe? Like, long-term, am I going to be okay?"`,
+    sarahMood: "vulnerable",
+    options: [
+      {
+        label: "A",
+        text: "Tell her there's essentially zero risk at this point, since she's already six weeks out and doing well.",
+        quality: "weak",
+        sarahReact: `"Oh — okay, that's good to hear I guess."`,
+        sarahMood: "quiet",
+        missNote: "Zero risk isn't accurate, and it skips the honest conversation her question was actually asking for.",
+      },
+      {
+        label: "B",
+        text: "Reassure her that it's very safe and she doesn't need to worry about it at this point.",
+        quality: "miss",
+        sarahReact: `"...Okay."`,
+        sarahMood: "quiet",
+        missNote: "Reassuring, but vague. Nothing here actually addresses what she's asking.",
+      },
+      {
+        label: "C",
+        text: "Give a direct yes, name the real but low risks in concrete terms, and reframe them positively — for example, a 99.9% chance of no negative impact, rather than a 0.1% chance of harm.",
+        quality: "strong",
+        sarahReact: `"Okay — put that way, it actually sounds a lot less scary than I was making it in my head."`,
+        sarahMood: "relieved",
+        strongNote: "A real number, framed constructively, answers the question directly instead of talking around it.",
+      },
+    ],
+  },
+  {
+    id: 4,
+    topicQuestion: `"What happens if something goes wrong down the road — who handles that?"`,
+    videoLabel: "The Actual Numbers, and What To Do",
+    videoLabel2: "The Mentor Warranty: A Second Perspective",
+    videoDesc: "A concrete look at real complication rates and a clear, direct next step: what to do and who to call if something feels wrong.",
+    videoDesc2: "A second surgeon's fuller answer, including how the Mentor warranty factors into what happens if something goes wrong.",
+    localSrc: "Adams_4.4.mp4",
+    localSrc2: "Mosh_4.4.mp4",
+    predictionPrompt: "Before the video plays: what do you think an experienced surgeon actually tells a patient who asks a calm, practical 'what's the process' question about long-term complications?",
+    sarahOpen: `"Okay, last thing — and I promise this isn't me trying to find something to worry about. But if something did go wrong down the road, like years from now, what actually happens? Do I just call you? Is there a process?"`,
+    sarahMood: "open",
+    options: [
+      {
+        label: "A",
+        text: "Give her the actual complication-rate numbers alongside a clear next step — call the office, come back in to be seen, sooner rather than later if something feels off.",
+        quality: "strong",
+        sarahReact: `"Okay, good — that's easy enough to remember."`,
+        sarahMood: "engaged",
+        strongNote: "She asked a logistics question, and this gives her a logistics answer — the number and the actual next step.",
+      },
+      {
+        label: "B",
+        text: "Cite the low complication rate to reassure her that this is unlikely to ever come up.",
+        quality: "miss",
+        sarahReact: `"...Okay."`,
+        sarahMood: "quiet",
+        missNote: "This never actually answers who she calls or what the process is. The reassurance lands, but her actual question doesn't get answered.",
+      },
+      {
+        label: "C",
+        text: "Tell her not to worry about it — these things almost never happen, and she can cross that bridge if she ever gets to it.",
+        quality: "weak",
+        sarahReact: `"Right, okay. I guess I'll just figure it out if it comes up."`,
+        sarahMood: "quiet",
+        missNote: "She asked a practical question and got a dismissal instead of a plan.",
+      },
+    ],
+  },
+];
+
+const CLOSING_PROMPT = "Sarah came back six weeks post-op with four different questions — recovery, longevity, safety, and what happens if something goes wrong. Looking back at this consultation, what's the one thing you did — or could have done — to answer what she was actually asking, instead of just reassuring her?";
+
+// ── Utility ───────────────────────────────────────────────────────────────────
+// Second-perspective nudge phrasing — same message, varied wording per beat so it
+// doesn't read as repeated boilerplate. Shared pool used across modules; picked
+// deterministically by beat id so it's stable within a session, not re-randomized
+// on every render.
+const SECOND_PERSPECTIVE_NUDGES = [
+  "Haven't watched the second perspective yet? It's worth the extra couple minutes before you move on.",
+  "Don't skip the second perspective — a couple more minutes, and it's worth hearing.",
+  "There's a second surgeon's take above you haven't watched yet. Worth pulling up before you continue.",
+  "Still haven't caught the second perspective? It only takes a couple minutes, and it's worth it.",
+];
+function getSecondPerspectiveNudge(beatId) {
+  return SECOND_PERSPECTIVE_NUDGES[beatId % SECOND_PERSPECTIVE_NUDGES.length];
+}
+
+function scrollTop(ref) {
+  if (ref && ref.current) ref.current.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+// ── UI primitives ─────────────────────────────────────────────────────────────
+function PrimaryBtn({ onClick, disabled, children, style = {} }) {
+  return (
+    <button onClick={onClick} disabled={disabled} style={{
+      background: disabled ? "#C8D4E0" : B.blue,
+      color: disabled ? "#8A9AAA" : B.white,
+      border: "none", borderRadius: 10, padding: "14px 24px",
+      fontSize: 15, fontWeight: 700, width: "100%",
+      cursor: disabled ? "not-allowed" : "pointer",
+      transition: "all 0.2s ease",
+      letterSpacing: 0.3,
+      ...style,
+    }}>{children}</button>
+  );
+}
+
+function SecondaryBtn({ onClick, children, style = {} }) {
+  return (
+    <button onClick={onClick} style={{
+      background: "transparent", color: B.blue,
+      border: `1.5px solid ${B.blue}`, borderRadius: 10,
+      padding: "12px 24px", fontSize: 14, fontWeight: 600,
+      width: "100%", cursor: "pointer", transition: "all 0.2s ease",
+      ...style,
+    }}>{children}</button>
+  );
+}
+
+// ── Header ────────────────────────────────────────────────────────────────────
+function Header() {
+  return (
+    <div style={{
+      background: B.darkBlue, padding: "14px 20px",
+      display: "flex", alignItems: "center", justifyContent: "space-between",
+      position: "sticky", top: 0, zIndex: 10,
+      boxShadow: "0 2px 12px rgba(0,0,0,0.25)",
+      gap: 10,
+    }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
+        <div style={{
+          width: 8, height: 8, borderRadius: "50%",
+          background: B.copper,
+          boxShadow: `0 0 6px ${B.copper}`,
+          animation: "pulseRing 2.5s ease infinite",
+          flexShrink: 0,
+        }} />
+        <span style={{
+          color: B.white, fontSize: 12, fontWeight: 700, letterSpacing: 0.3,
+          whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+        }}>
+          MENTOR™ Residency: The Consultation Series
+        </span>
+      </div>
+      <div style={{
+        background: "rgba(255,255,255,0.08)",
+        color: "rgba(255,255,255,0.6)",
+        fontSize: 11, padding: "3px 10px",
+        borderRadius: 20, letterSpacing: 1,
+        flexShrink: 0, whiteSpace: "nowrap",
+      }}>Module 4 · Prototype</div>
+    </div>
+  );
+}
+
+// ── Progress ──────────────────────────────────────────────────────────────────
+function ProgressDots({ beatIndex, total }) {
+  return (
+    <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 8 }}>
+      {Array.from({ length: total }).map((_, i) => (
+        <div key={i} style={{
+          width: i === beatIndex ? 24 : 8,
+          height: 8, borderRadius: 4,
+          background: i < beatIndex ? B.copper : i === beatIndex ? B.blue : "#D0D8E4",
+          transition: "all 0.3s ease",
+        }} />
+      ))}
+    </div>
+  );
+}
+
+// ── Sarah bubble ──────────────────────────────────────────────────────────────
+function SarahBubble({ text, mood, animClass = "slide-in" }) {
+  const moodStyles = {
+    open:       { bg: B.lightBlue,   border: B.blue },
+    engaged:    { bg: "#EAF5EB",     border: "#6DBF79" },
+    quiet:      { bg: B.amber,       border: B.amberBorder },
+    anxious:    { bg: B.warning,     border: B.warningBorder },
+    vulnerable: { bg: "#FEF6FF",     border: "#C9A8D4" },
+    relieved:   { bg: "#EAF5EB",     border: "#6DBF79" },
+    uncertain:  { bg: B.amber,       border: B.amberBorder },
+  };
+  const s = moodStyles[mood] || { bg: B.cream, border: "#D0D0D0" };
+
+  return (
+    <div className={animClass} style={{
+      background: s.bg,
+      border: `1.5px solid ${s.border}`,
+      borderRadius: "4px 16px 16px 16px",
+      padding: "14px 16px", marginBottom: 16,
+    }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+        <div style={{
+          width: 28, height: 28, borderRadius: "50%",
+          background: `linear-gradient(135deg, ${B.copper} 0%, #C49060 100%)`,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          fontSize: 12, fontWeight: 700, color: B.white, flexShrink: 0,
+        }}>S</div>
+        <span style={{ fontSize: 12, fontWeight: 700, color: B.darkBlue, letterSpacing: 0.3 }}>SARAH</span>
+      </div>
+      <p style={{ fontSize: 15, color: B.text, lineHeight: 1.55, fontStyle: "italic" }}>{text}</p>
+    </div>
+  );
+}
+
+// ── Miss callout ──────────────────────────────────────────────────────────────
+function MissNote({ text }) {
+  return (
+    <div className="slide-in" style={{
+      background: "#FFF8EE", border: `1px solid ${B.amberBorder}`,
+      borderLeft: `4px solid ${B.copper}`,
+      borderRadius: "0 10px 10px 0",
+      padding: "12px 14px", marginBottom: 16,
+    }}>
+      <div style={{ fontSize: 11, fontWeight: 700, color: "#A07020", letterSpacing: 0.8, marginBottom: 4 }}>
+        NOTICE THE SHIFT
+      </div>
+      <p style={{ fontSize: 13, color: "#705010", lineHeight: 1.5 }}>{text}</p>
+    </div>
+  );
+}
+
+// ── Strong-move callout ─────────────────────────────────────────────────────────
+function StrongNote({ text }) {
+  return (
+    <div className="slide-in" style={{
+      background: B.green, border: `1px solid ${B.greenBorder}`,
+      borderLeft: `4px solid #4FA868`,
+      borderRadius: "0 10px 10px 0",
+      padding: "12px 14px", marginBottom: 16,
+    }}>
+      <div style={{ fontSize: 11, fontWeight: 700, color: "#2E7D44", letterSpacing: 0.8, marginBottom: 4 }}>
+        STRONG MOVE
+      </div>
+      <p style={{ fontSize: 13, color: "#1F5C32", lineHeight: 1.5 }}>{text}</p>
+    </div>
+  );
+}
+
+// ── Video card — real embed or placeholder ────────────────────────────────────
+function VideoCard({ label, desc, isSecond = false, animClass = "slide-in", vimeoId = null, streamSrc = null, brightcoveUrl = null, localSrc = null }) {
+  return (
+    <div className={animClass} style={{
+      background: B.darkBlue, borderRadius: 14,
+      overflow: "hidden", marginBottom: 16,
+    }}>
+      {isSecond && (
+        <div style={{
+          background: B.copper, padding: "5px 14px",
+          fontSize: 11, fontWeight: 700, color: B.darkBlue,
+          letterSpacing: 0.8,
+        }}>SECOND PERSPECTIVE</div>
+      )}
+      <div style={{ padding: "16px" }}>
+        <div style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", letterSpacing: 0.8, marginBottom: 6 }}>
+          {isSecond ? "EXPERT VIDEO · 2 OF 2" : "EXPERT VIDEO"}
+        </div>
+        <div style={{ fontSize: 14, fontWeight: 700, color: B.white, marginBottom: 8, lineHeight: 1.4 }}>
+          {label}
+        </div>
+        <div style={{ fontSize: 12, color: "rgba(255,255,255,0.65)", lineHeight: 1.5, marginBottom: 14 }}>
+          {desc}
+        </div>
+
+        {localSrc ? (
+          // ── Native video (GitHub-hosted mp4, portrait 9:16) ──
+          <div className="video-frame" style={{ position: "relative", aspectRatio: "9 / 16", borderRadius: 10, overflow: "hidden", background: "#000" }}>
+            <video
+              src={localSrc}
+              controls
+              playsInline
+              preload="metadata"
+              style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "contain" }}
+              title={label}
+            />
+          </div>
+        ) : vimeoId ? (
+          // ── Vimeo embed (portrait 9:16) ──
+          <div className="video-frame" style={{ position: "relative", aspectRatio: "9 / 16", borderRadius: 10, overflow: "hidden" }}>
+            <iframe
+              src={`https://player.vimeo.com/video/${vimeoId}?badge=0&autopause=0&player_id=0&app_id=58479`}
+              frameBorder="0"
+              allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
+              style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
+              title={label}
+            />
+          </div>
+        ) : brightcoveUrl ? (
+          // ── Brightcove embed (portrait 9:16) ──
+          <div className="video-frame" style={{ position: "relative", aspectRatio: "9 / 16", borderRadius: 10, overflow: "hidden", background: "#000" }}>
+            <iframe
+              src={brightcoveUrl}
+              allowFullScreen
+              frameBorder="0"
+              allow="autoplay; fullscreen; encrypted-media"
+              style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: "none" }}
+              title={label}
+            />
+          </div>
+        ) : streamSrc ? (
+          // ── Stream embed (landscape 16:9) ──
+          <div style={{ position: "relative", paddingBottom: "56.25%", borderRadius: 10, overflow: "hidden", background: "#000" }}>
+            <iframe
+              src={streamSrc}
+              width="640" height="360"
+              frameBorder="0"
+              scrolling="no"
+              allowFullScreen
+              title={label}
+              style={{ border: "none", position: "absolute", top: 0, left: 0, right: 0, bottom: 0, height: "100%", maxWidth: "100%" }}
+            />
+          </div>
+        ) : (
+          // ── Placeholder (video not yet available) ──
+          <div style={{
+            background: "rgba(255,255,255,0.08)",
+            borderRadius: 10, height: 52,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            gap: 10,
+          }}>
+            <div style={{
+              width: 0, height: 0,
+              borderTop: "9px solid transparent",
+              borderBottom: "9px solid transparent",
+              borderLeft: `15px solid ${B.copper}`,
+              marginLeft: 3,
+            }} />
+            <span style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", letterSpacing: 0.5 }}>
+              Video coming soon
+            </span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Shell ─────────────────────────────────────────────────────────────────────
+function Shell({ children, scrollRef }) {
+  return (
+    <div style={{
+      minHeight: "100vh",
+      background: "linear-gradient(160deg, #f8f2ed 0%, #F0F4F8 100%)",
+      display: "flex", justifyContent: "center",
+      fontFamily: "'Segoe UI', system-ui, sans-serif",
+    }}>
+      <div className="app-shell" style={{ width: "100%", display: "flex", flexDirection: "column" }}>
+        <Header />
+        <div ref={scrollRef} style={{ padding: "24px 20px 60px", flex: 1, overflowY: "auto" }}>
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Label ─────────────────────────────────────────────────────────────────────
+function SectionLabel({ children }) {
+  return (
+    <div style={{
+      fontSize: 10, fontWeight: 700, letterSpacing: 1.2,
+      color: B.midGrey, marginBottom: 10, textTransform: "uppercase",
+    }}>{children}</div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// SCREENS
+// ══════════════════════════════════════════════════════════════════════════════
+
+function IntroScreen({ onStart }) {
+  return (
+    <div className="fade-in">
+      {/* Module badge */}
+      <div style={{
+        display: "inline-flex", alignItems: "center", gap: 6,
+        background: B.lightBlue, borderRadius: 20,
+        padding: "5px 12px", marginBottom: 20,
+      }}>
+        <span style={{ fontSize: 11, fontWeight: 700, color: B.blue, letterSpacing: 0.8 }}>
+          MODULE 4
+        </span>
+      </div>
+
+      {/* Title — the module's actual name, in the slot the generic "consultation simulation" heading used to occupy */}
+      <h1 style={{ fontSize: 26, fontWeight: 400, color: B.darkBlue, lineHeight: 1.25, marginBottom: 12 }}>
+        Recovery, Longevity &amp; Patient Readiness
+      </h1>
+      <p style={{ fontSize: 14, color: B.copper, lineHeight: 1.5, marginBottom: 10, fontWeight: 400 }}>
+        {/* Confirmed July 11 against the actual built Module 3 — Claire's closing deliberately doesn't mention Sarah (no-spoiler rule), so this line is the correct place for the reveal, not a duplicate of anything upstream. */}
+        Module 3 introduced Claire, working through her own decision. Now Sarah's back — the same patient from Module 2, further into hers.
+      </p>
+      <p style={{ fontSize: 15, color: "#4A5568", lineHeight: 1.6, marginBottom: 24 }}>
+        Sarah is back for a scheduled follow-up, six to eight weeks post-op. She's happy with her results. She also has a few questions she's been holding onto.
+      </p>
+
+      <div className="desktop-row">
+      {/* Sarah card */}
+      <div style={{
+        background: B.white, borderRadius: 16,
+        border: `1.5px solid #E2E8F0`,
+        padding: "18px", marginBottom: 24,
+        boxShadow: "0 2px 12px rgba(0,0,50,0.06)",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
+          <div style={{
+            width: 44, height: 44, borderRadius: "50%",
+            background: `linear-gradient(135deg, ${B.copper} 0%, #B87840 100%)`,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: 18, fontWeight: 800, color: B.white,
+          }}>S</div>
+          <div>
+            <div style={{ fontWeight: 700, color: B.darkBlue, fontSize: 16 }}>Sarah</div>
+            <div style={{ fontSize: 12, color: B.midGrey }}>Age 36 · 6–8 weeks post-op · Scheduled follow-up</div>
+          </div>
+        </div>
+        <div style={{
+          background: B.softGrey, borderRadius: 10,
+          padding: "12px 14px", marginBottom: 12,
+          borderLeft: `3px solid ${B.copper}`,
+        }}>
+          <p style={{ fontSize: 13, color: B.text, lineHeight: 1.55, fontStyle: "italic" }}>
+            "Honestly, the first couple weeks were harder than I expected — nobody really tells you what day three feels like. I'm doing so much better now, but it kind of made me realize I never really asked what 'normal' recovery actually looks like."
+          </p>
+        </div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+          {["Practical", "Follow-up questions"].map(tag => (
+            <span key={tag} style={{
+              background: B.lightBlue, color: B.blue,
+              fontSize: 11, fontWeight: 600, padding: "3px 9px",
+              borderRadius: 20, letterSpacing: 0.3,
+            }}>{tag}</span>
+          ))}
+        </div>
+      </div>
+
+      {/* How it works */}
+      <div style={{
+        background: B.white, borderRadius: 16,
+        border: `1.5px solid #E2E8F0`, padding: "18px", marginBottom: 28,
+      }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: B.darkBlue, letterSpacing: 0.5, marginBottom: 12 }}>
+          HOW THIS WORKS
+        </div>
+        {[
+          "Sarah speaks. Read carefully — not just what she says, but how she says it.",
+          "Choose your response. Three options are available.",
+          "See how Sarah reacts, then make your best guess before the surgeon video plays.",
+          "Hear from experienced surgeons, then continue the consultation.",
+        ].map((step, i) => (
+          <div key={i} style={{ display: "flex", gap: 12, marginBottom: i < 3 ? 10 : 0 }}>
+            <div style={{
+              width: 22, height: 22, borderRadius: "50%",
+              background: B.darkBlue, color: B.white,
+              fontSize: 11, fontWeight: 700,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              flexShrink: 0, marginTop: 1,
+            }}>{i + 1}</div>
+            <p style={{ fontSize: 13, color: "#4A5568", lineHeight: 1.5 }}>{step}</p>
+          </div>
+        ))}
+      </div>
+      </div>
+
+      <PrimaryBtn onClick={onStart}>Begin consultation →</PrimaryBtn>
+    </div>
+  );
+}
+
+// ── Beat screen ───────────────────────────────────────────────────────────────
+function BeatScreen({ beat, beatIndex, total, onChosen, onBack, scrollRef }) {
+  const [chosen, setChosen] = useState(null);
+  const [showVideo, setShowVideo] = useState(false);
+  const [showVideo2, setShowVideo2] = useState(false);
+  const [guess, setGuess] = useState("");
+  const [guessSubmitted, setGuessSubmitted] = useState(false);
+  const [hovered, setHovered] = useState(null);
+
+  const opt = chosen !== null ? beat.options[chosen] : null;
+  const isMiss = opt && (opt.quality === "miss" || opt.quality === "weak");
+  const isStrong = opt && opt.quality === "strong";
+  const hasTwoVideos = !!beat.videoLabel2;
+
+  function handleChoose(idx) {
+    if (chosen !== null) return;
+    setChosen(idx);
+    setTimeout(() => scrollTop(scrollRef), 100);
+  }
+
+  function handleReconsider() {
+    setChosen(null);
+    setTimeout(() => scrollTop(scrollRef), 100);
+  }
+
+  function handleSubmitGuess() {
+    setGuessSubmitted(true);
+    setShowVideo(true);
+    setTimeout(() => scrollTop(scrollRef), 100);
+  }
+
+  function handleNext() {
+    onChosen(chosen);
+  }
+
+  return (
+    <div>
+      <ProgressDots beatIndex={beatIndex} total={total} />
+      <div style={{ fontSize: 11, color: B.midGrey, textAlign: "center", marginBottom: 20 }}>
+        Topic {beatIndex + 1} of {total} · Module 4
+      </div>
+
+      {/* Sarah opens */}
+      <SarahBubble text={beat.sarahOpen} mood={beat.sarahMood} animClass="slide-in" />
+
+      {/* Options or reaction */}
+      {chosen === null ? (
+        <div className="slide-in-delay">
+          <SectionLabel>Your response</SectionLabel>
+          {beat.options.map((opt, idx) => (
+            <button
+              key={idx}
+              onClick={() => handleChoose(idx)}
+              onMouseEnter={() => setHovered(idx)}
+              onMouseLeave={() => setHovered(null)}
+              style={{
+                background: hovered === idx ? B.lightBlue : B.white,
+                border: `1.5px solid ${hovered === idx ? B.blue : "#D8E2EE"}`,
+                borderRadius: 12, padding: "14px 16px",
+                marginBottom: 10, width: "100%", textAlign: "left",
+                cursor: "pointer", transition: "all 0.18s ease",
+                display: "flex", gap: 12, alignItems: "flex-start",
+              }}
+            >
+              <div style={{
+                width: 24, height: 24, borderRadius: "50%",
+                background: hovered === idx ? B.blue : "#E2EAF4",
+                color: hovered === idx ? B.white : B.blue,
+                fontSize: 12, fontWeight: 700, flexShrink: 0,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                transition: "all 0.18s ease",
+              }}>{opt.label}</div>
+              <span style={{ fontSize: 14, color: B.text, lineHeight: 1.5 }}>{opt.text}</span>
+            </button>
+          ))}
+          <div style={{ marginTop: 6 }}>
+            <SecondaryBtn onClick={onBack}>
+              {beatIndex === 0 ? "Back to start" : "Back to previous topic"}
+            </SecondaryBtn>
+          </div>
+        </div>
+      ) : (
+        <div>
+          {/* Chosen option recap */}
+          <div className="slide-in" style={{
+            background: B.softGrey, borderRadius: 10,
+            border: "1.5px solid #D8E2EE",
+            padding: "12px 14px", marginBottom: 14,
+          }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: B.midGrey, letterSpacing: 0.8, marginBottom: 6 }}>
+              YOUR RESPONSE
+            </div>
+            <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+              <div style={{
+                width: 22, height: 22, borderRadius: "50%",
+                background: B.blue, color: B.white,
+                fontSize: 11, fontWeight: 700, flexShrink: 0,
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}>{opt.label}</div>
+              <p style={{ fontSize: 13, color: B.text, lineHeight: 1.5 }}>{opt.text}</p>
+            </div>
+          </div>
+
+          {/* Sarah's reaction */}
+          <SarahBubble text={opt.sarahReact} mood={opt.sarahMood} animClass="slide-in" />
+
+          {/* Miss note */}
+          {isMiss && opt.missNote && <MissNote text={opt.missNote} />}
+
+          {/* Strong-move note */}
+          {isStrong && opt.strongNote && <StrongNote text={opt.strongNote} />}
+
+          {/* Option to handle this moment differently, before committing to the videos */}
+          {!guessSubmitted && (
+            <div className="slide-in-delay" style={{ marginBottom: 16 }}>
+              <SecondaryBtn onClick={handleReconsider}>
+                Handle this differently
+              </SecondaryBtn>
+            </div>
+          )}
+
+          {/* Guess or video */}
+          {!guessSubmitted ? (
+            <div className="slide-in-delay" style={{
+              background: B.white, borderRadius: 14,
+              border: `1.5px solid #D8E2EE`, padding: "16px", marginBottom: 16,
+            }}>
+              <SectionLabel>Before the video plays</SectionLabel>
+              <p style={{ fontSize: 14, color: B.text, lineHeight: 1.55, marginBottom: 12 }}>
+                {beat.predictionPrompt}
+              </p>
+              <textarea
+                value={guess}
+                onChange={e => setGuess(e.target.value)}
+                placeholder="Write your answer here..."
+                rows={3}
+                style={{
+                  width: "100%", padding: "10px 12px",
+                  border: `1.5px solid ${guess.trim().length > 0 ? B.blue : "#D8E2EE"}`,
+                  borderRadius: 10, fontSize: 14, lineHeight: 1.5,
+                  resize: "none", outline: "none", color: B.text,
+                  transition: "border-color 0.2s",
+                  background: B.softGrey,
+                }}
+              />
+              {guess.trim().length > 0 && guess.trim().length < 3 && (
+                <p style={{ fontSize: 12, color: "#E57373", marginTop: 4 }}>
+                  Add a few more words to continue.
+                </p>
+              )}
+              <div style={{ marginTop: 12 }}>
+                <PrimaryBtn
+                  onClick={handleSubmitGuess}
+                  disabled={guess.trim().length < 3}
+                >
+                  {hasTwoVideos ? "Watch the surgeon videos →" : "Watch the surgeon video →"}
+                </PrimaryBtn>
+              </div>
+            </div>
+          ) : (
+            <div>
+              {/* Guess recap */}
+              <div className="fade-in" style={{
+                background: B.softGrey, borderRadius: 10,
+                border: "1.5px solid #D8E2EE",
+                padding: "12px 14px", marginBottom: 14,
+              }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: B.midGrey, letterSpacing: 0.8, marginBottom: 5 }}>
+                  YOUR ANSWER
+                </div>
+                <p style={{ fontSize: 13, color: B.text, lineHeight: 1.5, fontStyle: "italic" }}>
+                  "{guess}"
+                </p>
+              </div>
+
+              {/* Video 1 */}
+              {showVideo && (
+                <VideoCard
+                  label={beat.videoLabel}
+                  desc={beat.videoDesc}
+                  vimeoId={beat.vimeoId || null}
+                  streamSrc={beat.streamSrc || null}
+                  brightcoveUrl={beat.brightcoveUrl || null}
+                  localSrc={beat.localSrc || null}
+                  animClass="slide-in"
+                />
+              )}
+
+              {/* Video 2 trigger or card */}
+              {hasTwoVideos && showVideo && !showVideo2 && (
+                <div className="slide-in-delay" style={{
+                  background: B.white, borderRadius: 12,
+                  border: `1.5px solid ${B.copper}`,
+                  padding: "14px 16px", marginBottom: 16,
+                }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: "#A06020", letterSpacing: 0.5, marginBottom: 6 }}>
+                    ANOTHER PERSPECTIVE
+                  </div>
+                  <p style={{ fontSize: 13, color: B.text, lineHeight: 1.5, marginBottom: 12 }}>
+                    {beat.videoDesc2}
+                  </p>
+                  <SecondaryBtn onClick={() => { setShowVideo2(true); setTimeout(() => scrollTop(scrollRef), 100); }}>
+                    Watch second perspective →
+                  </SecondaryBtn>
+                </div>
+              )}
+
+              {hasTwoVideos && showVideo2 && (
+                <VideoCard
+                  label={beat.videoLabel2}
+                  desc={beat.videoDesc2}
+                  vimeoId={beat.vimeoId2 || null}
+                  brightcoveUrl={beat.brightcoveUrl2 || null}
+                  localSrc={beat.localSrc2 || null}
+                  isSecond={true}
+                  animClass="slide-in"
+                />
+              )}
+
+              {/* Nudge if a second perspective exists but hasn't been watched yet — same visual weight as the miss/strong callouts, since this matters as much as they do */}
+              {hasTwoVideos && showVideo && !showVideo2 && (
+                <div className="slide-in" style={{
+                  background: "#FFF8EE", border: `1.5px solid ${B.amberBorder}`,
+                  borderLeft: `4px solid ${B.copper}`,
+                  borderRadius: "0 10px 10px 0",
+                  padding: "12px 14px", marginBottom: 16,
+                }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: "#A07020", letterSpacing: 0.8, marginBottom: 4 }}>
+                    WORTH A LOOK
+                  </div>
+                  <p style={{ fontSize: 13, color: "#705010", lineHeight: 1.5 }}>
+                    {getSecondPerspectiveNudge(beat.id)}
+                  </p>
+                </div>
+              )}
+
+              {/* Advance button — first video is enough to continue; second perspective is offered, not required */}
+              {showVideo ? (
+                <div className="slide-in-delay">
+                  <PrimaryBtn onClick={handleNext}>
+                    {beatIndex < total - 1 ? "Continue consultation →" : "Finish the consultation →"}
+                  </PrimaryBtn>
+                  <div style={{ marginTop: 10 }}>
+                    <SecondaryBtn onClick={handleReconsider}>
+                      Go back over this topic
+                    </SecondaryBtn>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Closing screen ────────────────────────────────────────────────────────────
+// (Named "closing," not "reflection" — resident-facing copy avoids ID vocabulary.)
+function ClosingScreen({ onFinish, onBack, scrollRef }) {
+  const [response, setResponse] = useState("");
+
+  return (
+    <div className="fade-in">
+      <div style={{
+        background: B.darkBlue, borderRadius: 16,
+        padding: "20px", marginBottom: 24,
+      }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: B.copper, letterSpacing: 0.8, marginBottom: 8 }}>
+          THE CONSULTATION ENDS
+        </div>
+        <div style={{
+          background: "rgba(255,255,255,0.07)",
+          borderRadius: 10, padding: "12px 14px",
+          borderLeft: `3px solid ${B.copper}`,
+        }}>
+          <p style={{ fontSize: 14, color: "rgba(255,255,255,0.85)", lineHeight: 1.55, fontStyle: "italic" }}>
+            "Okay — I think that covers everything I was going to ask about. It helps to actually know instead of just guessing."
+          </p>
+          <div style={{ fontSize: 12, color: B.copper, marginTop: 6, fontWeight: 600 }}>— Sarah</div>
+        </div>
+      </div>
+
+      <div style={{ marginBottom: 24 }}>
+        <h2 style={{ fontSize: 20, fontWeight: 400, color: B.darkBlue, marginBottom: 10 }}>
+          One last question
+        </h2>
+        <p style={{ fontSize: 15, color: "#4A5568", lineHeight: 1.6, marginBottom: 16 }}>
+          {CLOSING_PROMPT}
+        </p>
+        <textarea
+          value={response}
+          onChange={e => setResponse(e.target.value)}
+          placeholder="Write your answer here..."
+          rows={5}
+          style={{
+            width: "100%", padding: "12px 14px",
+            border: `1.5px solid ${response.trim().length > 0 ? B.blue : "#D8E2EE"}`,
+            borderRadius: 12, fontSize: 14, lineHeight: 1.6,
+            resize: "none", outline: "none", color: B.text,
+            background: B.softGrey, transition: "border-color 0.2s",
+          }}
+        />
+        {response.trim().length > 0 && response.trim().length < 3 && (
+          <p style={{ fontSize: 12, color: "#E57373", marginTop: 4 }}>
+            Add a few more words to continue.
+          </p>
+        )}
+      </div>
+
+      <PrimaryBtn onClick={onFinish} disabled={response.trim().length < 3}>
+        Finish Module 4 →
+      </PrimaryBtn>
+      <div style={{ marginTop: 10 }}>
+        <SecondaryBtn onClick={onBack}>Back to previous topic</SecondaryBtn>
+      </div>
+    </div>
+  );
+}
+
+// ── Complete screen ───────────────────────────────────────────────────────────
+function CompleteScreen({ onReplay }) {
+  const topics = [
+    "Confirming a normal recovery instead of just reassuring her",
+    "Correcting the 'ten years' claim with real data and a monitoring plan",
+    "Reframing safety honestly, using a real number instead of a flat reassurance",
+    "Answering a practical logistics question with an actual next step",
+  ];
+
+  return (
+    <div className="fade-in">
+      <div style={{
+        background: `linear-gradient(135deg, ${B.darkBlue} 0%, #003D5C 100%)`,
+        borderRadius: 20, padding: "24px 20px", marginBottom: 24,
+        textAlign: "center",
+      }}>
+        <div style={{
+          width: 52, height: 52, borderRadius: "50%",
+          background: B.copper, margin: "0 auto 14px",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          fontSize: 22,
+        }}>✓</div>
+        <h2 style={{ fontSize: 22, fontWeight: 400, color: B.white, marginBottom: 8 }}>
+          Module 4 complete
+        </h2>
+        <p style={{ fontSize: 14, color: "rgba(255,255,255,0.7)", lineHeight: 1.5 }}>
+          Recovery, Longevity &amp; Patient Readiness
+        </p>
+      </div>
+
+      <div style={{
+        background: B.white, borderRadius: 16,
+        border: "1.5px solid #E2E8F0", padding: "18px", marginBottom: 20,
+      }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: B.darkBlue, letterSpacing: 0.5, marginBottom: 14 }}>
+          TOPICS COVERED IN THIS MODULE
+        </div>
+        {topics.map((t, i) => (
+          <div key={i} style={{ display: "flex", gap: 10, alignItems: "flex-start", marginBottom: i < topics.length - 1 ? 10 : 0 }}>
+            <div style={{
+              width: 20, height: 20, borderRadius: "50%",
+              background: "#EDF7EE", border: "1.5px solid #6DBF79",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 10, color: "#3A8A46", fontWeight: 800, flexShrink: 0,
+            }}>✓</div>
+            <p style={{ fontSize: 13, color: B.text, lineHeight: 1.5 }}>{t}</p>
+          </div>
+        ))}
+      </div>
+
+      <div style={{
+        background: B.lightBlue, borderRadius: 14,
+        border: `1.5px solid ${B.blue}`,
+        padding: "14px 16px", marginBottom: 24,
+      }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: B.blue, letterSpacing: 0.5, marginBottom: 6 }}>
+          COMING UP IN MODULE 5
+        </div>
+        <p style={{ fontSize: 13, color: B.text, lineHeight: 1.5 }}>
+          Becoming Practice-Ready — stepping back from a single patient to build your own practice.
+        </p>
+      </div>
+
+      {/* Full-width bottom button, not a small text link — per the Module 1/2 audit */}
+      <SecondaryBtn onClick={onReplay}>Replay Module 4</SecondaryBtn>
+
+      <div style={{ fontSize: 11, color: B.midGrey, textAlign: "center", marginTop: 20, letterSpacing: 0.5 }}>
+        MENTOR™ Residency: The Consultation Series · Module 4 · Prototype
+      </div>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// APP
+// ══════════════════════════════════════════════════════════════════════════════
+
+function App() {
+  const [phase, setPhase] = useState("intro"); // intro | beat | closing | complete
+  const [beatIndex, setBeatIndex] = useState(0);
+  const scrollRef = useRef(null);
+
+  function start() {
+    setPhase("beat");
+    setBeatIndex(0);
+    scrollTop(scrollRef);
+  }
+
+  function handleBeatDone() {
+    scrollTop(scrollRef);
+    if (beatIndex < BEATS.length - 1) {
+      setBeatIndex(i => i + 1);
+    } else {
+      setPhase("closing");
+    }
+  }
+
+  function handleBeatBack() {
+    scrollTop(scrollRef);
+    if (beatIndex > 0) {
+      setBeatIndex(i => i - 1);
+    } else {
+      setPhase("intro");
+    }
+  }
+
+  function handleClosingDone() {
+    setPhase("complete");
+    scrollTop(scrollRef);
+  }
+
+  function handleClosingBack() {
+    setPhase("beat");
+    setBeatIndex(BEATS.length - 1);
+    scrollTop(scrollRef);
+  }
+
+  function replay() {
+    setPhase("intro");
+    setBeatIndex(0);
+    scrollTop(scrollRef);
+  }
+
+  return (
+    <Shell scrollRef={scrollRef}>
+      {phase === "intro" && <IntroScreen onStart={start} />}
+      {phase === "beat" && (
+        <BeatScreen
+          key={beatIndex}
+          beat={BEATS[beatIndex]}
+          beatIndex={beatIndex}
+          total={BEATS.length}
+          onChosen={handleBeatDone}
+          onBack={handleBeatBack}
+          scrollRef={scrollRef}
+        />
+      )}
+      {phase === "closing" && (
+        <ClosingScreen onFinish={handleClosingDone} onBack={handleClosingBack} scrollRef={scrollRef} />
+      )}
+      {phase === "complete" && <CompleteScreen onReplay={replay} />}
+    </Shell>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+
+</script>
+</body>
+</html>
