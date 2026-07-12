@@ -40,6 +40,10 @@
     .app-shell { max-width: 760px; }
     .desktop-row { display: flex; gap: 20px; align-items: flex-start; }
     .desktop-row > * { flex: 1; }
+    /* Video-frame desktop cap — independent of .app-shell width. Paired with
+       VideoCard's aspectRatio property below (NOT paddingBottom percentage —
+       see MENTOR_Residency_Pitfalls.md #8 for why that trick breaks here). */
+    .video-frame { max-width: 340px; margin: 0 auto; }
   }
 </style>
 </head>
@@ -445,7 +449,7 @@ function StrongNote({ text }) {
 }
 
 // ── Video card — real Vimeo embed or placeholder ──────────────────────────────
-function VideoCard({ label, desc, isSecond = false, animClass = "slide-in", vimeoId = null, streamSrc = null, brightcoveUrl = null }) {
+function VideoCard({ label, desc, isSecond = false, animClass = "slide-in", localSrc = null, brightcoveUrl = null, vimeoId = null, streamSrc = null }) {
   return (
     <div className={animClass} style={{
       background: B.darkBlue, borderRadius: 14,
@@ -469,21 +473,21 @@ function VideoCard({ label, desc, isSecond = false, animClass = "slide-in", vime
           {desc}
         </div>
 
-        {vimeoId ? (
-          // ── Vimeo embed (portrait 9:16) ──
-          <div style={{ position: "relative", paddingBottom: "177.78%", borderRadius: 10, overflow: "hidden" }}>
-            <iframe
-              src={`https://player.vimeo.com/video/${vimeoId}?badge=0&autopause=0&player_id=0&app_id=58479`}
-              frameBorder="0"
-              allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
-              referrerPolicy="strict-origin-when-cross-origin"
-              style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
+        {localSrc ? (
+          // ── Native video (GitHub Pages demo only — local mp4, portrait 9:16) ──
+          <div className="video-frame" style={{ position: "relative", aspectRatio: "9 / 16", borderRadius: 10, overflow: "hidden", background: "#000" }}>
+            <video
+              src={localSrc}
+              controls
+              playsInline
+              preload="metadata"
+              style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "contain" }}
               title={label}
             />
           </div>
         ) : brightcoveUrl ? (
-          // ── Brightcove embed (portrait 9:16) ──
-          <div style={{ position: "relative", paddingBottom: "177.78%", borderRadius: 10, overflow: "hidden", background: "#000" }}>
+          // ── Brightcove embed (portrait 9:16) — PREFERRED per Standard 5.2 ──
+          <div className="video-frame" style={{ position: "relative", aspectRatio: "9 / 16", borderRadius: 10, overflow: "hidden", background: "#000" }}>
             <iframe
               src={brightcoveUrl}
               allowFullScreen
@@ -493,9 +497,21 @@ function VideoCard({ label, desc, isSecond = false, animClass = "slide-in", vime
               title={label}
             />
           </div>
+        ) : vimeoId ? (
+          // ── Vimeo embed (portrait 9:16) — testing/interim only ──
+          <div className="video-frame" style={{ position: "relative", aspectRatio: "9 / 16", borderRadius: 10, overflow: "hidden" }}>
+            <iframe
+              src={`https://player.vimeo.com/video/${vimeoId}?badge=0&autopause=0&player_id=0&app_id=58479`}
+              frameBorder="0"
+              allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
+              style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
+              title={label}
+            />
+          </div>
         ) : streamSrc ? (
-          // ── Stream embed (landscape 16:9) ──
-          <div style={{ position: "relative", paddingBottom: "56.25%", borderRadius: 10, overflow: "hidden", background: "#000" }}>
+          // ── Stream embed (landscape 16:9) — not recommended, auth wall blocks external users ──
+          <div className="video-frame" style={{ position: "relative", aspectRatio: "16 / 9", borderRadius: 10, overflow: "hidden", background: "#000" }}>
             <iframe
               src={streamSrc}
               width="640" height="360"
@@ -842,6 +858,7 @@ function BeatScreen({ beat, beatIndex, total, onChosen, onBack, scrollRef }) {
                 <VideoCard
                   label={beat.videoLabel}
                   desc={beat.videoDesc}
+                  localSrc={beat.localSrc || null}
                   vimeoId={beat.vimeoId || null}
                   streamSrc={beat.streamSrc || null}
                   brightcoveUrl={beat.brightcoveUrl || null}
@@ -872,6 +889,7 @@ function BeatScreen({ beat, beatIndex, total, onChosen, onBack, scrollRef }) {
                 <VideoCard
                   label={beat.videoLabel2}
                   desc={beat.videoDesc2}
+                  localSrc={beat.localSrc2 || null}
                   vimeoId={beat.vimeoId2 || null}
                   brightcoveUrl={beat.brightcoveUrl2 || null}
                   isSecond={true}
