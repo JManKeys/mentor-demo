@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>MENTOR™ Residency · Module 1 Prototype</title>
+<title>MENTOR™ Future Leaders: Breast Augmentation Consultation · Module 1</title>
 <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
 <!-- Babel CDN — pinned per project standard. Unpinned unpkg.com serves "latest",
@@ -74,6 +74,73 @@ const B = {
   warningBorder: "#E0A040",
 };
 
+// ── Course-open sequence data ───────────────────────────────────────────────────
+// Locked in chat 7/17 (Description + KOL copy), source content confirmed against
+// Mentor_Future_Leaders_ELearning_Journey.pdf (Black Box, Disclosures, ISI) and
+// Black_Box_Warning_verbiage.docx (exact match). This entire block — MODULE_AMP,
+// PROGRAM_DESCRIPTION, SURGEONS, MODULE_KOL_IDS — is the one part of the open
+// sequence that changes per module. Everything else in the four screens below
+// (TitleScreen, BlackBoxScreen, DisclosuresScreen, DescriptionKolScreen) is
+// identical across all 5 modules, which is why this is structured as a single
+// parameterized block up top rather than baked into the screens themselves —
+// replicating to Modules 2–5 means swapping only this section.
+//
+// Sequence order (revised 7/17 per Jonathan): Title -> Black Box -> Disclosures/
+// ISI/AMP -> Description+Meet the Surgeons -> module intro. Both compliance
+// screens run back-to-back up front, ahead of the surgeons and content — the
+// reasoning being that learners "check the box" through disclosures regardless
+// of where they sit, so front-loading them together rather than splitting
+// content across the compliance block reads better.
+
+const MODULE_AMP = "US_MNT_AMNT_418936"; // Module 1 — Foundations: Implants and Expectations
+
+const PROGRAM_TITLE = "MENTOR™ Future Leaders: Breast Augmentation Consultation";
+
+const PROGRAM_DESCRIPTION = [
+  "This program is built around real consultations — the same conversations you'll be having as a resident, and soon on your own.",
+  "Instead of lectures, you'll work through short videos with surgeons in practice today, hearing the actual thinking behind how they respond to real patient questions.",
+  "By the time you're across the table from your own patient, it won't be the first time you've thought it through.",
+];
+
+// Full surgeon roster — bios are identical across all 5 modules. Which ones
+// appear in a given module is controlled entirely by MODULE_KOL_IDS below,
+// cross-referenced against Residency_Video_Tracker.xlsx (Primary/Secondary
+// designations only — "Not Used" and blank entries excluded).
+const SURGEONS = {
+  mosharrafa: {
+    name: "Dr. Tamir Mosharrafa",
+    photo: "Dr__Mosharrafa.jpg",
+    photoFocusY: 50, // near-square crop (527x573) — negligible vertical margin either way
+    oneLiner: "Phoenix and Scottsdale surgeon who still teaches residents alongside running his own practice.",
+    bio: "Dr. Tamir Mosharrafa practices in Phoenix and Scottsdale, where he co-founded Mosharrafa Plastic Surgery Group. He trained at Baylor College of Medicine and still teaches residents today, on top of running his own practice. When he's not in the OR, he's probably on a golf course or watching hockey.",
+  },
+  adams: {
+    name: "Dr. William Adams",
+    photo: "Dr__Adams.jpg",
+    photoFocusY: 15, // tall portrait (510x757), face starts ~17% down — default 50% center-crop clipped hair
+    oneLiner: "Dallas surgeon whose implant safety research is used by surgeons worldwide.",
+    bio: "Dr. William Adams practices in Dallas, where he also trained and now teaches at UT Southwestern. He's spent his career on one problem — making breast implant surgery safer — and the irrigation technique he developed is now used by surgeons worldwide. He literally wrote the book on breast augmentation.",
+  },
+  yates: {
+    name: "Dr. Essie Yates",
+    photo: "Dr__Yates.jpg",
+    photoFocusY: 3, // tall portrait (567x699), face starts ~8% down — needed the most correction of the four
+    oneLiner: "Fort Lauderdale surgeon working across both cosmetic and reconstructive breast surgery.",
+    bio: "Dr. Essie Yates practices in Fort Lauderdale after training across London, New York, and Chicago. She splits her work between cosmetic and reconstructive breast surgery, and built her practice around one idea: outer confidence starts with inner strength.",
+  },
+  mohan: {
+    name: "Dr. Kriti Mohan",
+    photo: "Dr__Mohan.jpg",
+    photoFocusY: 50, // landscape-oriented (750x723) — cover crops left/right, not top/bottom, so this is unused in practice
+    oneLiner: "Houston surgeon leading a practice built entirely around breast surgery.",
+    bio: "Dr. Kriti Mohan leads Ciaravino Total Beauty in Houston, a practice that's been a destination for breast surgery for decades. She trained in microsurgery and reconstructive surgery at Baylor College of Medicine — and before medicine, she studied cell biology, neuroscience, and art history, a mix that still shows up in how she approaches results.",
+  },
+};
+
+// Module 1 features all four — cross-referenced against the tracker (every
+// surgeon has at least one Primary/Secondary designation in Module 1's beats).
+const MODULE_KOL_IDS = ["mosharrafa", "adams", "yates", "mohan"];
+
 // ── Beat data ─────────────────────────────────────────────────────────────────
 // Source: Module_01_Beats_Working_Draft.md (all four beats DRAFT, option lengths
 // rebalanced July 7 — see Pitfall #10) and Module_01_Maya.docx. Video selection
@@ -99,9 +166,7 @@ const BEATS = [
     videoLabel: `Saline vs. Silicone: What the Difference Actually Means`,
     videoLabel2: `A Fuller Picture of the Implant Portfolio`,
     videoDesc: "Covers the shell/fill distinction, rippling and wrinkling differences (more pronounced in saline, especially on leaner builds), and silicone's lower palpability — closing with a direct recommendation of silicone for most patients.",
-    videoDesc2: "Frames the choice around the broader Mentor portfolio rather than a binary — the default recommendation is Memory Gel Boost for most patients, but flags saline's specific appeal to patients who want peace of mind about what's inside if a rupture occurs.",
-    localSrc: "Mosh_1.1.mp4",
-    localSrc2: "Yates_1.1.mp4",
+    videoDesc2: "Frames the choice around the broader Mentor portfolio rather than a binary — his go-to is Memory Gel Boost for most patients, but flags saline's specific appeal to patients who want peace of mind about what's inside if a rupture occurs.",
     predictionPrompt: "Before the video plays: what do you think an experienced surgeon says when a patient who's already decided on silicone asks him to walk her through the difference anyway?",
     mayaOpen: `"I've done a ton of research — probably more than I should have, honestly. I know I want silicone, but I keep reading things that make me second-guess myself. Can you just walk me through the difference so I know I'm making the right call?"`,
     mayaMood: "open",
@@ -139,8 +204,6 @@ const BEATS = [
     videoLabel2: `Using Inspiration Photos to Decode "Natural"`,
     videoDesc: "His definition centers on upper-pole slope and takeoff rather than roundness, plus the distinction between how a breast looks in vs. out of a bra — natural at rest, adjustable with support.",
     videoDesc2: "Her approach: patients use the same word to mean different, sometimes opposite things (natural slope vs. proportionate/augmented), and inspiration photos are the tool for surfacing which one a given patient actually means.",
-    localSrc: "Mosh_1.2.mp4",
-    localSrc2: "Mohan_1.2.mp4",
     predictionPrompt: "Before the video plays: what do you think an experienced surgeon means by 'natural,' clinically, when a patient shows him a photo that's clearly augmented?",
     mayaOpen: `"Okay — so I have this picture. [She turns her phone toward you. The result is clearly augmented — fuller upper pole, visible projection.] This is kind of the look I'm going for. Is that natural? Because when I say natural, I think I mean something specific, but everyone looks at me weird when I show them this."`,
     mayaMood: "open",
@@ -178,8 +241,6 @@ const BEATS = [
     videoLabel2: `How Profile and Volume Distribution Actually Work`,
     videoDesc: `His position: the "only teardrop looks natural" claim is flawed — a well-fitted round implant can look just as natural, and round is more versatile across patient anatomy. Fit to the breast, not implant shape alone, drives the result.`,
     videoDesc2: "More technical companion: base diameter and desired volume determine profile (not the reverse), and round implants typically retain more upper-pole volume than teardrop — relevant to patients who want fuller upper pole vs. those who don't.",
-    localSrc: "Adams_1.3.mp4",
-    localSrc2: "Mosh_1.3.mp4",
     predictionPrompt: "Before the video plays: what do you think an experienced surgeon says when a patient repeats a belief she picked up online — that round implants look fake?",
     mayaOpen: `"Someone I follow just got the teardrop ones and said they're more natural-looking. Is that true? Because I've seen people say round ones look fake, and I really don't want that round-ball thing at the top."`,
     mayaMood: "open",
@@ -217,8 +278,6 @@ const BEATS = [
     videoLabel2: `Matching Implant to Tissue for a Natural Feel`,
     videoDesc: `Her framing: thicker gel (e.g., Boost) reads firmer and more upright; softer gel (classic Memory Gel) has more natural slope and give. Directly explains the "firm" sensation Maya described at her fitting.`,
     videoDesc2: "Complementary: soft-tissue evaluation and cohesivity matching are what make an implant undetectable by feel — framed as the explicit goal of the surgery, not just a possible outcome.",
-    localSrc: "Mohan_1.4.mp4",
-    localSrc2: "Mosh_1.4.mp4",
     predictionPrompt: "Before the video plays: what do you think an experienced surgeon says determines whether an implant actually feels real?",
     mayaOpen: `"Last thing — my friend said hers feel completely real. Like, she says people can't tell unless she tells them. Is that actually possible? Because I've touched some at like a fitting thing and they felt… firm. Not bad, just not what I expected."`,
     mayaMood: "vulnerable",
@@ -322,7 +381,7 @@ function Header() {
           color: B.white, fontSize: 12, fontWeight: 700, letterSpacing: 0.3,
           whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
         }}>
-          MENTOR™ Residency: The Consultation Series
+          {PROGRAM_TITLE}
         </span>
       </div>
       <div style={{
@@ -598,6 +657,256 @@ function SectionLabel({ children }) {
 // ══════════════════════════════════════════════════════════════════════════════
 // SCREENS
 // ══════════════════════════════════════════════════════════════════════════════
+
+// ── Course-open sequence: 1. Title ──────────────────────────────────────────────
+// Experience-register screen (per the two-register design principle) — full
+// on-brand warmth, same as the rest of the module. This is the one true
+// "cold open" of the whole program; nothing precedes it.
+function TitleScreen({ onContinue }) {
+  return (
+    <div className="fade-in">
+      <div style={{
+        background: `linear-gradient(135deg, ${B.darkBlue} 0%, #003D5C 100%)`,
+        borderRadius: 20, padding: "40px 26px", marginBottom: 24,
+        textAlign: "center",
+      }}>
+        <div style={{
+          width: 10, height: 10, borderRadius: "50%",
+          background: B.copper, margin: "0 auto 20px",
+          boxShadow: `0 0 10px ${B.copper}`,
+        }} />
+        <h1 style={{ fontSize: 24, fontWeight: 400, color: B.white, lineHeight: 1.35, marginBottom: 12 }}>
+          MENTOR&trade; Future Leaders
+        </h1>
+        <p style={{ fontSize: 15, color: "rgba(255,255,255,0.75)", lineHeight: 1.5 }}>
+          Breast Augmentation Consultation
+        </p>
+      </div>
+      <PrimaryBtn onClick={onContinue}>Continue →</PrimaryBtn>
+    </div>
+  );
+}
+
+// ── Course-open sequence: 2. Black Box Warning ──────────────────────────────────
+// Compliance register — same brand system, deliberately quieter and faster.
+// No icons, gradients, or badges. Text matches Black_Box_Warning_verbiage.docx
+// exactly; do not paraphrase or reformat this content.
+function BlackBoxScreen({ onContinue, onBack }) {
+  const bullets = [
+    "Breast implants are not lifetime devices. The longer people have them, the greater chances are that they will develop complications, some will require more surgery.",
+    "Breast implants have been associated with the development of a cancer of the immune system called breast implant-associated anaplastic large cell lymphoma (BIA-ALCL). This cancer occurs more commonly in patients with textured breast implants than smooth implants, although rates are not well defined. Some patients have died from BIA-ALCL.",
+    "Patients receiving breast implants have reported a variety of systemic symptoms such as joint pain, muscle aches, confusion, chronic fatigue, autoimmune diseases and others. Individual patient risk for developing these symptoms has not been well established. Some patients report complete resolution of symptoms when the implants are removed without replacement.",
+  ];
+  return (
+    <div className="fade-in">
+      <div style={{
+        background: B.white, border: "1px solid #D8DEE6",
+        borderRadius: 8, padding: "18px 16px", marginBottom: 20,
+      }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: B.text, letterSpacing: 0.6, marginBottom: 10 }}>
+          WARNING:
+        </div>
+        {bullets.map((b, i) => (
+          <p key={i} style={{ fontSize: 12.5, color: "#333", lineHeight: 1.5, marginBottom: i < bullets.length - 1 ? 8 : 12 }}>
+            &bull; {b}
+          </p>
+        ))}
+        <p style={{ fontSize: 12.5, color: "#333", lineHeight: 1.5 }}>
+          The sale and distribution of Mentor Breast Implant Devices are restricted to users and/or user facilities that provide information to patients about the risks and benefits of the device prior to its use in the form and manner specified in approved labeling to be provided by Mentor Worldwide LLC.
+        </p>
+      </div>
+      <PrimaryBtn onClick={onContinue}>Continue →</PrimaryBtn>
+      <div style={{ marginTop: 10 }}>
+        <SecondaryBtn onClick={onBack}>Back</SecondaryBtn>
+      </div>
+    </div>
+  );
+}
+
+// ── Course-open sequence: 3. Description + Meet the surgeons ───────────────────
+// Experience register. Description text is locked, identical across all 5
+// modules. Surgeon roster is filtered per module via MODULE_KOL_IDS — this is
+// the parameterized part when replicating to Modules 2–5. Tapping a name opens
+// KOLModal with the full bio (see below); the intro screen itself stays compact
+// per the front-loading pacing discussion (guaranteed exposure, not profile depth).
+function DescriptionKolScreen({ onContinue, onBack }) {
+  const [openSurgeon, setOpenSurgeon] = useState(null);
+
+  return (
+    <div className="fade-in">
+      <h1 style={{ fontSize: 22, fontWeight: 400, color: B.darkBlue, lineHeight: 1.3, marginBottom: 16 }}>
+        About this program
+      </h1>
+      {PROGRAM_DESCRIPTION.map((p, i) => (
+        <p key={i} style={{ fontSize: 15, color: "#4A5568", lineHeight: 1.6, marginBottom: i < PROGRAM_DESCRIPTION.length - 1 ? 14 : 26 }}>
+          {p}
+        </p>
+      ))}
+
+      <div style={{
+        background: B.white, borderRadius: 16,
+        border: "1.5px solid #E2E8F0", padding: "18px", marginBottom: 28,
+      }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: B.darkBlue, letterSpacing: 0.5, marginBottom: 4 }}>
+          MEET THE SURGEONS
+        </div>
+        <p style={{ fontSize: 12.5, color: B.midGrey, lineHeight: 1.5, marginBottom: 14 }}>
+          Every video in this module comes from a surgeon in practice today. Here's who you'll be learning from.
+        </p>
+        {MODULE_KOL_IDS.map((id, i) => {
+          const s = SURGEONS[id];
+          return (
+            <button
+              key={id}
+              onClick={() => setOpenSurgeon(id)}
+              style={{
+                display: "flex", alignItems: "center", gap: 12, width: "100%",
+                background: "transparent", border: "none", textAlign: "left",
+                padding: "10px 0", borderTop: i > 0 ? "1px solid #EEF1F5" : "none",
+                cursor: "pointer",
+              }}
+            >
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: B.darkBlue }}>{s.name}</div>
+                <div style={{ fontSize: 12.5, color: "#4A5568", lineHeight: 1.4 }}>{s.oneLiner}</div>
+              </div>
+              <div style={{ color: B.blue, fontSize: 18, flexShrink: 0 }}>›</div>
+            </button>
+          );
+        })}
+        <p style={{ fontSize: 12, color: B.midGrey, fontStyle: "italic", marginTop: 12 }}>
+          Want more on any of them? Tap a name to read their full bio.
+        </p>
+      </div>
+
+      <PrimaryBtn onClick={onContinue}>Continue →</PrimaryBtn>
+      <div style={{ marginTop: 10 }}>
+        <SecondaryBtn onClick={onBack}>Back</SecondaryBtn>
+      </div>
+
+      {openSurgeon && (
+        <KOLModal surgeon={SURGEONS[openSurgeon]} onClose={() => setOpenSurgeon(null)} />
+      )}
+    </div>
+  );
+}
+
+// ── Avatar — headshot with initial-circle fallback ──────────────────────────────
+// Matches PatientCard's initial-circle treatment for visual consistency. Falls
+// back automatically if a headshot file isn't present alongside the HTML (same
+// principle as VideoCard's placeholder state when no video asset is hosted yet).
+function Avatar({ photo, name, size = 44, focusY = 50 }) {
+  const [errored, setErrored] = useState(false);
+  if (!photo || errored) {
+    return (
+      <div style={{
+        width: size, height: size, borderRadius: "50%", flexShrink: 0,
+        background: `linear-gradient(135deg, ${B.copper} 0%, #B87840 100%)`,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        fontSize: size * 0.4, fontWeight: 800, color: B.white,
+      }}>{name.replace("Dr. ", "")[0]}</div>
+    );
+  }
+  return (
+    <img
+      src={photo}
+      alt={name}
+      onError={() => setErrored(true)}
+      style={{
+        width: size, height: size, borderRadius: "50%", flexShrink: 0,
+        objectFit: "cover", objectPosition: `50% ${focusY}%`,
+      }}
+    />
+  );
+}
+
+// ── KOL bio modal ────────────────────────────────────────────────────────────────
+// Photo appears here, not on the compact intro list — per Jonathan's direction,
+// this is the one place in the sequence where the surgeon's actual image belongs.
+// Sized larger (110px) than the 44px list-row avatar since this is the "profile"
+// view, not just a name-recognition row.
+function KOLModal({ surgeon, onClose }) {
+  return (
+    <div
+      className="fade-in"
+      onClick={onClose}
+      style={{
+        position: "fixed", inset: 0, background: "rgba(0,20,40,0.5)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        padding: 20, zIndex: 100,
+      }}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          background: B.white, borderRadius: 16, padding: "28px 22px 24px",
+          maxWidth: 400, width: "100%", maxHeight: "80vh", overflowY: "auto",
+          textAlign: "center",
+        }}
+      >
+        <Avatar photo={surgeon.photo} name={surgeon.name} size={110} focusY={surgeon.photoFocusY} />
+        <div style={{ fontSize: 18, fontWeight: 700, color: B.darkBlue, marginTop: 16, marginBottom: 16 }}>
+          {surgeon.name}
+        </div>
+        <p style={{ fontSize: 14.5, color: "#4A5568", lineHeight: 1.6, marginBottom: 20, textAlign: "left" }}>
+          {surgeon.bio}
+        </p>
+        <SecondaryBtn onClick={onClose}>Close</SecondaryBtn>
+      </div>
+    </div>
+  );
+}
+
+// ── Course-open sequence: 4. Disclosures + ISI + AMP ────────────────────────────
+// Compliance register — quiet and fast, dense plain text, no decoration.
+// Text confirmed against Mentor_Future_Leaders_ELearning_Journey.pdf (Disclosures
+// + ISI) and the disclosures workbook. AMP number is the one line that changes
+// per module (MODULE_AMP, defined at top).
+function DisclosuresScreen({ onContinue, onBack }) {
+  return (
+    <div className="fade-in">
+      <div style={{
+        background: B.white, border: "1px solid #D8DEE6",
+        borderRadius: 8, padding: "18px 16px", marginBottom: 20,
+      }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: B.text, letterSpacing: 0.6, marginBottom: 8 }}>
+          DISCLOSURES
+        </div>
+        <p style={{ fontSize: 12.5, color: "#333", lineHeight: 1.5, marginBottom: 10 }}>
+          This presentation includes a demonstration of the use of a medical device. The steps demonstrated with respect to the use of any medical device in this presentation may not be the complete steps of the procedure. Individual physician preference and experience, as well as patient needs, may dictate variation in procedure steps. Before using any medical device, review all the Instructions For Use with particular attention to the indications, contraindications, warnings and precautions.
+        </p>
+        <p style={{ fontSize: 12.5, color: "#333", lineHeight: 1.5, marginBottom: 20 }}>
+          Dr. William P. Adams Jr., Dr. Kriti Mohan, Dr. Tamir Mosharrafa, and Dr. Essie Yates are compensated by and presenting on behalf of Mentor Worldwide LLC and must present information in accordance with applicable regulatory requirements.
+        </p>
+
+        <div style={{ fontSize: 12, fontWeight: 700, color: B.text, letterSpacing: 0.6, marginBottom: 8 }}>
+          IMPORTANT SAFETY INFORMATION
+        </div>
+        <p style={{ fontSize: 11.5, color: "#555", lineHeight: 1.5, marginBottom: 8 }}>
+          Prior to use, refer to the instructions for use supplied with this device for indications, contraindications, side effects, warnings and precautions. Caution: US law restricts this device to sale by or on the order of a physician.
+        </p>
+        <p style={{ fontSize: 11.5, color: "#555", lineHeight: 1.5, marginBottom: 8 }}>
+          MENTOR MemoryGel Breast Implants, MENTOR MemoryShape Breast Implants, and MENTOR Saline-filled Breast Implants are indicated for breast augmentation in women (at least 22 years old for MemoryGel Implants and MemoryShape Implants, and 18 years old for Saline Implants) or for breast reconstruction. Breast implant surgery should not be performed in women with active infection anywhere in their body, with existing cancer or pre-cancer of their breast who have not received adequate treatment for those conditions, or who are currently pregnant or nursing.
+        </p>
+        <p style={{ fontSize: 11.5, color: "#555", lineHeight: 1.5, marginBottom: 8 }}>
+          Breast implants are not lifetime devices and breast implantation may not be a one-time surgery. The chance of developing complications increases over time. The most common complications for breast augmentation and reconstruction with MemoryGel Implants include any reoperation, capsular contracture, and implant removal with or without replacement. The most common complications with MemoryShape Implants for breast augmentation include reoperation for any reason, implant removal with or without replacement, and ptosis. The most common complications with MemoryShape Implants for breast reconstruction include reoperation for any reason, implant removal with or without replacement, and capsular contracture. A lower risk of complication is rupture. The health consequences of a ruptured silicone gel breast implant have not been fully established. MRI screenings are recommended three years after initial implant surgery and then every two years after to detect silent rupture. Breast implants are also associated with the risk of breast implant-associated anaplastic large cell lymphoma (BIA-ALCL), an uncommon type of lymphoma. An individual's risk of developing BIA-ALCL with MENTOR Breast Implants is low based on the incidence of worldwide cases. The most common complications with MENTOR Saline-filled Implants include reoperation, implant removal, capsular contracture, breast pain, and implant deflation.
+        </p>
+        <p style={{ fontSize: 11.5, color: "#555", lineHeight: 1.5, marginBottom: 20 }}>
+          For MemoryGel Implants, patients should receive a copy of Important Information for Augmentation Patients about MENTOR MemoryGel Breast Implants or Important Information for Reconstruction Patients about MENTOR MemoryGel Breast Implants. For MemoryShape Implants, patients should receive a copy of Patient Educational Brochure – Breast Augmentation with MENTOR MemoryShape Breast Implants or Patient Educational Brochure – Breast Reconstruction with MENTOR MemoryShape Breast Implants, and a copy of Quick Facts about Breast Augmentation &amp; Reconstruction with MENTOR MemoryShape Breast Implants. For MENTOR Saline-filled Implants, patients should receive a copy of Saline-Filled Breast Implants: Making an Informed Decision. Your patient needs to read and understand the information regarding the risks and benefits of breast implants, with an opportunity to consult with you prior to deciding on surgery.
+        </p>
+
+        <div style={{ fontSize: 10.5, color: B.midGrey, letterSpacing: 0.3, borderTop: "1px solid #EEF1F5", paddingTop: 10 }}>
+          &copy; Mentor Worldwide LLC · {MODULE_AMP}
+        </div>
+      </div>
+
+      <PrimaryBtn onClick={onContinue}>Continue →</PrimaryBtn>
+      <div style={{ marginTop: 10 }}>
+        <SecondaryBtn onClick={onBack}>Back</SecondaryBtn>
+      </div>
+    </div>
+  );
+}
 
 function IntroScreen({ onStart }) {
   return (
@@ -1052,7 +1361,7 @@ function CompleteScreen({ onReplay }) {
       <SecondaryBtn onClick={onReplay}>Replay Module 1</SecondaryBtn>
 
       <div style={{ fontSize: 11, color: B.midGrey, textAlign: "center", marginTop: 20, letterSpacing: 0.5 }}>
-        MENTOR™ Residency: The Consultation Series · Module 1 · Prototype
+        {PROGRAM_TITLE} · Module 1 · Prototype
       </div>
     </div>
   );
@@ -1063,9 +1372,19 @@ function CompleteScreen({ onReplay }) {
 // ══════════════════════════════════════════════════════════════════════════════
 
 function App() {
-  const [phase, setPhase] = useState("intro"); // intro | beat | closing | complete
+  // title | blackbox | descKol | disclosures | intro | beat | closing | complete
+  // The first four are the mandatory course-open sequence — shown once, in this
+  // order, before any module-specific content. Both replay() and the beat-1
+  // back button return to "intro" (not "title"), by design: the open sequence
+  // is a one-time gate on first entry, never re-shown on return.
+  const [phase, setPhase] = useState("title");
   const [beatIndex, setBeatIndex] = useState(0);
   const scrollRef = useRef(null);
+
+  function goto(nextPhase) {
+    setPhase(nextPhase);
+    scrollTop(scrollRef);
+  }
 
   function start() {
     setPhase("beat");
@@ -1110,6 +1429,16 @@ function App() {
 
   return (
     <Shell scrollRef={scrollRef}>
+      {phase === "title" && <TitleScreen onContinue={() => goto("blackbox")} />}
+      {phase === "blackbox" && (
+        <BlackBoxScreen onContinue={() => goto("disclosures")} onBack={() => goto("title")} />
+      )}
+      {phase === "disclosures" && (
+        <DisclosuresScreen onContinue={() => goto("descKol")} onBack={() => goto("blackbox")} />
+      )}
+      {phase === "descKol" && (
+        <DescriptionKolScreen onContinue={() => goto("intro")} onBack={() => goto("disclosures")} />
+      )}
       {phase === "intro" && <IntroScreen onStart={start} />}
       {phase === "beat" && (
         <BeatScreen
