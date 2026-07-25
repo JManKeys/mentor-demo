@@ -74,6 +74,79 @@ const B = {
   warningBorder: "#E0A040",
 };
 
+// ── Course-open sequence data ───────────────────────────────────────────────────
+// Locked in chat 7/17 (Description + KOL copy), source content confirmed against
+// Mentor_Future_Leaders_ELearning_Journey.pdf (Black Box, Disclosures, ISI) and
+// Black_Box_Warning_verbiage.docx (exact match). This entire block — MODULE_AMP,
+// PROGRAM_DESCRIPTION, SURGEONS, MODULE_KOL_IDS — is the one part of the open
+// sequence that changes per module. Everything else in the front-gate screens
+// (TitleScreen, BlackBoxScreen, DescriptionKolScreen) is identical across all
+// 5 modules.
+//
+// Per Standard v1.7, Section 1.7: Module 5's end-of-module architecture is a
+// bigger departure than Modules 2-4's. Complete screen has no "coming up" box
+// and reads "Two more steps before you're finished: required safety
+// information, then a short survey." ISI Screen 2 ends with "Continue to
+// Survey" instead of "Close Module 5," and the survey is the module's true
+// terminal phase — confirmed via Conversation_With_Laura_071326.docx: the
+// original QR-code-to-external-survey plan was replaced with an inline
+// embedded survey ("we'll just end with the survey").
+
+const MODULE_AMP = "US_MNT_AMNT_418940"; // Module 5 — Becoming Practice-Ready
+
+const PROGRAM_TITLE = "MENTOR™ Future Leaders: Breast Augmentation Consultation";
+
+const PROGRAM_DESCRIPTION = [
+  "This program is built around real consultations — the same conversations you'll be having as a resident, and soon on your own.",
+  "Instead of lectures, you'll work through short videos with surgeons in practice today, hearing the actual thinking behind how they respond to real patient questions.",
+  "By the time you're across the table from your own patient, it won't be the first time you've thought it through.",
+];
+
+// Full surgeon roster — bios are identical across all 5 modules. Which ones
+// appear in a given module's KOL intro screen is controlled by
+// MODULE_KOL_IDS below. Note: the closing SURVEY lists all four surgeons
+// regardless of MODULE_KOL_IDS — the survey is a faculty-wide evaluation for
+// the whole residency series, not scoped to this module's roster.
+const SURGEONS = {
+  mosharrafa: {
+    name: "Dr. Tamir Mosharrafa",
+    photo: "Dr__Mosharrafa.jpg",
+    photoFocusY: 50, // near-square crop (527x573) — negligible vertical margin either way
+    oneLiner: "Phoenix and Scottsdale surgeon who still teaches residents alongside running his own practice.",
+    bio: "Dr. Tamir Mosharrafa practices in Phoenix and Scottsdale, where he co-founded Mosharrafa Plastic Surgery Group. He trained at Baylor College of Medicine and still teaches residents today, on top of running his own practice. When he's not in the OR, he's probably on a golf course or watching hockey.",
+  },
+  adams: {
+    name: "Dr. William Adams",
+    photo: "Dr__Adams.jpg",
+    photoFocusY: 15, // tall portrait (510x757), face starts ~17% down — default 50% center-crop clipped hair
+    oneLiner: "Dallas surgeon whose implant safety research is used by surgeons worldwide.",
+    bio: "Dr. William Adams practices in Dallas, where he also trained and now teaches at UT Southwestern. He's spent his career on one problem — making breast implant surgery safer — and the irrigation technique he developed is now used by surgeons worldwide. He literally wrote the book on breast augmentation.",
+  },
+  yates: {
+    name: "Dr. Essie Yates",
+    photo: "Dr__Yates.jpg",
+    photoFocusY: 3, // tall portrait (567x699), face starts ~8% down — needed the most correction of the four
+    oneLiner: "Fort Lauderdale surgeon working across both cosmetic and reconstructive breast surgery.",
+    bio: "Dr. Essie Yates practices in Fort Lauderdale after training across London, New York, and Chicago. She splits her work between cosmetic and reconstructive breast surgery, and built her practice around one idea: outer confidence starts with inner strength.",
+  },
+  mohan: {
+    name: "Dr. Kriti Mohan",
+    photo: "Dr__Mohan.jpg",
+    photoFocusY: 50, // landscape-oriented (750x723) — cover crops left/right, not top/bottom, so this is unused in practice
+    oneLiner: "Houston surgeon leading a practice built entirely around breast surgery.",
+    bio: "Dr. Kriti Mohan leads Ciaravino Total Beauty in Houston, a practice that's been a destination for breast surgery for decades. She trained in microsurgery and reconstructive surgery at Baylor College of Medicine — and before medicine, she studied cell biology, neuroscience, and art history, a mix that still shows up in how she approaches results.",
+  },
+};
+
+// Module 5 excludes Adams per Standard v1.8, Section 1.8 — confirmed against
+// the beat data below: all four beats use Mosharrafa/Mohan pairings except
+// 5.4, which uses Mosharrafa/Yates. Adams appears in none of them.
+const MODULE_KOL_IDS = ["mosharrafa", "mohan", "yates"];
+
+// Full faculty roster for the closing survey — order matches the screenshot
+// (Adams, Mohan, Mosharrafa, Yates — alphabetical, not MODULE_KOL_IDS order).
+const SURVEY_FACULTY_IDS = ["adams", "mohan", "mosharrafa", "yates"];
+
 // ── Beat data ─────────────────────────────────────────────────────────────────
 // Source: Module_05_Beats_Working_Draft.md (all 4 beats SETTLED, fully revised
 // July 11 through a nuance/realism review with Jonathan). Video selection per
@@ -318,7 +391,7 @@ function Header() {
           color: B.white, fontSize: 12, fontWeight: 700, letterSpacing: 0.3,
           whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
         }}>
-          MENTOR™ Residency: The Consultation Series
+          {PROGRAM_TITLE}
         </span>
       </div>
       <div style={{
@@ -564,6 +637,189 @@ function SectionLabel({ children }) {
 // ══════════════════════════════════════════════════════════════════════════════
 // SCREENS
 // ══════════════════════════════════════════════════════════════════════════════
+
+// ── Course-open sequence: 1. Title ──────────────────────────────────────────────
+function TitleScreen({ onContinue }) {
+  return (
+    <div className="fade-in">
+      <div style={{
+        background: `linear-gradient(135deg, ${B.darkBlue} 0%, #003D5C 100%)`,
+        borderRadius: 20, padding: "40px 26px", marginBottom: 24,
+        textAlign: "center",
+      }}>
+        <div style={{
+          width: 10, height: 10, borderRadius: "50%",
+          background: B.copper, margin: "0 auto 20px",
+          boxShadow: `0 0 10px ${B.copper}`,
+        }} />
+        <h1 style={{ fontSize: 24, fontWeight: 400, color: B.white, lineHeight: 1.35, marginBottom: 12 }}>
+          MENTOR&trade; Future Leaders
+        </h1>
+        <p style={{ fontSize: 15, color: "rgba(255,255,255,0.75)", lineHeight: 1.5 }}>
+          Breast Augmentation Consultation
+        </p>
+      </div>
+      <PrimaryBtn onClick={onContinue}>Continue →</PrimaryBtn>
+    </div>
+  );
+}
+
+// ── Course-open sequence: 2. Black Box Warning ──────────────────────────────────
+function BlackBoxScreen({ onContinue, onBack }) {
+  const bullets = [
+    "Breast implants are not lifetime devices. The longer people have them, the greater chances are that they will develop complications, some will require more surgery.",
+    "Breast implants have been associated with the development of a cancer of the immune system called breast implant-associated anaplastic large cell lymphoma (BIA-ALCL). This cancer occurs more commonly in patients with textured breast implants than smooth implants, although rates are not well defined. Some patients have died from BIA-ALCL.",
+    "Patients receiving breast implants have reported a variety of systemic symptoms such as joint pain, muscle aches, confusion, chronic fatigue, autoimmune diseases and others. Individual patient risk for developing these symptoms has not been well established. Some patients report complete resolution of symptoms when the implants are removed without replacement.",
+  ];
+  return (
+    <div className="fade-in">
+      <div style={{
+        background: B.white, border: "1px solid #D8DEE6",
+        borderRadius: 8, padding: "18px 16px", marginBottom: 20,
+      }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: B.text, letterSpacing: 0.6, marginBottom: 10 }}>
+          WARNING:
+        </div>
+        {bullets.map((b, i) => (
+          <p key={i} style={{ fontSize: 12.5, color: "#333", lineHeight: 1.5, marginBottom: i < bullets.length - 1 ? 8 : 12 }}>
+            &bull; {b}
+          </p>
+        ))}
+        <p style={{ fontSize: 12.5, color: "#333", lineHeight: 1.5 }}>
+          The sale and distribution of Mentor Breast Implant Devices are restricted to users and/or user facilities that provide information to patients about the risks and benefits of the device prior to its use in the form and manner specified in approved labeling to be provided by Mentor Worldwide LLC.
+        </p>
+      </div>
+      <PrimaryBtn onClick={onContinue}>Continue →</PrimaryBtn>
+      <div style={{ marginTop: 10 }}>
+        <SecondaryBtn onClick={onBack}>Back</SecondaryBtn>
+      </div>
+    </div>
+  );
+}
+
+// ── Course-open sequence: 3. Description + Meet the surgeons ───────────────────
+// Module 5 excludes Adams here (MODULE_KOL_IDS), but the closing survey below
+// still evaluates all four — different scope, don't conflate the two lists.
+function DescriptionKolScreen({ onContinue, onBack }) {
+  const [openSurgeon, setOpenSurgeon] = useState(null);
+
+  return (
+    <div className="fade-in">
+      <h1 style={{ fontSize: 22, fontWeight: 400, color: B.darkBlue, lineHeight: 1.3, marginBottom: 16 }}>
+        About this program
+      </h1>
+      {PROGRAM_DESCRIPTION.map((p, i) => (
+        <p key={i} style={{ fontSize: 15, color: "#4A5568", lineHeight: 1.6, marginBottom: i < PROGRAM_DESCRIPTION.length - 1 ? 14 : 26 }}>
+          {p}
+        </p>
+      ))}
+
+      <div style={{
+        background: B.white, borderRadius: 16,
+        border: "1.5px solid #E2E8F0", padding: "18px", marginBottom: 28,
+      }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: B.darkBlue, letterSpacing: 0.5, marginBottom: 4 }}>
+          MEET THE SURGEONS
+        </div>
+        <p style={{ fontSize: 12.5, color: B.midGrey, lineHeight: 1.5, marginBottom: 14 }}>
+          Every video in this module comes from a surgeon in practice today. Here's who you'll be learning from.
+        </p>
+        {MODULE_KOL_IDS.map((id, i) => {
+          const s = SURGEONS[id];
+          return (
+            <button
+              key={id}
+              onClick={() => setOpenSurgeon(id)}
+              style={{
+                display: "flex", alignItems: "center", gap: 12, width: "100%",
+                background: "transparent", border: "none", textAlign: "left",
+                padding: "10px 0", borderTop: i > 0 ? "1px solid #EEF1F5" : "none",
+                cursor: "pointer",
+              }}
+            >
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: B.darkBlue }}>{s.name}</div>
+                <div style={{ fontSize: 12.5, color: "#4A5568", lineHeight: 1.4 }}>{s.oneLiner}</div>
+              </div>
+              <div style={{ color: B.blue, fontSize: 18, flexShrink: 0 }}>›</div>
+            </button>
+          );
+        })}
+        <p style={{ fontSize: 12, color: B.midGrey, fontStyle: "italic", marginTop: 12 }}>
+          Want more on any of them? Tap a name to read their full bio.
+        </p>
+      </div>
+
+      <PrimaryBtn onClick={onContinue}>Continue →</PrimaryBtn>
+      <div style={{ marginTop: 10 }}>
+        <SecondaryBtn onClick={onBack}>Back</SecondaryBtn>
+      </div>
+
+      {openSurgeon && (
+        <KOLModal surgeon={SURGEONS[openSurgeon]} onClose={() => setOpenSurgeon(null)} />
+      )}
+    </div>
+  );
+}
+
+// ── Avatar — headshot with initial-circle fallback ──────────────────────────────
+function Avatar({ photo, name, size = 44, focusY = 50 }) {
+  const [errored, setErrored] = useState(false);
+  if (!photo || errored) {
+    return (
+      <div style={{
+        width: size, height: size, borderRadius: "50%", flexShrink: 0,
+        background: `linear-gradient(135deg, ${B.copper} 0%, #B87840 100%)`,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        fontSize: size * 0.4, fontWeight: 800, color: B.white,
+      }}>{name.replace("Dr. ", "")[0]}</div>
+    );
+  }
+  return (
+    <img
+      src={photo}
+      alt={name}
+      onError={() => setErrored(true)}
+      style={{
+        width: size, height: size, borderRadius: "50%", flexShrink: 0,
+        objectFit: "cover", objectPosition: `50% ${focusY}%`,
+      }}
+    />
+  );
+}
+
+// ── KOL bio modal ────────────────────────────────────────────────────────────────
+function KOLModal({ surgeon, onClose }) {
+  return (
+    <div
+      className="fade-in"
+      onClick={onClose}
+      style={{
+        position: "fixed", inset: 0, background: "rgba(0,20,40,0.5)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        padding: 20, zIndex: 100,
+      }}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          background: B.white, borderRadius: 16, padding: "28px 22px 24px",
+          maxWidth: 400, width: "100%", maxHeight: "80vh", overflowY: "auto",
+          textAlign: "center",
+        }}
+      >
+        <Avatar photo={surgeon.photo} name={surgeon.name} size={110} focusY={surgeon.photoFocusY} />
+        <div style={{ fontSize: 18, fontWeight: 700, color: B.darkBlue, marginTop: 16, marginBottom: 16 }}>
+          {surgeon.name}
+        </div>
+        <p style={{ fontSize: 14.5, color: "#4A5568", lineHeight: 1.6, marginBottom: 20, textAlign: "left" }}>
+          {surgeon.bio}
+        </p>
+        <SecondaryBtn onClick={onClose}>Close</SecondaryBtn>
+      </div>
+    </div>
+  );
+}
 
 function IntroScreen({ onStart }) {
   return (
@@ -955,7 +1211,7 @@ function ClosingScreen({ onFinish, onBack, scrollRef }) {
 // one). The graduation moment already happened on the Closing Screen; this
 // stays the same practical wrap-up format Modules 1-4 use, just without a
 // next-module teaser.
-function CompleteScreen({ onReplay }) {
+function CompleteScreen({ onContinue, onReplay }) {
   const topics = [
     "Building a habit of honest, systematic self-review from the start of independent practice",
     "Evaluating a practice opportunity firsthand rather than by reputation or numbers alone",
@@ -1004,11 +1260,314 @@ function CompleteScreen({ onReplay }) {
         ))}
       </div>
 
+      {/* Module 5's specific two-step framing — differs from M1-4's single
+          "One more step" line, since a survey follows the ISI here. */}
+      <p style={{ fontSize: 13, color: B.midGrey, textAlign: "center", fontStyle: "italic", margin: "0 0 14px" }}>
+        Two more steps before you're finished: required safety information, then a short survey.
+      </p>
+      <PrimaryBtn onClick={onContinue}>Continue →</PrimaryBtn>
+
       {/* Full-width bottom button, not a small text link — per the Module 1/2 audit */}
-      <SecondaryBtn onClick={onReplay}>Replay Module 5</SecondaryBtn>
+      <div style={{ marginTop: 10 }}>
+        <SecondaryBtn onClick={onReplay}>Replay Module 5</SecondaryBtn>
+      </div>
 
       <div style={{ fontSize: 11, color: B.midGrey, textAlign: "center", marginTop: 20, letterSpacing: 0.5 }}>
-        MENTOR™ Residency: The Consultation Series · Module 5 · Prototype
+        {PROGRAM_TITLE} · Module 5 · Prototype
+      </div>
+    </div>
+  );
+}
+
+// ── Course-open sequence: 4. Disclosures + ISI + AMP ────────────────────────────
+// Relocated to the end per Standard v1.7, Section 1.7 — same pattern as
+// Modules 1-4, except Screen 2 ends with "Continue to Survey" instead of
+// "Close Module 5," since the survey — not a Closed screen — is this
+// module's true terminal phase.
+function ISIScreenOne({ onContinue, onBack }) {
+  return (
+    <div className="fade-in">
+      <div style={{
+        background: B.lightBlue, borderRadius: 10,
+        padding: "14px 18px", marginBottom: 18,
+      }}>
+        <p style={{ fontSize: 14, fontWeight: 600, color: B.darkBlue, lineHeight: 1.4, margin: 0 }}>
+          Before you finish Module 5, please review the following required information:
+        </p>
+      </div>
+
+      <div style={{
+        background: B.white, border: "1px solid #D8DEE6",
+        borderRadius: 8, padding: "18px 16px", marginBottom: 20,
+      }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: B.text, letterSpacing: 0.6, marginBottom: 8 }}>
+          DISCLOSURES
+        </div>
+        <p style={{ fontSize: 12.5, color: "#333", lineHeight: 1.5, marginBottom: 10 }}>
+          This presentation includes a demonstration of the use of a medical device. The steps demonstrated with respect to the use of any medical device in this presentation may not be the complete steps of the procedure. Individual physician preference and experience, as well as patient needs, may dictate variation in procedure steps. Before using any medical device, review all the Instructions For Use with particular attention to the indications, contraindications, warnings and precautions.
+        </p>
+        <p style={{ fontSize: 12.5, color: "#333", lineHeight: 1.5, marginBottom: 0 }}>
+          Dr. William P. Adams Jr., Dr. Kriti Mohan, Dr. Tamir Mosharrafa, and Dr. Essie Yates are compensated by and presenting on behalf of Mentor Worldwide LLC and must present information in accordance with applicable regulatory requirements.
+        </p>
+
+        <div style={{ borderTop: "1px solid #EEF1F5", margin: "16px 0" }} />
+
+        <div style={{ fontSize: 12, fontWeight: 700, color: B.text, letterSpacing: 0.6, marginBottom: 8 }}>
+          IMPORTANT SAFETY INFORMATION
+        </div>
+        <p style={{ fontSize: 11.5, color: "#555", lineHeight: 1.5, marginBottom: 8 }}>
+          Prior to use, refer to the instructions for use supplied with this device for indications, contraindications, side effects, warnings and precautions. Caution: US law restricts this device to sale by or on the order of a physician.
+        </p>
+        <p style={{ fontSize: 11.5, color: "#555", lineHeight: 1.5, marginBottom: 8 }}>
+          MENTOR MemoryGel Breast Implants, MENTOR MemoryShape Breast Implants, and MENTOR Saline-filled Breast Implants are indicated for breast augmentation in women (at least 22 years old for MemoryGel Implants and MemoryShape Implants, and 18 years old for Saline Implants) or for breast reconstruction. Breast implant surgery should not be performed in women with active infection anywhere in their body, with existing cancer or pre-cancer of their breast who have not received adequate treatment for those conditions, or who are currently pregnant or nursing.
+        </p>
+        <p style={{ fontSize: 11.5, color: "#555", lineHeight: 1.5, marginBottom: 0 }}>
+          Breast implants are not lifetime devices and breast implantation may not be a one-time surgery. The chance of developing complications increases over time. The most common complications for breast augmentation and reconstruction with MemoryGel Implants include any reoperation, capsular contracture, and implant removal with or without replacement. The most common complications with MemoryShape Implants for breast augmentation include reoperation for any reason, implant removal with or without replacement, and ptosis. The most common complications with MemoryShape Implants for breast reconstruction include reoperation for any reason, implant removal with or without replacement, and capsular contracture. A lower risk of complication is rupture. The health consequences of a ruptured silicone gel breast implant have not been fully established. MRI screenings are recommended three years after initial implant surgery and then every two years after to detect silent rupture. Breast implants are also associated with the risk of breast implant-associated anaplastic large cell lymphoma (BIA-ALCL), an uncommon type of lymphoma. An individual's risk of developing BIA-ALCL with MENTOR Breast Implants is low based on the incidence of worldwide cases. The most common complications with MENTOR Saline-filled Implants include reoperation, implant removal, capsular contracture, breast pain, and implant deflation.
+        </p>
+      </div>
+
+      <PrimaryBtn onClick={onContinue}>Continue →</PrimaryBtn>
+      <div style={{ marginTop: 10 }}>
+        <SecondaryBtn onClick={onBack}>Back</SecondaryBtn>
+      </div>
+    </div>
+  );
+}
+
+function ISIScreenTwo({ onContinue, onBack }) {
+  return (
+    <div className="fade-in">
+      <div style={{
+        background: B.white, border: "1px solid #D8DEE6",
+        borderRadius: 8, padding: "18px 16px", marginBottom: 20,
+      }}>
+        <p style={{ fontSize: 11.5, color: "#555", lineHeight: 1.5, marginBottom: 20 }}>
+          For MemoryGel Implants, patients should receive a copy of Important Information for Augmentation Patients about MENTOR MemoryGel Breast Implants or Important Information for Reconstruction Patients about MENTOR MemoryGel Breast Implants. For MemoryShape Implants, patients should receive a copy of Patient Educational Brochure – Breast Augmentation with MENTOR MemoryShape Breast Implants or Patient Educational Brochure – Breast Reconstruction with MENTOR MemoryShape Breast Implants, and a copy of Quick Facts about Breast Augmentation &amp; Reconstruction with MENTOR MemoryShape Breast Implants. For MENTOR Saline-filled Implants, patients should receive a copy of Saline-Filled Breast Implants: Making an Informed Decision. Your patient needs to read and understand the information regarding the risks and benefits of breast implants, with an opportunity to consult with you prior to deciding on surgery.
+        </p>
+
+        <div style={{ fontSize: 10.5, color: B.midGrey, letterSpacing: 0.3, borderTop: "1px solid #EEF1F5", paddingTop: 10, marginBottom: 20 }}>
+          &copy; Mentor Worldwide LLC · {MODULE_AMP}
+        </div>
+
+        <p style={{
+          fontSize: 14, fontWeight: 600, color: B.darkBlue, lineHeight: 1.5,
+          textAlign: "center", margin: 0, paddingTop: 16, borderTop: "1px solid #EEF1F5",
+        }}>
+          This concludes Module 5: Becoming Practice-Ready.
+        </p>
+      </div>
+
+      <p style={{ fontSize: 13, color: B.midGrey, textAlign: "center", fontStyle: "italic", margin: "0 0 14px" }}>
+        Completing the survey finishes this course.
+      </p>
+      <PrimaryBtn onClick={onContinue}>Continue to Survey</PrimaryBtn>
+      <div style={{ marginTop: 10 }}>
+        <SecondaryBtn onClick={onBack}>Back</SecondaryBtn>
+      </div>
+    </div>
+  );
+}
+
+// ── Rating primitives — shared by the two survey scale styles ──────────────────
+// NPS-style 0-10 numbered scale (recommend + overall value questions) and a
+// Likert row-per-item grid (product usage + faculty ratings). Neither existed
+// in any prior module — this is Module 5's one genuinely new UI pattern, not
+// something copied verbatim from M1-4. Built to match the existing brand
+// system (same radio-circle treatment, same type scale) rather than
+// introducing a new visual language.
+function NPSScale({ value, onChange, lowLabel, highLabel }) {
+  return (
+    <div>
+      <div style={{ display: "flex", justifyContent: "space-between", gap: 4, flexWrap: "wrap" }}>
+        {Array.from({ length: 11 }).map((_, i) => (
+          <button
+            key={i}
+            onClick={() => onChange(i)}
+            style={{
+              width: 28, height: 28, borderRadius: "50%",
+              border: `1.5px solid ${value === i ? B.blue : "#D8E2EE"}`,
+              background: value === i ? B.blue : B.white,
+              color: value === i ? B.white : B.text,
+              fontSize: 12, fontWeight: 700, cursor: "pointer",
+              transition: "all 0.15s ease", flexShrink: 0,
+            }}
+          >{i}</button>
+        ))}
+      </div>
+      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
+        <span style={{ fontSize: 10.5, color: B.midGrey }}>{lowLabel}</span>
+        <span style={{ fontSize: 10.5, color: B.midGrey }}>{highLabel}</span>
+      </div>
+    </div>
+  );
+}
+
+function RatingGrid({ rows, columns, values, onChange }) {
+  return (
+    <div style={{ overflowX: "auto" }}>
+      <table style={{ borderCollapse: "collapse", width: "100%", minWidth: 420 }}>
+        <thead>
+          <tr>
+            <td />
+            {columns.map(col => (
+              <td key={col} style={{ textAlign: "center", paddingBottom: 8 }}>
+                <span style={{ fontSize: 10.5, color: B.midGrey, lineHeight: 1.3, display: "inline-block", maxWidth: 64 }}>{col}</span>
+              </td>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map(row => (
+            <tr key={row}>
+              <td style={{ fontSize: 12.5, fontWeight: 600, color: B.text, paddingRight: 10, paddingTop: 10, whiteSpace: "nowrap" }}>
+                {row}
+              </td>
+              {columns.map(col => (
+                <td key={col} style={{ textAlign: "center", paddingTop: 10 }}>
+                  <button
+                    onClick={() => onChange(row, col)}
+                    aria-label={`${row}: ${col}`}
+                    style={{
+                      width: 18, height: 18, borderRadius: "50%",
+                      border: `1.5px solid ${values[row] === col ? B.blue : "#D8E2EE"}`,
+                      background: values[row] === col ? B.blue : B.white,
+                      cursor: "pointer", padding: 0,
+                    }}
+                  />
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function SurveyCard({ children }) {
+  return (
+    <div style={{
+      background: B.white, borderRadius: 16,
+      border: "1.5px solid #E2E8F0", padding: "18px", marginBottom: 18,
+    }}>{children}</div>
+  );
+}
+
+// ── Survey — Module 5's true terminal phase ─────────────────────────────────────
+// Content transcribed directly from Jonathan's copy-approval screenshot deck
+// (Module_05_Screenshots.pdf) rather than Future_Leaders_Survey.docx, which
+// only has the title/thank-you copy and surgeon names — not the questions
+// themselves. ASSUMPTION FLAGGED: no post-submit confirmation state was
+// visible in that screenshot (it only shows the form). The thank-you panel
+// below is a placeholder built in the existing brand voice, not confirmed
+// copy — flag to Jonathan/Laura before this ships to copy approval.
+function SurveyScreen({ onSubmit }) {
+  const [recommend, setRecommend] = useState(null);
+  const [usage, setUsage] = useState({});
+  const [faculty, setFaculty] = useState({});
+  const [value, setValue] = useState(null);
+  const [submitted, setSubmitted] = useState(false);
+
+  const usageColumns = ["Infrequently", "Somewhat Infrequently", "Occasionally", "Somewhat Often", "Often"];
+  const facultyColumns = ["Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"];
+  // Survey uses "Dr. William Adams, Jr." specifically (per the screenshot),
+  // which differs from SURGEONS.adams.name ("Dr. William Adams") used
+  // elsewhere in the app — kept as its own list rather than derived, since
+  // the two naming conventions serve different contexts (ISI vs. survey).
+  const facultyNames = {
+    adams: "Dr. William Adams, Jr.",
+    mohan: "Dr. Kriti Mohan",
+    mosharrafa: "Dr. Tamir Mosharrafa",
+    yates: "Dr. Essie Yates",
+  };
+  const facultyRows = SURVEY_FACULTY_IDS.map(id => facultyNames[id]);
+
+  const canSubmit =
+    recommend !== null &&
+    usage["MENTOR™ Product Portfolio"] &&
+    facultyRows.every(r => faculty[r]) &&
+    value !== null;
+
+  function handleSubmit() {
+    setSubmitted(true);
+    if (onSubmit) onSubmit();
+  }
+
+  if (submitted) {
+    return (
+      <div className="fade-in" style={{ textAlign: "center", paddingTop: 40 }}>
+        <div style={{
+          width: 52, height: 52, borderRadius: "50%",
+          background: B.copper, margin: "0 auto 18px",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          fontSize: 22,
+        }}>✓</div>
+        <h2 style={{ fontSize: 20, fontWeight: 400, color: B.darkBlue, marginBottom: 10 }}>
+          Course complete
+        </h2>
+        <p style={{ fontSize: 14, color: "#4A5568", lineHeight: 1.5 }}>
+          Thank you for your feedback and for completing the MENTOR™ Future Leaders E-Learning Journey. You may now close this window or return to your course list.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="fade-in">
+      <div style={{
+        background: `linear-gradient(135deg, ${B.darkBlue} 0%, #003D5C 100%)`,
+        borderRadius: 16, padding: "18px 20px", marginBottom: 20,
+      }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: B.copper, letterSpacing: 0.8, marginBottom: 6 }}>
+          BEFORE YOU GO
+        </div>
+        <p style={{ fontSize: 14, color: B.white, lineHeight: 1.5, margin: 0 }}>
+          Five modules, four surgeons, no scripts. Before you go — the honest version of how it went.
+        </p>
+      </div>
+
+      <SurveyCard>
+        <p style={{ fontSize: 14, fontWeight: 600, color: B.darkBlue, marginBottom: 14 }}>
+          Would you recommend this event?
+        </p>
+        <NPSScale value={recommend} onChange={setRecommend} lowLabel="Not likely at all" highLabel="Very likely" />
+      </SurveyCard>
+
+      <SurveyCard>
+        <p style={{ fontSize: 14, fontWeight: 600, color: B.darkBlue, marginBottom: 14 }}>
+          When clinically appropriate, my use of these products will likely be as follows:
+        </p>
+        <RatingGrid
+          rows={["MENTOR™ Product Portfolio"]}
+          columns={usageColumns}
+          values={usage}
+          onChange={(row, col) => setUsage(u => ({ ...u, [row]: col }))}
+        />
+      </SurveyCard>
+
+      <SurveyCard>
+        <p style={{ fontSize: 14, fontWeight: 600, color: B.darkBlue, marginBottom: 14 }}>
+          The faculty helped me to understand the training content:
+        </p>
+        <RatingGrid
+          rows={facultyRows}
+          columns={facultyColumns}
+          values={faculty}
+          onChange={(row, col) => setFaculty(f => ({ ...f, [row]: col }))}
+        />
+      </SurveyCard>
+
+      <SurveyCard>
+        <p style={{ fontSize: 14, fontWeight: 600, color: B.darkBlue, marginBottom: 14 }}>
+          How would you rate the overall value of the event?
+        </p>
+        <NPSScale value={value} onChange={setValue} lowLabel="Not Valuable" highLabel="Extremely Valuable" />
+      </SurveyCard>
+
+      <PrimaryBtn onClick={handleSubmit} disabled={!canSubmit}>Submit &amp; Complete Course</PrimaryBtn>
+
+      <div style={{ fontSize: 11, color: B.midGrey, textAlign: "center", marginTop: 20, letterSpacing: 0.5 }}>
+        {PROGRAM_TITLE} · Module 5 · Prototype
       </div>
     </div>
   );
@@ -1019,9 +1578,20 @@ function CompleteScreen({ onReplay }) {
 // ══════════════════════════════════════════════════════════════════════════════
 
 function App() {
-  const [phase, setPhase] = useState("intro"); // intro | beat | closing | complete
+  // title | blackbox | descKol | intro | beat | closing | complete | isi1 | isi2 | survey
+  // Per Standard v1.7 (Section 1.7): Title/Black Box/Description+KOL are a
+  // one-time front gate, same as Modules 1-4. But Module 5's end-of-module
+  // sequence departs from the M1-4 pattern: no "closed" phase — the survey
+  // itself is the true terminal phase, reached via ISI Screen 2's "Continue
+  // to Survey" rather than "Close Module 5."
+  const [phase, setPhase] = useState("title");
   const [beatIndex, setBeatIndex] = useState(0);
   const scrollRef = useRef(null);
+
+  function goto(nextPhase) {
+    setPhase(nextPhase);
+    scrollTop(scrollRef);
+  }
 
   function start() {
     setPhase("beat");
@@ -1064,8 +1634,40 @@ function App() {
     scrollTop(scrollRef);
   }
 
+  function handleCompleteContinue() {
+    setPhase("isi1");
+    scrollTop(scrollRef);
+  }
+
+  function handleIsi1Continue() {
+    setPhase("isi2");
+    scrollTop(scrollRef);
+  }
+
+  function handleIsi1Back() {
+    setPhase("complete");
+    scrollTop(scrollRef);
+  }
+
+  function handleIsi2Continue() {
+    setPhase("survey");
+    scrollTop(scrollRef);
+  }
+
+  function handleIsi2Back() {
+    setPhase("isi1");
+    scrollTop(scrollRef);
+  }
+
   return (
     <Shell scrollRef={scrollRef}>
+      {phase === "title" && <TitleScreen onContinue={() => goto("blackbox")} />}
+      {phase === "blackbox" && (
+        <BlackBoxScreen onContinue={() => goto("descKol")} onBack={() => goto("title")} />
+      )}
+      {phase === "descKol" && (
+        <DescriptionKolScreen onContinue={() => goto("intro")} onBack={() => goto("blackbox")} />
+      )}
       {phase === "intro" && <IntroScreen onStart={start} />}
       {phase === "beat" && (
         <BeatScreen
@@ -1081,7 +1683,16 @@ function App() {
       {phase === "closing" && (
         <ClosingScreen onFinish={handleClosingDone} onBack={handleClosingBack} scrollRef={scrollRef} />
       )}
-      {phase === "complete" && <CompleteScreen onReplay={replay} />}
+      {phase === "complete" && (
+        <CompleteScreen onContinue={handleCompleteContinue} onReplay={replay} />
+      )}
+      {phase === "isi1" && (
+        <ISIScreenOne onContinue={handleIsi1Continue} onBack={handleIsi1Back} />
+      )}
+      {phase === "isi2" && (
+        <ISIScreenTwo onContinue={handleIsi2Continue} onBack={handleIsi2Back} />
+      )}
+      {phase === "survey" && <SurveyScreen />}
     </Shell>
   );
 }
