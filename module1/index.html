@@ -4,8 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>MENTOR™ Future Leaders: Breast Augmentation Consultation · Module 1</title>
-<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<!-- React/ReactDOM CDN — pinned per project standard (see MENTOR_Residency_Pitfalls.md
+     #5). Found unpinned during the 08/25 copy-approval edit pass — the checklist's
+     "already fixed" note applied only to the Babel tag below; React/ReactDOM had
+     been missed. Pinned to 18.3.1, the final 18.x release, to match Babel's exact-
+     version pattern. Never remove this version pin. -->
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"></script>
 <!-- Babel CDN — pinned per project standard. Unpinned unpkg.com serves "latest",
      which silently broke Module 1 and 2's original prototypes when Babel 7.29.0
      shipped a regression (Jan 2026). Never remove this version pin. -->
@@ -85,12 +90,15 @@ const B = {
 // up top rather than baked into the screens themselves — replicating to
 // Modules 2–5 means swapping only this section.
 //
-// SUPERSEDED — see Standard v1.7, Section 1.7 (confirmed July 2026): the
-// Disclosures/ISI/AMP screen is no longer part of this front sequence. It now
-// runs at the END of the module (ISIScreenOne / ISIScreenTwo, below the
-// Complete screen), reached only after all beats and the closing reflection.
-// Current front sequence: Title -> Black Box -> Description+Meet the
-// Surgeons -> module intro.
+// SUPERSEDED (July 2026) then PARTIALLY RE-SUPERSEDED (08/25, per the Aug 24
+// copy-approval call): Standard v1.7, Section 1.7 moved the whole Disclosures/
+// ISI/AMP block to the END of the module. The Aug 24 reviewer call then moved
+// the Disclosures paragraph + physician byline + sale/distribution + Important
+// Information/Caution content back to the FRONT, directly after the Black Box
+// Warning (DisclosuresScreen, below) — only the ISI itself (indications +
+// complications language) stays at the end, alone (ISIScreenOne/Two, below the
+// Complete screen). Current front sequence: Title -> Black Box -> Disclosures
+// -> Description+Meet the Surgeons -> module intro.
 
 const MODULE_AMP = "US_MNT_AMNT_418936"; // Module 1 — Foundations: Implants and Expectations
 
@@ -119,7 +127,7 @@ const SURGEONS = {
     photo: "Dr__Adams.jpg",
     photoFocusY: 15, // tall portrait (510x757), face starts ~17% down — default 50% center-crop clipped hair
     oneLiner: "Dallas surgeon whose implant safety research is used by surgeons worldwide.",
-    bio: "Dr. William Adams practices in Dallas, where he also trained and now teaches at UT Southwestern. He's spent his career on one problem — making breast implant surgery safer — and the irrigation technique he developed is now used by surgeons worldwide. He literally wrote the book on breast augmentation.",
+    bio: "Dr. William Adams practices in Dallas, where he also trained and now teaches at UT Southwestern. He is an active researcher and has developed new irrigations for use in clinical breast implant surgery.",
   },
   yates: {
     name: "Dr. Essie Yates",
@@ -165,8 +173,8 @@ const BEATS = [
     topicQuestion: `"I keep hearing about saline versus silicone — honestly, what's the difference? Which one is better?"`,
     videoLabel: `Saline vs. Silicone: What the Difference Actually Means`,
     videoLabel2: `A Fuller Picture of the Implant Portfolio`,
-    videoDesc: "Covers the shell/fill distinction, rippling and wrinkling differences (more pronounced in saline, especially on leaner builds), and silicone's lower palpability — closing with a direct recommendation of silicone for most patients.",
-    videoDesc2: "Frames the choice around the broader Mentor portfolio rather than a binary — his go-to is Memory Gel Boost for most patients, but flags saline's specific appeal to patients who want peace of mind about what's inside if a rupture occurs.",
+    videoDesc: "Covers the shell/fill distinction, rippling and wrinkling differences (more pronounced in saline, especially on leaner builds), and silicone's lower palpability.",
+    videoDesc2: "Frames the choice around the broader Mentor portfolio, but flags saline's specific appeal to patients who want peace of mind about what's inside if a rupture occurs.",
     predictionPrompt: "Before the video plays: what do you think an experienced surgeon says when a patient who's already decided on silicone asks him to walk her through the difference anyway?",
     mayaOpen: `"I've done a ton of research — probably more than I should have, honestly. I know I want silicone, but I keep reading things that make me second-guess myself. Can you just walk me through the difference so I know I'm making the right call?"`,
     mayaMood: "open",
@@ -390,7 +398,7 @@ function Header() {
         fontSize: 11, padding: "3px 10px",
         borderRadius: 20, letterSpacing: 1,
         flexShrink: 0, whiteSpace: "nowrap",
-      }}>Module 1 · Prototype</div>
+      }}>Module 1</div>
     </div>
   );
 }
@@ -703,16 +711,65 @@ function BlackBoxScreen({ onContinue, onBack }) {
         background: B.white, border: "1px solid #D8DEE6",
         borderRadius: 8, padding: "18px 16px", marginBottom: 20,
       }}>
-        <div style={{ fontSize: 12, fontWeight: 700, color: B.text, letterSpacing: 0.6, marginBottom: 10 }}>
-          WARNING:
+        {/* Black box wraps ONLY the WARNING heading + 3 bullets, per the 08/24
+            copy-approval call (Jennifer/Laura): "it only goes around the bullet...
+            this part stays outside" (referring to sale/distribution, which is
+            no longer even on this screen — see DisclosuresScreen below). */}
+        <div style={{ border: "2px solid #000000", borderRadius: 4, padding: "14px 14px 12px" }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: B.text, letterSpacing: 0.6, marginBottom: 10 }}>
+            WARNING:
+          </div>
+          {bullets.map((b, i) => (
+            <p key={i} style={{ fontSize: 12.5, color: "#333", lineHeight: 1.5, marginBottom: i < bullets.length - 1 ? 8 : 0 }}>
+              &bull; {b}
+            </p>
+          ))}
         </div>
-        {bullets.map((b, i) => (
-          <p key={i} style={{ fontSize: 12.5, color: "#333", lineHeight: 1.5, marginBottom: i < bullets.length - 1 ? 8 : 12 }}>
-            &bull; {b}
-          </p>
-        ))}
-        <p style={{ fontSize: 12.5, color: "#333", lineHeight: 1.5 }}>
+      </div>
+      <PrimaryBtn onClick={onContinue}>Continue →</PrimaryBtn>
+      <div style={{ marginTop: 10 }}>
+        <SecondaryBtn onClick={onBack}>Back</SecondaryBtn>
+      </div>
+    </div>
+  );
+}
+
+// ── Course-open sequence: 2b. Disclosures + physician byline + sale/distribution
+// + Important Information/Caution ──────────────────────────────────────────────
+// Added 08/25 per the Aug 24 copy-approval call (Jennifer/Laura/Tara): this
+// content moves to the FRONT of the module, directly after the Black Box
+// Warning. Only the ISI proper (indications + complications language, the text
+// that "starts at Mentor memory gel breast implants" per Laura on the call)
+// stays at the very end of the module, alone — see ISIScreenOne below. This
+// content previously lived at the end, bundled into the old ISIScreenOne, per
+// a July 2026 Standard v1.7 change (front-loading experiment) that the Aug 24
+// reviewer call has now superseded for the Disclosures/byline/sale-distribution/
+// Important-Info block specifically. The ISI itself stays where Standard v1.7
+// put it — at the end.
+function DisclosuresScreen({ onContinue, onBack }) {
+  return (
+    <div className="fade-in">
+      <div style={{
+        background: B.white, border: "1px solid #D8DEE6",
+        borderRadius: 8, padding: "18px 16px", marginBottom: 20,
+      }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: B.text, letterSpacing: 0.6, marginBottom: 8 }}>
+          DISCLOSURES
+        </div>
+        <p style={{ fontSize: 12.5, color: "#333", lineHeight: 1.5, marginBottom: 10 }}>
+          This presentation includes a demonstration of the use of a medical device. The steps demonstrated with respect to the use of any medical device in this presentation may not be the complete steps of the procedure. Individual physician preference and experience, as well as patient needs, may dictate variation in procedure steps. Before using any medical device, review all the Instructions For Use with particular attention to the indications, contraindications, warnings and precautions.
+        </p>
+        <p style={{ fontSize: 12.5, color: "#333", lineHeight: 1.5, marginBottom: 0 }}>
+          Dr. William P. Adams Jr., Dr. Kriti Mohan, Dr. Tamir Mosharrafa, and Dr. Essie Yates are compensated by and presenting on behalf of Mentor Worldwide LLC and must present information in accordance with applicable regulatory requirements.
+        </p>
+
+        <div style={{ borderTop: "1px solid #EEF1F5", margin: "16px 0" }} />
+
+        <p style={{ fontSize: 12.5, color: "#333", lineHeight: 1.5, marginBottom: 10 }}>
           The sale and distribution of Mentor Breast Implant Devices are restricted to users and/or user facilities that provide information to patients about the risks and benefits of the device prior to its use in the form and manner specified in approved labeling to be provided by Mentor Worldwide LLC.
+        </p>
+        <p style={{ fontSize: 11.5, color: "#555", lineHeight: 1.5, marginBottom: 0 }}>
+          Prior to use, refer to the instructions for use supplied with this device for indications, contraindications, side effects, warnings and precautions. Caution: US law restricts this device to sale by or on the order of a physician.
         </p>
       </div>
       <PrimaryBtn onClick={onContinue}>Continue →</PrimaryBtn>
@@ -738,10 +795,17 @@ function DescriptionKolScreen({ onContinue, onBack }) {
         About this program
       </h1>
       {PROGRAM_DESCRIPTION.map((p, i) => (
-        <p key={i} style={{ fontSize: 15, color: "#4A5568", lineHeight: 1.6, marginBottom: i < PROGRAM_DESCRIPTION.length - 1 ? 14 : 26 }}>
+        <p key={i} style={{ fontSize: 15, color: "#4A5568", lineHeight: 1.6, marginBottom: 14 }}>
           {p}
         </p>
       ))}
+
+      {/* Fictional-patient disclosure — per Daniel DeSpirito's approved pattern
+          (copy-approval, 08/24), added to the "About this program" screen for
+          each module. Maya is Module 1's persona. */}
+      <p style={{ fontSize: 13, color: B.midGrey, fontStyle: "italic", lineHeight: 1.5, marginBottom: 26 }}>
+        Maya is a fictional patient used for educational purposes.
+      </p>
 
       <div style={{
         background: B.white, borderRadius: 16,
@@ -886,28 +950,13 @@ function ISIScreenOne({ onContinue, onBack }) {
         borderRadius: 8, padding: "18px 16px", marginBottom: 20,
       }}>
         <div style={{ fontSize: 12, fontWeight: 700, color: B.text, letterSpacing: 0.6, marginBottom: 8 }}>
-          DISCLOSURES
-        </div>
-        <p style={{ fontSize: 12.5, color: "#333", lineHeight: 1.5, marginBottom: 10 }}>
-          This presentation includes a demonstration of the use of a medical device. The steps demonstrated with respect to the use of any medical device in this presentation may not be the complete steps of the procedure. Individual physician preference and experience, as well as patient needs, may dictate variation in procedure steps. Before using any medical device, review all the Instructions For Use with particular attention to the indications, contraindications, warnings and precautions.
-        </p>
-        <p style={{ fontSize: 12.5, color: "#333", lineHeight: 1.5, marginBottom: 0 }}>
-          Dr. William P. Adams Jr., Dr. Kriti Mohan, Dr. Tamir Mosharrafa, and Dr. Essie Yates are compensated by and presenting on behalf of Mentor Worldwide LLC and must present information in accordance with applicable regulatory requirements.
-        </p>
-
-        <div style={{ borderTop: "1px solid #EEF1F5", margin: "16px 0" }} />
-
-        <div style={{ fontSize: 12, fontWeight: 700, color: B.text, letterSpacing: 0.6, marginBottom: 8 }}>
           IMPORTANT SAFETY INFORMATION
         </div>
         <p style={{ fontSize: 11.5, color: "#555", lineHeight: 1.5, marginBottom: 8 }}>
-          Prior to use, refer to the instructions for use supplied with this device for indications, contraindications, side effects, warnings and precautions. Caution: US law restricts this device to sale by or on the order of a physician.
-        </p>
-        <p style={{ fontSize: 11.5, color: "#555", lineHeight: 1.5, marginBottom: 8 }}>
-          MENTOR MemoryGel Breast Implants, MENTOR MemoryShape Breast Implants, and MENTOR Saline-filled Breast Implants are indicated for breast augmentation in women (at least 22 years old for MemoryGel Implants and MemoryShape Implants, and 18 years old for Saline Implants) or for breast reconstruction. Breast implant surgery should not be performed in women with active infection anywhere in their body, with existing cancer or pre-cancer of their breast who have not received adequate treatment for those conditions, or who are currently pregnant or nursing.
+          MENTOR&trade; MemoryGel&trade; Breast Implants, MENTOR&trade; MemoryShape&trade; Breast Implants, and MENTOR&trade; Saline-filled Breast Implants are indicated for breast augmentation in women (at least 22 years old for MemoryGel&trade; Implants and MemoryShape&trade; Implants, and 18 years old for Saline Implants) or for breast reconstruction. Breast implant surgery should not be performed in women with active infection anywhere in their body, with existing cancer or pre-cancer of their breast who have not received adequate treatment for those conditions, or who are currently pregnant or nursing.
         </p>
         <p style={{ fontSize: 11.5, color: "#555", lineHeight: 1.5, marginBottom: 0 }}>
-          Breast implants are not lifetime devices and breast implantation may not be a one-time surgery. The chance of developing complications increases over time. The most common complications for breast augmentation and reconstruction with MemoryGel Implants include any reoperation, capsular contracture, and implant removal with or without replacement. The most common complications with MemoryShape Implants for breast augmentation include reoperation for any reason, implant removal with or without replacement, and ptosis. The most common complications with MemoryShape Implants for breast reconstruction include reoperation for any reason, implant removal with or without replacement, and capsular contracture. A lower risk of complication is rupture. The health consequences of a ruptured silicone gel breast implant have not been fully established. MRI screenings are recommended three years after initial implant surgery and then every two years after to detect silent rupture. Breast implants are also associated with the risk of breast implant-associated anaplastic large cell lymphoma (BIA-ALCL), an uncommon type of lymphoma. An individual's risk of developing BIA-ALCL with MENTOR Breast Implants is low based on the incidence of worldwide cases. The most common complications with MENTOR Saline-filled Implants include reoperation, implant removal, capsular contracture, breast pain, and implant deflation.
+          Breast implants are not lifetime devices and breast implantation may not be a one-time surgery. The chance of developing complications increases over time. The most common complications for breast augmentation and reconstruction with MemoryGel&trade; Implants include any reoperation, capsular contracture, and implant removal with or without replacement. The most common complications with MemoryShape&trade; Implants for breast augmentation include reoperation for any reason, implant removal with or without replacement, and ptosis. The most common complications with MemoryShape&trade; Implants for breast reconstruction include reoperation for any reason, implant removal with or without replacement, and capsular contracture. A lower risk of complication is rupture. The health consequences of a ruptured silicone gel breast implant have not been fully established. MRI screenings are recommended three years after initial implant surgery and then every two years after to detect silent rupture. Breast implants are also associated with the risk of breast implant-associated anaplastic large cell lymphoma (BIA-ALCL), an uncommon type of lymphoma. An individual's risk of developing BIA-ALCL with MENTOR&trade; Breast Implants is low based on the incidence of worldwide cases. The most common complications with MENTOR&trade; Saline-filled Implants include reoperation, implant removal, capsular contracture, breast pain, and implant deflation.
         </p>
       </div>
 
@@ -927,11 +976,11 @@ function ISIScreenTwo({ onClose, onBack }) {
         borderRadius: 8, padding: "18px 16px", marginBottom: 20,
       }}>
         <p style={{ fontSize: 11.5, color: "#555", lineHeight: 1.5, marginBottom: 20 }}>
-          For MemoryGel Implants, patients should receive a copy of Important Information for Augmentation Patients about MENTOR MemoryGel Breast Implants or Important Information for Reconstruction Patients about MENTOR MemoryGel Breast Implants. For MemoryShape Implants, patients should receive a copy of Patient Educational Brochure – Breast Augmentation with MENTOR MemoryShape Breast Implants or Patient Educational Brochure – Breast Reconstruction with MENTOR MemoryShape Breast Implants, and a copy of Quick Facts about Breast Augmentation &amp; Reconstruction with MENTOR MemoryShape Breast Implants. For MENTOR Saline-filled Implants, patients should receive a copy of Saline-Filled Breast Implants: Making an Informed Decision. Your patient needs to read and understand the information regarding the risks and benefits of breast implants, with an opportunity to consult with you prior to deciding on surgery.
+          For MemoryGel&trade; Implants, patients should receive a copy of Important Information for Augmentation Patients about MENTOR&trade; MemoryGel&trade; Breast Implants or Important Information for Reconstruction Patients about MENTOR&trade; MemoryGel&trade; Breast Implants. For MemoryShape&trade; Implants, patients should receive a copy of Patient Educational Brochure – Breast Augmentation with MENTOR&trade; MemoryShape&trade; Breast Implants or Patient Educational Brochure – Breast Reconstruction with MENTOR&trade; MemoryShape&trade; Breast Implants, and a copy of Quick Facts about Breast Augmentation &amp; Reconstruction with MENTOR&trade; MemoryShape&trade; Breast Implants. For MENTOR&trade; Saline-filled Implants, patients should receive a copy of Saline-Filled Breast Implants: Making an Informed Decision. Your patient needs to read and understand the information regarding the risks and benefits of breast implants, with an opportunity to consult with you prior to deciding on surgery.
         </p>
 
         <div style={{ fontSize: 10.5, color: B.midGrey, letterSpacing: 0.3, borderTop: "1px solid #EEF1F5", paddingTop: 10, marginBottom: 20 }}>
-          &copy; Mentor Worldwide LLC · {MODULE_AMP}
+          &copy; Johnson &amp; Johnson and its affiliates 2026 · {MODULE_AMP}
         </div>
 
         <p style={{
@@ -1433,7 +1482,7 @@ function CompleteScreen({ onContinue, onReplay }) {
       </div>
 
       <div style={{ fontSize: 11, color: B.midGrey, textAlign: "center", marginTop: 20, letterSpacing: 0.5 }}>
-        {PROGRAM_TITLE} · Module 1 · Prototype
+        {PROGRAM_TITLE} · Module 1
       </div>
     </div>
   );
@@ -1444,15 +1493,18 @@ function CompleteScreen({ onContinue, onReplay }) {
 // ══════════════════════════════════════════════════════════════════════════════
 
 function App() {
-  // title | blackbox | descKol | intro | beat | closing | complete | isi1 | isi2 | closed
+  // title | blackbox | disclosures | descKol | intro | beat | closing | complete | isi1 | isi2 | closed
   // Per Standard v1.7 (Section 1.7): Disclosures/ISI/AMP moved from the front
-  // of this sequence to the end. Title, Black Box, and Description+KOL remain
-  // a one-time front gate — shown once on first entry, bypassed by replay()
+  // of this sequence to the end. Per the Aug 24 08/25-implemented copy-approval
+  // correction: the Disclosures/byline/sale-distribution/Important-Info content
+  // moved back to the front (new "disclosures" phase, right after "blackbox").
+  // The ISI itself stays at the end, per Standard v1.7 — only that one block
+  // moved back. Title, Black Box, Disclosures, and Description+KOL are all part
+  // of the one-time front gate — shown once on first entry, bypassed by replay()
   // and by the beat-1 back button, both of which still return to "intro."
-  // The new isi1/isi2/closed phases are NOT part of that front gate; they're
-  // only reached once, forward, after a learner finishes all beats and the
-  // closing reflection. Replay still bypasses them entirely, same as it always
-  // bypassed the old front-loaded disclosures — confirmed with Jonathan,
+  // The isi1/isi2/closed phases are NOT part of that front gate; they're only
+  // reached once, forward, after a learner finishes all beats and the closing
+  // reflection. Replay still bypasses them entirely — confirmed with Jonathan,
   // Replay should behave identically to its pre-relocation behavior.
   const [phase, setPhase] = useState("title");
   const [beatIndex, setBeatIndex] = useState(0);
@@ -1539,10 +1591,13 @@ function App() {
     <Shell scrollRef={scrollRef}>
       {phase === "title" && <TitleScreen onContinue={() => goto("blackbox")} />}
       {phase === "blackbox" && (
-        <BlackBoxScreen onContinue={() => goto("descKol")} onBack={() => goto("title")} />
+        <BlackBoxScreen onContinue={() => goto("disclosures")} onBack={() => goto("title")} />
+      )}
+      {phase === "disclosures" && (
+        <DisclosuresScreen onContinue={() => goto("descKol")} onBack={() => goto("blackbox")} />
       )}
       {phase === "descKol" && (
-        <DescriptionKolScreen onContinue={() => goto("intro")} onBack={() => goto("blackbox")} />
+        <DescriptionKolScreen onContinue={() => goto("intro")} onBack={() => goto("disclosures")} />
       )}
       {phase === "intro" && <IntroScreen onStart={start} />}
       {phase === "beat" && (
