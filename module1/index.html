@@ -1238,6 +1238,13 @@ function BeatScreen({ beat, beatIndex, total, onChosen, onBack, scrollRef }) {
                   Add a few more words to continue.
                 </p>
               )}
+              {/* Free-text field disclaimer — per copy-approval item 2.5 (global,
+                  confirmed 08/24 call: "field used for reflection only," "non-archived,"
+                  applies to every free-text field across all modules). Wording locked
+                  08/26 (Jonathan). */}
+              <p style={{ fontSize: 12, color: B.midGrey, fontStyle: "italic", marginTop: 6 }}>
+                This is a private reflection space. Your response isn't stored, archived, or graded.
+              </p>
               <div style={{ marginTop: 12 }}>
                 <PrimaryBtn
                   onClick={handleSubmitGuess}
@@ -1396,6 +1403,11 @@ function ClosingScreen({ onFinish, onBack, scrollRef }) {
             Add a few more words to continue.
           </p>
         )}
+        {/* Free-text field disclaimer — see the identical note on the per-beat
+            prediction field above; same item 2.5, same locked wording. */}
+        <p style={{ fontSize: 12, color: B.midGrey, fontStyle: "italic", marginTop: 6 }}>
+          This is a private reflection space. Your response isn't stored, archived, or graded.
+        </p>
       </div>
 
       <PrimaryBtn onClick={onFinish} disabled={response.trim().length < 3}>
