@@ -622,16 +622,68 @@ function BlackBoxScreen({ onContinue, onBack }) {
         background: B.white, border: "1px solid #D8DEE6",
         borderRadius: 8, padding: "18px 16px", marginBottom: 20,
       }}>
-        <div style={{ fontSize: 12, fontWeight: 700, color: B.text, letterSpacing: 0.6, marginBottom: 10 }}>
-          WARNING:
+        {/* Black box wraps ONLY the WARNING heading + 3 bullets, per the 08/24
+            copy-approval call (Jennifer/Laura): "it only goes around the bullet...
+            this part stays outside" (referring to sale/distribution, which is
+            no longer even on this screen — see DisclosuresScreen below).
+            Correction (08/27): this module never got that fix applied — the
+            sale/distribution paragraph was still bundled in here with no inner
+            box, matching Module 1/2's pre-fix state. Fixed to match. */}
+        <div style={{ border: "2px solid #000000", borderRadius: 4, padding: "14px 14px 12px" }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: B.text, letterSpacing: 0.6, marginBottom: 10 }}>
+            WARNING:
+          </div>
+          {bullets.map((b, i) => (
+            <p key={i} style={{ fontSize: 12.5, color: "#333", lineHeight: 1.5, marginBottom: i < bullets.length - 1 ? 8 : 0 }}>
+              &bull; {b}
+            </p>
+          ))}
         </div>
-        {bullets.map((b, i) => (
-          <p key={i} style={{ fontSize: 12.5, color: "#333", lineHeight: 1.5, marginBottom: i < bullets.length - 1 ? 8 : 12 }}>
-            &bull; {b}
-          </p>
-        ))}
-        <p style={{ fontSize: 12.5, color: "#333", lineHeight: 1.5 }}>
+      </div>
+      <PrimaryBtn onClick={onContinue}>Continue →</PrimaryBtn>
+      <div style={{ marginTop: 10 }}>
+        <SecondaryBtn onClick={onBack}>Back</SecondaryBtn>
+      </div>
+    </div>
+  );
+}
+
+// ── Course-open sequence: 2b. Disclosures + physician byline + sale/distribution
+// + Important Information/Caution ──────────────────────────────────────────────
+// Added 08/27 per the Aug 24 copy-approval call (Jennifer/Laura/Tara), matching
+// Modules 1 and 2's fix: this content moves to the FRONT of the module, directly
+// after the Black Box Warning. Only the ISI proper (indications + complications
+// language) stays at the very end of the module, alone — see ISIScreenOne below.
+// Correction: this module was still on the pre-08/24 bundled-at-the-end pattern
+// (Disclosures + full ISI combined into one screen at the very end) — the
+// original checklist pass called this "already present and correct" based on
+// text content alone, without checking placement against the actual M1/M2 fix.
+// Physician byline trimmed to Module 3's actual roster (Adams, Mosharrafa,
+// Yates) per Jonathan's 08/27 call — Mohan excluded, no content in this module.
+function DisclosuresScreen({ onContinue, onBack }) {
+  return (
+    <div className="fade-in">
+      <div style={{
+        background: B.white, border: "1px solid #D8DEE6",
+        borderRadius: 8, padding: "18px 16px", marginBottom: 20,
+      }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: B.text, letterSpacing: 0.6, marginBottom: 8 }}>
+          DISCLOSURES
+        </div>
+        <p style={{ fontSize: 12.5, color: "#333", lineHeight: 1.5, marginBottom: 10 }}>
+          This presentation includes a demonstration of the use of a medical device. The steps demonstrated with respect to the use of any medical device in this presentation may not be the complete steps of the procedure. Individual physician preference and experience, as well as patient needs, may dictate variation in procedure steps. Before using any medical device, review all the Instructions For Use with particular attention to the indications, contraindications, warnings and precautions.
+        </p>
+        <p style={{ fontSize: 12.5, color: "#333", lineHeight: 1.5, marginBottom: 0 }}>
+          Dr. William P. Adams Jr., Dr. Tamir Mosharrafa, and Dr. Essie Yates are compensated by and presenting on behalf of Mentor Worldwide LLC and must present information in accordance with applicable regulatory requirements.
+        </p>
+
+        <div style={{ borderTop: "1px solid #EEF1F5", margin: "16px 0" }} />
+
+        <p style={{ fontSize: 12.5, color: "#333", lineHeight: 1.5, marginBottom: 10 }}>
           The sale and distribution of Mentor Breast Implant Devices are restricted to users and/or user facilities that provide information to patients about the risks and benefits of the device prior to its use in the form and manner specified in approved labeling to be provided by Mentor Worldwide LLC.
+        </p>
+        <p style={{ fontSize: 11.5, color: "#555", lineHeight: 1.5, marginBottom: 0 }}>
+          Prior to use, refer to the instructions for use supplied with this device for indications, contraindications, side effects, warnings and precautions. Caution: US law restricts this device to sale by or on the order of a physician.
         </p>
       </div>
       <PrimaryBtn onClick={onContinue}>Continue →</PrimaryBtn>
@@ -773,8 +825,9 @@ function KOLModal({ surgeon, onClose }) {
   );
 }
 
-// ── Course-open sequence: 4. Disclosures + ISI + AMP ────────────────────────────
-// Relocated to the END of the module per Standard v1.7, Section 1.7.
+// ── Course-open sequence: 4. ISI + AMP ───────────────────────────────────────────
+// ISI proper only — Disclosures/byline/sale-distribution/Important-Info moved to
+// the front (see DisclosuresScreen above) per the Aug 24 copy-approval call.
 function ISIScreenOne({ onContinue, onBack }) {
   return (
     <div className="fade-in">
@@ -792,23 +845,8 @@ function ISIScreenOne({ onContinue, onBack }) {
         borderRadius: 8, padding: "18px 16px", marginBottom: 20,
       }}>
         <div style={{ fontSize: 12, fontWeight: 700, color: B.text, letterSpacing: 0.6, marginBottom: 8 }}>
-          DISCLOSURES
-        </div>
-        <p style={{ fontSize: 12.5, color: "#333", lineHeight: 1.5, marginBottom: 10 }}>
-          This presentation includes a demonstration of the use of a medical device. The steps demonstrated with respect to the use of any medical device in this presentation may not be the complete steps of the procedure. Individual physician preference and experience, as well as patient needs, may dictate variation in procedure steps. Before using any medical device, review all the Instructions For Use with particular attention to the indications, contraindications, warnings and precautions.
-        </p>
-        <p style={{ fontSize: 12.5, color: "#333", lineHeight: 1.5, marginBottom: 0 }}>
-          Dr. William P. Adams Jr., Dr. Tamir Mosharrafa, and Dr. Essie Yates are compensated by and presenting on behalf of Mentor Worldwide LLC and must present information in accordance with applicable regulatory requirements.
-        </p>
-
-        <div style={{ borderTop: "1px solid #EEF1F5", margin: "16px 0" }} />
-
-        <div style={{ fontSize: 12, fontWeight: 700, color: B.text, letterSpacing: 0.6, marginBottom: 8 }}>
           IMPORTANT SAFETY INFORMATION
         </div>
-        <p style={{ fontSize: 11.5, color: "#555", lineHeight: 1.5, marginBottom: 8 }}>
-          Prior to use, refer to the instructions for use supplied with this device for indications, contraindications, side effects, warnings and precautions. Caution: US law restricts this device to sale by or on the order of a physician.
-        </p>
         <p style={{ fontSize: 11.5, color: "#555", lineHeight: 1.5, marginBottom: 8 }}>
           MENTOR&trade; MemoryGel&trade; Breast Implants, MENTOR&trade; MemoryShape&trade; Breast Implants, and MENTOR&trade; Saline-filled Breast Implants are indicated for breast augmentation in women (at least 22 years old for MemoryGel&trade; Implants and MemoryShape&trade; Implants, and 18 years old for Saline Implants) or for breast reconstruction. Breast implant surgery should not be performed in women with active infection anywhere in their body, with existing cancer or pre-cancer of their breast who have not received adequate treatment for those conditions, or who are currently pregnant or nursing.
         </p>
@@ -1361,7 +1399,7 @@ function CompleteScreen({ onContinue, onReplay }) {
 // ══════════════════════════════════════════════════════════════════════════════
 
 function App() {
-  // title | blackbox | descKol | intro | beat | closing | complete | isi1 | isi2 | closed
+  // title | blackbox | disclosures | descKol | intro | beat | closing | complete | isi1 | isi2 | closed
   // Per Standard v1.7 (Section 1.7): Disclosures/ISI/AMP moved from the front
   // of this sequence to the end. Title, Black Box, and Description+KOL remain
   // a one-time front gate — shown once on first entry, bypassed by replay()
@@ -1447,10 +1485,13 @@ function App() {
     <Shell scrollRef={scrollRef}>
       {phase === "title" && <TitleScreen onContinue={() => goto("blackbox")} />}
       {phase === "blackbox" && (
-        <BlackBoxScreen onContinue={() => goto("descKol")} onBack={() => goto("title")} />
+        <BlackBoxScreen onContinue={() => goto("disclosures")} onBack={() => goto("title")} />
+      )}
+      {phase === "disclosures" && (
+        <DisclosuresScreen onContinue={() => goto("descKol")} onBack={() => goto("blackbox")} />
       )}
       {phase === "descKol" && (
-        <DescriptionKolScreen onContinue={() => goto("intro")} onBack={() => goto("blackbox")} />
+        <DescriptionKolScreen onContinue={() => goto("intro")} onBack={() => goto("disclosures")} />
       )}
       {phase === "intro" && <IntroScreen onStart={start} />}
       {phase === "beat" && (
