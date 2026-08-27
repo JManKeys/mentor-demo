@@ -4,8 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>MENTOR™ Future Leaders: Breast Augmentation Consultation · Module 3</title>
-<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<!-- React/ReactDOM CDN — pinned per project standard (see MENTOR_Residency_Pitfalls.md
+     #5). Found unpinned during the 08/27 copy-approval edit pass — same gap Modules
+     1 and 2 both had; Babel below was already correctly pinned but React/ReactDOM
+     were not. Pinned to 18.3.1, the final 18.x release, to match Babel's exact-
+     version pattern. Never remove this version pin. -->
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"></script>
 <!-- Babel CDN — pinned per project standard. Unpinned unpkg.com serves "latest",
      which silently broke Module 1 and 2's original prototypes when Babel 7.29.0
      shipped a regression (Jan 2026). Never remove this version pin. -->
@@ -105,7 +110,7 @@ const SURGEONS = {
     photo: "Dr__Adams.jpg",
     photoFocusY: 15, // tall portrait (510x757), face starts ~17% down — default 50% center-crop clipped hair
     oneLiner: "Dallas surgeon whose implant safety research is used by surgeons worldwide.",
-    bio: "Dr. William Adams practices in Dallas, where he also trained and now teaches at UT Southwestern. He's spent his career on one problem — making breast implant surgery safer — and the irrigation technique he developed is now used by surgeons worldwide. He literally wrote the book on breast augmentation.",
+    bio: "Dr. William Adams practices in Dallas, where he also trained and now teaches at UT Southwestern. He is an active researcher and has developed new irrigations for use in clinical breast implant surgery.",
   },
   yates: {
     name: "Dr. Essie Yates",
@@ -137,9 +142,12 @@ const MODULE_KOL_IDS = ["mosharrafa", "adams", "yates"];
 // Module_03_Claire.docx. Video selection per Residency_Video_Tracker.xlsx:
 // 3.1 Primary Adams / Secondary Yates
 // 3.2 Primary Mosharrafa / Secondary Yates
-// No video assets are hosted yet for Module 3 — VideoCard renders its placeholder
-// state (no localSrc/brightcoveUrl/vimeoId/streamSrc) until real clips are edited
-// and hosted.
+// Correction (08/27): this comment previously claimed no video assets were
+// hosted yet for Module 3. That was stale/wrong — all four clips below
+// (Adams_3.1.mp4, Yates_3.1.mp4, Mosh_3.2.mp4, Yates_3.2.mp4) are wired via
+// localSrc AND confirmed present in the repo (raw.githubusercontent.com HTTP
+// 200 for all four, checked directly rather than assumed). Module 3 is fully
+// video-wired — don't carry the old "coming soon" assumption forward.
 // Structural note: Module 3 has 2 Topic Questions/beats (Residency_Video_Tracker.xlsx
 // rows 14–15; Module_03_Claire.docx persona doc), not 5 — Standard Section 2.2's
 // "Modules 1–4 have five beats each" line is stale (Module 1 and 4 both have 4;
@@ -307,7 +315,7 @@ function Header() {
         fontSize: 11, padding: "3px 10px",
         borderRadius: 20, letterSpacing: 1,
         flexShrink: 0, whiteSpace: "nowrap",
-      }}>Module 3 · Prototype</div>
+      }}>Module 3</div>
     </div>
   );
 }
@@ -646,10 +654,17 @@ function DescriptionKolScreen({ onContinue, onBack }) {
         About this program
       </h1>
       {PROGRAM_DESCRIPTION.map((p, i) => (
-        <p key={i} style={{ fontSize: 15, color: "#4A5568", lineHeight: 1.6, marginBottom: i < PROGRAM_DESCRIPTION.length - 1 ? 14 : 26 }}>
+        <p key={i} style={{ fontSize: 15, color: "#4A5568", lineHeight: 1.6, marginBottom: 14 }}>
           {p}
         </p>
       ))}
+
+      {/* Fictional-patient disclosure — per Daniel DeSpirito's approved pattern
+          (copy-approval, 08/24), added to the "About this program" screen for
+          each module. Claire is Module 3's persona. */}
+      <p style={{ fontSize: 13, color: B.midGrey, fontStyle: "italic", lineHeight: 1.5, marginBottom: 26 }}>
+        Claire is a fictional patient used for educational purposes.
+      </p>
 
       <div style={{
         background: B.white, borderRadius: 16,
@@ -783,7 +798,7 @@ function ISIScreenOne({ onContinue, onBack }) {
           This presentation includes a demonstration of the use of a medical device. The steps demonstrated with respect to the use of any medical device in this presentation may not be the complete steps of the procedure. Individual physician preference and experience, as well as patient needs, may dictate variation in procedure steps. Before using any medical device, review all the Instructions For Use with particular attention to the indications, contraindications, warnings and precautions.
         </p>
         <p style={{ fontSize: 12.5, color: "#333", lineHeight: 1.5, marginBottom: 0 }}>
-          Dr. William P. Adams Jr., Dr. Kriti Mohan, Dr. Tamir Mosharrafa, and Dr. Essie Yates are compensated by and presenting on behalf of Mentor Worldwide LLC and must present information in accordance with applicable regulatory requirements.
+          Dr. William P. Adams Jr., Dr. Tamir Mosharrafa, and Dr. Essie Yates are compensated by and presenting on behalf of Mentor Worldwide LLC and must present information in accordance with applicable regulatory requirements.
         </p>
 
         <div style={{ borderTop: "1px solid #EEF1F5", margin: "16px 0" }} />
@@ -795,10 +810,10 @@ function ISIScreenOne({ onContinue, onBack }) {
           Prior to use, refer to the instructions for use supplied with this device for indications, contraindications, side effects, warnings and precautions. Caution: US law restricts this device to sale by or on the order of a physician.
         </p>
         <p style={{ fontSize: 11.5, color: "#555", lineHeight: 1.5, marginBottom: 8 }}>
-          MENTOR MemoryGel Breast Implants, MENTOR MemoryShape Breast Implants, and MENTOR Saline-filled Breast Implants are indicated for breast augmentation in women (at least 22 years old for MemoryGel Implants and MemoryShape Implants, and 18 years old for Saline Implants) or for breast reconstruction. Breast implant surgery should not be performed in women with active infection anywhere in their body, with existing cancer or pre-cancer of their breast who have not received adequate treatment for those conditions, or who are currently pregnant or nursing.
+          MENTOR&trade; MemoryGel&trade; Breast Implants, MENTOR&trade; MemoryShape&trade; Breast Implants, and MENTOR&trade; Saline-filled Breast Implants are indicated for breast augmentation in women (at least 22 years old for MemoryGel&trade; Implants and MemoryShape&trade; Implants, and 18 years old for Saline Implants) or for breast reconstruction. Breast implant surgery should not be performed in women with active infection anywhere in their body, with existing cancer or pre-cancer of their breast who have not received adequate treatment for those conditions, or who are currently pregnant or nursing.
         </p>
         <p style={{ fontSize: 11.5, color: "#555", lineHeight: 1.5, marginBottom: 0 }}>
-          Breast implants are not lifetime devices and breast implantation may not be a one-time surgery. The chance of developing complications increases over time. The most common complications for breast augmentation and reconstruction with MemoryGel Implants include any reoperation, capsular contracture, and implant removal with or without replacement. The most common complications with MemoryShape Implants for breast augmentation include reoperation for any reason, implant removal with or without replacement, and ptosis. The most common complications with MemoryShape Implants for breast reconstruction include reoperation for any reason, implant removal with or without replacement, and capsular contracture. A lower risk of complication is rupture. The health consequences of a ruptured silicone gel breast implant have not been fully established. MRI screenings are recommended three years after initial implant surgery and then every two years after to detect silent rupture. Breast implants are also associated with the risk of breast implant-associated anaplastic large cell lymphoma (BIA-ALCL), an uncommon type of lymphoma. An individual's risk of developing BIA-ALCL with MENTOR Breast Implants is low based on the incidence of worldwide cases. The most common complications with MENTOR Saline-filled Implants include reoperation, implant removal, capsular contracture, breast pain, and implant deflation.
+          Breast implants are not lifetime devices and breast implantation may not be a one-time surgery. The chance of developing complications increases over time. The most common complications for breast augmentation and reconstruction with MemoryGel&trade; Implants include any reoperation, capsular contracture, and implant removal with or without replacement. The most common complications with MemoryShape&trade; Implants for breast augmentation include reoperation for any reason, implant removal with or without replacement, and ptosis. The most common complications with MemoryShape&trade; Implants for breast reconstruction include reoperation for any reason, implant removal with or without replacement, and capsular contracture. A lower risk of complication is rupture. The health consequences of a ruptured silicone gel breast implant have not been fully established. MRI screenings are recommended three years after initial implant surgery and then every two years after to detect silent rupture. Breast implants are also associated with the risk of breast implant-associated anaplastic large cell lymphoma (BIA-ALCL), an uncommon type of lymphoma. An individual's risk of developing BIA-ALCL with MENTOR&trade; Breast Implants is low based on the incidence of worldwide cases. The most common complications with MENTOR&trade; Saline-filled Implants include reoperation, implant removal, capsular contracture, breast pain, and implant deflation.
         </p>
       </div>
 
@@ -818,11 +833,11 @@ function ISIScreenTwo({ onClose, onBack }) {
         borderRadius: 8, padding: "18px 16px", marginBottom: 20,
       }}>
         <p style={{ fontSize: 11.5, color: "#555", lineHeight: 1.5, marginBottom: 20 }}>
-          For MemoryGel Implants, patients should receive a copy of Important Information for Augmentation Patients about MENTOR MemoryGel Breast Implants or Important Information for Reconstruction Patients about MENTOR MemoryGel Breast Implants. For MemoryShape Implants, patients should receive a copy of Patient Educational Brochure – Breast Augmentation with MENTOR MemoryShape Breast Implants or Patient Educational Brochure – Breast Reconstruction with MENTOR MemoryShape Breast Implants, and a copy of Quick Facts about Breast Augmentation &amp; Reconstruction with MENTOR MemoryShape Breast Implants. For MENTOR Saline-filled Implants, patients should receive a copy of Saline-Filled Breast Implants: Making an Informed Decision. Your patient needs to read and understand the information regarding the risks and benefits of breast implants, with an opportunity to consult with you prior to deciding on surgery.
+          For MemoryGel&trade; Implants, patients should receive a copy of Important Information for Augmentation Patients about MENTOR&trade; MemoryGel&trade; Breast Implants or Important Information for Reconstruction Patients about MENTOR&trade; MemoryGel&trade; Breast Implants. For MemoryShape&trade; Implants, patients should receive a copy of Patient Educational Brochure – Breast Augmentation with MENTOR&trade; MemoryShape&trade; Breast Implants or Patient Educational Brochure – Breast Reconstruction with MENTOR&trade; MemoryShape&trade; Breast Implants, and a copy of Quick Facts about Breast Augmentation &amp; Reconstruction with MENTOR&trade; MemoryShape&trade; Breast Implants. For MENTOR&trade; Saline-filled Implants, patients should receive a copy of Saline-Filled Breast Implants: Making an Informed Decision. Your patient needs to read and understand the information regarding the risks and benefits of breast implants, with an opportunity to consult with you prior to deciding on surgery.
         </p>
 
         <div style={{ fontSize: 10.5, color: B.midGrey, letterSpacing: 0.3, borderTop: "1px solid #EEF1F5", paddingTop: 10, marginBottom: 20 }}>
-          &copy; Mentor Worldwide LLC · {MODULE_AMP}
+          &copy; Johnson &amp; Johnson and its affiliates 2026 · {MODULE_AMP}
         </div>
 
         <p style={{
@@ -1077,6 +1092,13 @@ function BeatScreen({ beat, beatIndex, total, onChosen, onBack, scrollRef }) {
                   Add a few more words to continue.
                 </p>
               )}
+              {/* Free-text field disclaimer — per copy-approval item 2.5 (global,
+                  confirmed 08/24 call: "field used for reflection only," "non-archived,"
+                  applies to every free-text field across all modules). Wording locked
+                  08/26 (Jonathan). */}
+              <p style={{ fontSize: 12, color: B.midGrey, fontStyle: "italic", marginTop: 6 }}>
+                This is a private reflection space. Your response isn't stored, archived, or graded.
+              </p>
               <div style={{ marginTop: 12 }}>
                 <PrimaryBtn
                   onClick={handleSubmitGuess}
@@ -1235,6 +1257,11 @@ function ClosingScreen({ onFinish, onBack, scrollRef }) {
             Add a few more words to continue.
           </p>
         )}
+        {/* Free-text field disclaimer — see the identical note on the per-beat
+            prediction field above; same item 2.5, same locked wording. */}
+        <p style={{ fontSize: 12, color: B.midGrey, fontStyle: "italic", marginTop: 6 }}>
+          This is a private reflection space. Your response isn't stored, archived, or graded.
+        </p>
       </div>
 
       <PrimaryBtn onClick={onFinish} disabled={response.trim().length < 3}>
@@ -1323,7 +1350,7 @@ function CompleteScreen({ onContinue, onReplay }) {
       </div>
 
       <div style={{ fontSize: 11, color: B.midGrey, textAlign: "center", marginTop: 20, letterSpacing: 0.5 }}>
-        {PROGRAM_TITLE} · Module 3 · Prototype
+        {PROGRAM_TITLE} · Module 3
       </div>
     </div>
   );
