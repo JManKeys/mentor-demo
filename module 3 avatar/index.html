@@ -391,7 +391,7 @@ function ClaireBubble({ text, mood, animClass = "slide-in" }) {
 // autoplay-with-sound, a Play button overlay appears instead of failing
 // silently. A Replay control is always available underneath once the clip
 // has started, per the "play it again if they want" requirement.
-function ClaireAvatarVideo({ src }) {
+function ClaireAvatarVideo({ src, scrollRef }) {
   const videoRef = useRef(null);
   const [needsPlayButton, setNeedsPlayButton] = useState(false);
   const [started, setStarted] = useState(false);
@@ -402,12 +402,21 @@ function ClaireAvatarVideo({ src }) {
     const v = videoRef.current;
     if (!v) return;
     v.currentTime = 0;
-    const playPromise = v.play();
-    if (playPromise !== undefined) {
-      playPromise
-        .then(() => setStarted(true))
-        .catch(() => setNeedsPlayButton(true)); // autoplay-with-sound blocked by the browser
-    }
+    // Delayed slightly, and scroll-to-top is re-asserted once playback
+    // actually starts: on mobile (Safari in particular), a video beginning
+    // to autoplay can itself scroll the page to bring it into view, which
+    // undoes the scroll-to-top the phase transition already did an instant
+    // earlier and leaves the learner mid-page instead of at the top. Caught
+    // 08/28 (Jonathan, testing on his phone).
+    const t = setTimeout(() => {
+      const playPromise = v.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => { setStarted(true); scrollTop(scrollRef); })
+          .catch(() => setNeedsPlayButton(true)); // autoplay-with-sound blocked by the browser
+      }
+    }, 150);
+    return () => clearTimeout(t);
   }, [src]);
 
   function handlePlayClick() {
@@ -1152,7 +1161,7 @@ function BeatScreen({ beat, beatIndex, total, onChosen, onBack, scrollRef }) {
           referenced by ClaireBubble elsewhere in this file, e.g. the reaction
           bubbles below) rather than removed, so this stays a minimal, isolated
           change from the real Module 3 build. */}
-      <ClaireAvatarVideo src={beat.claireAvatarSrc} />
+      <ClaireAvatarVideo src={beat.claireAvatarSrc} scrollRef={scrollRef} />
 
       {/* Options or reaction */}
       {chosen === null ? (
