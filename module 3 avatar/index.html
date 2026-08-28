@@ -41,6 +41,21 @@
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: #C0C8D4; border-radius: 4px; }
 
+  /* Root viewport height — EXPERIMENT-ONLY FIX (08/28). Real Module 3 uses a
+     plain inline minHeight:"100vh" on Shell's outer div, same as every other
+     module. On mobile, 100vh is computed against the LARGEST possible
+     viewport (address bar hidden), not the actually-visible one (address bar
+     showing) — so the shell renders taller than the real visible window,
+     leaving genuine window-level scroll distance between the top of the page
+     and content the app already scrolled its own inner container to "the
+     top" of. That's what Jonathan hit: the avatar-video screen looked like
+     it "didn't know where the top of the page was" on his phone, in both
+     Edge and Chrome (i.e. not a single-browser quirk — the classic 100vh
+     mobile-viewport bug). 100dvh tracks the real, current visible viewport;
+     kept as a second declaration (not @supports) so a browser without dvh
+     support just keeps the 100vh line above it, per normal CSS cascade. */
+  .app-viewport { min-height: 100vh; min-height: 100dvh; }
+
   /* Desktop breakpoint — matches Module 1 / shared components reference */
   .app-shell { max-width: 480px; }
   @media (min-width: 900px) {
@@ -264,8 +279,13 @@ function getSecondPerspectiveNudge(beatId) {
   return SECOND_PERSPECTIVE_NUDGES[beatId % SECOND_PERSPECTIVE_NUDGES.length];
 }
 
+// EXPERIMENT-ONLY: also resets window scroll, not just the inner scrollRef
+// container. Belt-and-suspenders alongside the .app-viewport/dvh fix above —
+// if anything still leaves the window itself scrolled (address-bar
+// transitions, a video nudging focus, etc.), this catches it too.
 function scrollTop(ref) {
   if (ref && ref.current) ref.current.scrollTo({ top: 0, behavior: "smooth" });
+  if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 // ── UI primitives ─────────────────────────────────────────────────────────────
@@ -686,8 +706,7 @@ function PatientCard({ name, age, occupation, quote, tags }) {
 // ── Shell ─────────────────────────────────────────────────────────────────────
 function Shell({ children, scrollRef }) {
   return (
-    <div style={{
-      minHeight: "100vh",
+    <div className="app-viewport" style={{
       background: "linear-gradient(160deg, #f8f2ed 0%, #F0F4F8 100%)",
       display: "flex", justifyContent: "center",
       fontFamily: "'Segoe UI', system-ui, sans-serif",
