@@ -179,9 +179,18 @@ const MODULE_KOL_IDS = ["mosharrafa", "adams", "yates", "mohan"];
 // 1.2 Primary Mosharrafa / Secondary Mohan
 // 1.3 Primary Adams / Secondary Mosharrafa
 // 1.4 Primary Mohan / Secondary Mosharrafa
-// No video assets are hosted yet for Module 1 — VideoCard renders its placeholder
-// state (no localSrc/brightcoveUrl/vimeoId/streamSrc) until real clips are edited
-// and hosted.
+// Correction (09/08): the line below previously claimed no video assets were
+// hosted yet for Module 1. That was stale — the eight clips were already
+// sitting in the module1/ folder (Adams_1.3.mp4, Mohan_1.2.mp4, Mohan_1.4.mp4,
+// Mosh_1.1.mp4, Mosh_1.2.mp4, Mosh_1.3.mp4, Mosh_1.4.mp4, Yates_1.1.mp4), just
+// never wired via localSrc/localSrc2. Wired below, matching the Primary/
+// Secondary mapping above exactly. Copied into module 1 avatar/ alongside
+// this file (plain local file copy on Jonathan's machine, not through the
+// cloud-sandbox device bridge — see Module1_Avatar_Build_Handoff_09-08.md for
+// why that distinction mattered here). module1/index.html (the real,
+// copy-approved build) has NOT been touched and still shows the "Video
+// coming soon" placeholder — this fix only applies to this avatar build,
+// which is now the one heading to copy approval.
 // Copy-approval note (Beat 1, per Section 8.2): Mosharrafa's video includes the
 // line "we know that silicone implants are safe and do not cause any form of
 // human disease" — the BIA-ALCL black-box disclosure-adjacent claim. Resolved:
@@ -198,6 +207,10 @@ const BEATS = [
     videoDesc: "Covers the shell/fill distinction, rippling and wrinkling differences (more pronounced in saline, especially on leaner builds), and silicone's lower palpability.",
     videoDesc2: "Frames the choice around the broader MENTOR™ portfolio, but flags saline's specific appeal to patients who want peace of mind about what's inside if a rupture occurs.",
     predictionPrompt: "Before the video plays: what do you think an experienced surgeon says when a patient who's already decided on silicone asks him to walk her through the difference anyway?",
+    // Beat 1.1 — Primary Mosharrafa / Secondary Yates, per the tracker mapping
+    // in the comment above.
+    localSrc: "Mosh_1.1.mp4",
+    localSrc2: "Yates_1.1.mp4",
     jennyOpen: `"I've done a ton of research — probably more than I should have, honestly. I know I want silicone, but I keep reading things that make me second-guess myself. Can you just walk me through the difference so I know I'm making the right call?"`,
     jennyMood: "open",
     // Avatar Rollout handoff (09/08) — AI avatar (Synthesia) delivering
@@ -239,6 +252,9 @@ const BEATS = [
     videoDesc: "His definition centers on upper-pole slope and takeoff rather than roundness, plus the distinction between how a breast looks in vs. out of a bra — natural at rest, adjustable with support.",
     videoDesc2: "Her approach: patients use the same word to mean different, sometimes opposite things (natural slope vs. proportionate/augmented), and inspiration photos are the tool for surfacing which one a given patient actually means.",
     predictionPrompt: "Before the video plays: what do you think an experienced surgeon means by 'natural,' clinically, when a patient shows him a photo that's clearly augmented?",
+    // Beat 1.2 — Primary Mosharrafa / Secondary Mohan.
+    localSrc: "Mosh_1.2.mp4",
+    localSrc2: "Mohan_1.2.mp4",
     jennyOpen: `"Okay — so I have this picture. [She turns her phone toward you. The result is clearly augmented — fuller upper pole, visible projection.] This is kind of the look I'm going for. Is that natural? Because when I say natural, I think I mean something specific, but everyone looks at me weird when I show them this."`,
     jennyMood: "open",
     // Beat 2: the augmented reference photo / what "natural" means. See the
@@ -279,6 +295,9 @@ const BEATS = [
     videoDesc: `His position: the "only teardrop looks natural" claim is flawed — a well-fitted round implant can look just as natural, and round is more versatile across patient anatomy. Fit to the breast, not implant shape alone, drives the result.`,
     videoDesc2: "More technical companion: base diameter and desired volume determine profile (not the reverse), and round implants typically retain more upper-pole volume than teardrop — relevant to patients who want fuller upper pole vs. those who don't.",
     predictionPrompt: "Before the video plays: what do you think an experienced surgeon says when a patient repeats a belief she picked up online — that round implants look fake?",
+    // Beat 1.3 — Primary Adams / Secondary Mosharrafa.
+    localSrc: "Adams_1.3.mp4",
+    localSrc2: "Mosh_1.3.mp4",
     jennyOpen: `"Someone I follow just got the teardrop ones and said they're more natural-looking. Is that true? Because I've seen people say round ones look fake, and I really don't want that round-ball thing at the top."`,
     jennyMood: "open",
     // Beat 3: teardrop vs. round implant shape. See the note on Beat 1's
@@ -319,6 +338,9 @@ const BEATS = [
     videoDesc: `Her framing: thicker gel (e.g., Boost) reads firmer and more upright; softer gel (classic Memory Gel) has more natural slope and give. Directly explains the "firm" sensation Jenny described at her fitting.`,
     videoDesc2: "Complementary: soft-tissue evaluation and cohesivity matching are what make an implant undetectable by feel — framed as the explicit goal of the surgery, not just a possible outcome.",
     predictionPrompt: "Before the video plays: what do you think an experienced surgeon says determines whether an implant actually feels real?",
+    // Beat 1.4 — Primary Mohan / Secondary Mosharrafa.
+    localSrc: "Mohan_1.4.mp4",
+    localSrc2: "Mosh_1.4.mp4",
     jennyOpen: `"Last thing — my friend said hers feel completely real. Like, she says people can't tell unless she tells them. Is that actually possible? Because I've touched some at like a fitting thing and they felt… firm. Not bad, just not what I expected."`,
     jennyMood: "vulnerable",
     // Beat 4: what implants actually feel like. See the note on Beat 1's
