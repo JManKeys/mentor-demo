@@ -1,0 +1,1844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>MENTOR™ Future Leaders: Breast Augmentation Consultation · Module 4 (Avatar Concept)</title>
+<!-- React/ReactDOM CDN — pinned per project standard (see MENTOR_Residency_Pitfalls.md
+     #5). Found unpinned during the 08/27 copy-approval edit pass — the same gap
+     Modules 1, 2, and 3 all had. Pinned to 18.3.1, the final 18.x release, to match
+     Babel's exact-version pattern. Never remove this version pin. -->
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"></script>
+<!-- Babel CDN — pinned per project standard. Unpinned unpkg.com serves "latest",
+     which silently broke Module 1 and 2's original prototypes when Babel 7.29.0
+     shipped a regression (Jan 2026). Never remove this version pin. -->
+<script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #F0F4F8; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+  textarea, input { font-family: inherit; }
+  button { font-family: inherit; cursor: pointer; }
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes pulseRing {
+    0%   { box-shadow: 0 0 0 0 rgba(224,177,131,0.4); }
+    70%  { box-shadow: 0 0 0 8px rgba(224,177,131,0); }
+    100% { box-shadow: 0 0 0 0 rgba(224,177,131,0); }
+  }
+  .fade-in  { animation: fadeIn 0.4s ease forwards; }
+  .slide-in { animation: fadeSlideIn 0.4s ease forwards; }
+  .slide-in-delay { animation: fadeSlideIn 0.4s ease 0.15s both; }
+  .slide-in-delay2 { animation: fadeSlideIn 0.4s ease 0.3s both; }
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #C0C8D4; border-radius: 4px; }
+
+  /* Root viewport height — carried over from the module 1/2/3 avatar precedent
+     (08/28 fix, re-confirmed 09/08, 09/10, 09/12). The real Module 4 build uses
+     a plain inline minHeight:"100vh" on Shell's outer div, same as every other
+     non-avatar module. On mobile, 100vh is computed against the LARGEST
+     possible viewport (address bar hidden), not the actually-visible one
+     (address bar showing) — so the shell renders taller than the real visible
+     window, leaving genuine window-level scroll distance between the top of
+     the page and content the app already scrolled its own inner container to
+     "the top" of. This build has the same avatar-video autoplay behavior that
+     motivated the original fix, so it carries the same one. 100dvh tracks the
+     real, current visible viewport; kept as a second declaration (not
+     @supports) so a browser without dvh support just keeps the 100vh line
+     above it, per normal CSS cascade. */
+  .app-viewport { min-height: 100vh; min-height: 100dvh; }
+
+  /* Desktop breakpoint — widens the column and allows side-by-side cards past 900px */
+  .app-shell { max-width: 480px; }
+  @media (min-width: 900px) {
+    .app-shell { max-width: 760px; }
+    .desktop-row { display: flex; gap: 20px; align-items: flex-start; }
+    .video-frame { max-width: 340px; margin: 0 auto; }
+    /* Avatar-video desktop cap — separate from .video-frame above because the
+       Marisol avatar clips are landscape (16:9, Synthesia export) rather than
+       the portrait 9:16 surgeon clips .video-frame is sized for. Matches the
+       module 1/2/3 avatar precedent exactly. */
+    .avatar-video-frame { max-width: 480px; margin: 0 auto; }
+    .desktop-row > * { flex: 1; }
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+
+const { useState, useRef, useEffect } = React;
+
+// ── Brand tokens ──────────────────────────────────────────────────────────────
+const B = {
+  darkBlue:  "#002756",
+  blue:      "#004DAC",
+  lightBlue: "#E4EFF7",
+  copper:    "#E0B183",
+  cream:     "#f8f2ed",
+  white:     "#FFFFFF",
+  midGrey:   "#8A8A8A",
+  softGrey:  "#F5F7FA",
+  text:      "#1A1A1A",
+  green:     "#EDF7EE",
+  greenBorder: "#A8D5B0",
+  amber:     "#FFF8EE",
+  amberBorder: "#E8C87A",
+  warning:   "#FFF3E0",
+  warningBorder: "#E0A040",
+};
+
+// ── Course-open sequence data ───────────────────────────────────────────────────
+// Locked in chat 7/17 (Description + KOL copy), source content confirmed against
+// Mentor_Future_Leaders_ELearning_Journey.pdf (Black Box, Disclosures, ISI) and
+// Black_Box_Warning_verbiage.docx (exact match). This entire block — MODULE_AMP,
+// PROGRAM_DESCRIPTION, SURGEONS, MODULE_KOL_IDS — is the one part of the open
+// sequence that changes per module. Everything else in the front-gate screens
+// (TitleScreen, BlackBoxScreen, DescriptionKolScreen) is identical across all
+// 5 modules, which is why this is structured as a single parameterized block
+// up top rather than baked into the screens themselves.
+//
+// Per Standard v1.7, Section 1.7: the Disclosures/ISI/AMP screen is no longer
+// part of this front sequence. It now runs at the END of the module
+// (ISIScreenOne / ISIScreenTwo, below the Complete screen), reached only after
+// all beats and the closing reflection. Current front sequence: Title -> Black
+// Box -> Description+Meet the Surgeons -> module intro.
+
+const MODULE_AMP = "US_MNT_AMNT_418939"; // Module 4 — Recovery, Longevity & Patient Readiness
+
+const PROGRAM_TITLE = "MENTOR™ Future Leaders: Breast Augmentation Consultation";
+
+const PROGRAM_DESCRIPTION = [
+  "This program is built around real consultations — the same conversations you'll be having as a resident, and soon on your own.",
+  "Instead of lectures, you'll work through short videos with surgeons in practice today, hearing the actual thinking behind how they respond to real patient questions.",
+  "By the time you're across the table from your own patient, it won't be the first time you've thought it through.",
+];
+
+// Full surgeon roster — bios are identical across all 5 modules. Which ones
+// appear in a given module is controlled entirely by MODULE_KOL_IDS below,
+// cross-referenced against Residency_Video_Tracker.xlsx (Primary/Secondary
+// designations only — "Not Used" and blank entries excluded).
+const SURGEONS = {
+  mosharrafa: {
+    name: "Dr. Tamir Mosharrafa",
+    photo: "Dr__Mosharrafa.jpg",
+    photoFocusY: 50, // near-square crop (527x573) — negligible vertical margin either way
+    oneLiner: "Phoenix and Scottsdale surgeon who still teaches residents alongside running his own practice.",
+    bio: "Dr. Tamir Mosharrafa practices in Phoenix and Scottsdale, where he co-founded Mosharrafa Plastic Surgery Group. He trained at Baylor College of Medicine and still teaches residents today, on top of running his own practice. When he's not in the OR, he's probably on a golf course or watching hockey.",
+  },
+  adams: {
+    name: "Dr. William Adams",
+    photo: "Dr__Adams.jpg",
+    photoFocusY: 15, // tall portrait (510x757), face starts ~17% down — default 50% center-crop clipped hair
+    oneLiner: "Dallas surgeon whose implant safety research is used by surgeons worldwide.",
+    bio: "Dr. William Adams practices in Dallas, where he also trained and now teaches at UT Southwestern. He is an active researcher and has developed new irrigations for use in clinical breast implant surgery.",
+  },
+  yates: {
+    name: "Dr. Essie Yates",
+    photo: "Dr__Yates.jpg",
+    photoFocusY: 3, // tall portrait (567x699), face starts ~8% down — needed the most correction of the four
+    oneLiner: "Fort Lauderdale surgeon working across both cosmetic and reconstructive breast surgery.",
+    bio: "Dr. Essie Yates practices in Fort Lauderdale after training across London, New York, and Chicago. She splits her work between cosmetic and reconstructive breast surgery, and built her practice around one idea: outer confidence starts with inner strength.",
+  },
+  mohan: {
+    name: "Dr. Kriti Mohan",
+    photo: "Dr__Mohan.jpg",
+    photoFocusY: 50, // landscape-oriented (750x723) — cover crops left/right, not top/bottom, so this is unused in practice
+    oneLiner: "Houston surgeon leading a practice built entirely around breast surgery.",
+    bio: "Dr. Kriti Mohan leads Ciaravino Total Beauty in Houston, a practice that's been a destination for breast surgery for decades. She trained in microsurgery and reconstructive surgery at Baylor College of Medicine — and before medicine, she studied cell biology, neuroscience, and art history, a mix that still shows up in how she approaches results.",
+  },
+};
+
+// Module 4 excludes Yates per Standard v1.8, Section 1.8 — no content for any
+// of 4.1 through 4.4 involves her (all four beats use Adams/Mosharrafa or
+// Mosharrafa/Mohan per the Video Tracker comment below).
+const MODULE_KOL_IDS = ["mosharrafa", "adams", "mohan"];
+
+// ── Beat data ─────────────────────────────────────────────────────────────────
+// Source: Module_04_Beats_Working_Draft.md (all four beats SETTLED) and
+// Module_04_Sarah_Revisited.docx v2. Video selection per Residency_Video_Tracker.xlsx:
+// 4.1 Primary Adams / Secondary Mosharrafa
+// 4.2 Primary Adams / Secondary Mosharrafa
+// 4.3 Primary Mosharrafa / Secondary Mohan
+// 4.4 Primary Adams / Secondary Mosharrafa
+// GITHUB PAGES DEMO COPY — video sources point to local mp4 files hosted
+// in this same repo (jmankeys.github.io/mentor-demo/), via VideoCard's
+// localSrc/localSrc2 props. This is separate from the Brightcove URLs the
+// real LMS build will use — do not carry localSrc into the SCORM package.
+// Miss positions: Beat1=A, Beat2=C, Beat3=B, Beat4=B (see options below for
+// actual per-beat quality assignment; not a fixed pattern). Corrected 08/27 —
+// this comment previously had the wrong letters for Beats 1 and 2, and left
+// Beat 4 unresolved.
+const BEATS = [
+  {
+    id: 1,
+    topicQuestion: `"A friend told me her recovery was uncomfortable — how bad is it really?"`,
+    videoLabel: "What Recovery Actually Looks Like",
+    videoLabel2: "The Week-by-Week Breakdown",
+    videoDesc: "How a modern, well-executed approach to breast augmentation is built around fast functional recovery — same-day activity, quick return to normal life.",
+    videoDesc2: "A more detailed week-by-week recovery timeline — what's normal at 72 hours, at two weeks, and at six weeks.",
+    localSrc: "Adams_4.1.mp4",
+    localSrc2: "Mosh_4.1.mp4",
+    predictionPrompt: "Before the video plays: what do you think an experienced surgeon says when a patient asks whether her own recovery was normal?",
+    marisolOpen: `"Honestly, the first couple weeks were harder than I expected — nobody really tells you what day three feels like. I'm doing so much better now, but it kind of made me realize I never really asked what 'normal' recovery actually looks like. Was what I went through normal, or should I have called someone?"`,
+    marisolMood: "open",
+    // Beat 1: recovery normalcy question. See MarisolAvatarVideo's precedent
+    // (module 3 avatar/index.html's shenaeAvatarSrc, module 2 avatar/index.html's
+    // marisolAvatarSrc).
+    marisolAvatarSrc: "Marisol_M4Q1.mp4",
+    options: [
+      {
+        label: "A",
+        text: "Tell her that recovery varies a lot from patient to patient, and that as long as she's feeling better now, there's nothing to worry about.",
+        quality: "miss",
+        marisolReact: `"...Okay."`,
+        marisolMood: "quiet",
+        missNote: "This never confirms whether what she went through was normal. She's still holding the same question she walked in with.",
+      },
+      {
+        label: "B",
+        text: "Reassure her that the first two weeks are always the hardest part for everyone, and that she's clearly through the worst of it now.",
+        quality: "weak",
+        marisolReact: `"Right, yeah. I guess so."`,
+        marisolMood: "quiet",
+        missNote: "General reassurance, but nothing specific to what she experienced. She still doesn't know if day three was normal or something worth calling about.",
+      },
+      {
+        label: "C",
+        text: "Frame her recovery around a modern approach to breast augmentation built for fast recovery — same-day light activity, quick return to normal life — and confirm that what she went through lines up with that.",
+        quality: "strong",
+        marisolReact: `"Oh, okay — so I wasn't doing anything wrong by feeling back to normal that fast, that's actually just how it's supposed to go now?"`,
+        marisolMood: "engaged",
+        strongNote: "This directly answers the question she actually asked — was it normal — instead of just sympathizing with the first two weeks.",
+      },
+    ],
+  },
+  {
+    id: 2,
+    topicQuestion: `"How long will implants last? Am I going to need to replace them?"`,
+    videoLabel: "Implant Longevity: The Current Generation",
+    videoLabel2: "A Different Angle on the 'Ten Years' Question",
+    videoDesc: "What the current generation of devices actually shows for long-term rupture rates, and why ongoing ultrasound surveillance — not a fixed expiration date — is the responsible way to track it.",
+    videoDesc2: "A second surgeon directly names and corrects the 'ten years' myth patients often hear.",
+    localSrc: "Adams_4.2.mp4",
+    localSrc2: "Mosh_4.2.mp4",
+    // Item 4.2-B, 08/26 claims review (Laura: "Add footnote B") — Dr.
+    // Mosharrafa's speculative "probably in the range of 5%" leak-rate aside.
+    // See OpinionFootnote's definition above for full context.
+    opinionFootnote2: true,
+    predictionPrompt: "Before the video plays: what do you think an experienced surgeon says when a patient repeats a 'ten years and you need to replace them' claim she heard secondhand?",
+    marisolOpen: `"I read somewhere — or maybe it was my sister, actually — that implants only last like ten years and then you have to get them redone. Is that true? Because nobody mentioned anything like that to me before the surgery, and now I'm wondering if I missed something."`,
+    marisolMood: "open",
+    // Beat 2: implant longevity question.
+    marisolAvatarSrc: "Marisol_M4Q2.mp4",
+    options: [
+      {
+        label: "A",
+        text: "Cite the long-term rupture rate data directly, but don't mention any ongoing monitoring or checkup plan.",
+        quality: "weak",
+        marisolReact: `"Oh — so there's still a real chance it could happen, then?"`,
+        marisolMood: "uncertain",
+        missNote: "A number without any follow-up plan can sound more alarming than reassuring. She's left with a statistic and no sense of what happens next.",
+      },
+      {
+        label: "B",
+        text: "Explain that the devices used today are a different generation from the ones behind that old claim, cite the actual long-term rupture data, and describe the ongoing ultrasound checkups that monitor implants over time.",
+        quality: "strong",
+        marisolReact: `"Okay — so it's not like there's some hard cutoff, and you'd actually catch it if something changed? That actually helps."`,
+        marisolMood: "engaged",
+        strongNote: "She wasn't just asking if the number was true — she wanted to know what happens if it does fail, and how anyone would catch it. This covers both.",
+      },
+      {
+        label: "C",
+        text: "Tell her that implants can last a long time and there's no need to worry about a fixed replacement schedule.",
+        quality: "miss",
+        marisolReact: `"...Okay."`,
+        marisolMood: "quiet",
+        missNote: "This corrects the myth in the vaguest way possible — no number, no plan. She still doesn't know what happens if something changes.",
+      },
+    ],
+  },
+  {
+    id: 3,
+    topicQuestion: `"Is breast augmentation safe?"`,
+    videoLabel: "Reframing Risk: The 99.9% Conversation",
+    videoLabel2: "A Second Perspective on Documenting the Safety Conversation",
+    videoDesc: "How to have an honest, non-alarming conversation about real but low surgical risk — using a positive-framing technique rather than a flat reassurance.",
+    videoDesc2: "A second surgeon's approach to making sure the safety conversation is documented as having happened.",
+    localSrc: "Mosh_4.3.mp4",
+    localSrc2: "Mohan_4.3.mp4",
+    predictionPrompt: "Before the video plays: what do you think an experienced surgeon says when a patient asks, in the abstract, whether the surgery she already had was actually safe?",
+    marisolOpen: `"Can I ask something kind of random? I never really let myself think about this before surgery — I was so focused on just getting through it — but now I keep wondering... is this actually safe? Like, long-term, am I going to be okay?"`,
+    marisolMood: "vulnerable",
+    // Beat 3: long-term safety question.
+    marisolAvatarSrc: "Marisol_M4Q3.mp4",
+    options: [
+      {
+        label: "A",
+        text: "Tell her there's essentially zero risk at this point, since she's already six weeks out and doing well.",
+        quality: "weak",
+        marisolReact: `"Oh — okay, that's good to hear I guess."`,
+        marisolMood: "quiet",
+        missNote: "Zero risk isn't accurate, and it skips the honest conversation her question was actually asking for.",
+      },
+      {
+        label: "B",
+        text: "Reassure her that it's very safe and she doesn't need to worry about it at this point.",
+        quality: "miss",
+        marisolReact: `"...Okay."`,
+        marisolMood: "quiet",
+        missNote: "Reassuring, but vague. Nothing here actually addresses what she's asking.",
+      },
+      {
+        label: "C",
+        text: "Give a direct yes, name the real but low risks in concrete terms, and reframe them positively — for example, a 99.9% chance of no negative impact, rather than a 0.1% chance of harm.",
+        quality: "strong",
+        marisolReact: `"Okay — put that way, it actually sounds a lot less scary than I was making it in my head."`,
+        marisolMood: "relieved",
+        strongNote: "A real number, framed constructively, answers the question directly instead of talking around it.",
+      },
+    ],
+  },
+  {
+    id: 4,
+    topicQuestion: `"What happens if something goes wrong down the road — who handles that?"`,
+    videoLabel: "The Actual Numbers, and What To Do",
+    videoLabel2: "The MENTOR™ Warranty: A Second Perspective",
+    videoDesc: "A concrete look at real complication rates and a clear, direct next step: what to do and who to call if something feels wrong.",
+    videoDesc2: "A second surgeon's fuller answer, including how the MENTOR™ warranty factors into what happens if something goes wrong.",
+    localSrc: "Adams_4.4.mp4",
+    localSrc2: "Mosh_4.4.mp4",
+    predictionPrompt: "Before the video plays: what do you think an experienced surgeon actually tells a patient who asks a calm, practical 'what's the process' question about long-term complications?",
+    marisolOpen: `"Okay, last thing — and I promise this isn't me trying to find something to worry about. But if something did go wrong down the road, like years from now, what actually happens? Do I just call you? Is there a process?"`,
+    marisolMood: "open",
+    // Beat 4: what-if-something-goes-wrong question.
+    marisolAvatarSrc: "Marisol_M4Q4.mp4",
+    options: [
+      {
+        label: "A",
+        text: "Give her the actual complication-rate numbers alongside a clear next step — call the office, come back in to be seen, sooner rather than later if something feels off.",
+        quality: "strong",
+        marisolReact: `"Okay, good — that's easy enough to remember."`,
+        marisolMood: "engaged",
+        strongNote: "She asked a logistics question, and this gives her a logistics answer — the number and the actual next step.",
+      },
+      {
+        label: "B",
+        text: "Cite the low complication rate to reassure her that this is unlikely to ever come up.",
+        quality: "miss",
+        marisolReact: `"...Okay."`,
+        marisolMood: "quiet",
+        missNote: "This never actually answers who she calls or what the process is. The reassurance lands, but her actual question doesn't get answered.",
+      },
+      {
+        label: "C",
+        text: "Tell her not to worry about it — these things almost never happen, and she can cross that bridge if she ever gets to it.",
+        quality: "weak",
+        marisolReact: `"Right, okay. I guess I'll just figure it out if it comes up."`,
+        marisolMood: "quiet",
+        missNote: "She asked a practical question and got a dismissal instead of a plan.",
+      },
+    ],
+  },
+];
+
+const CLOSING_PROMPT = "Marisol came back six weeks post-op with four different questions — recovery, longevity, safety, and what happens if something goes wrong. Looking back at this consultation, what's the one thing you did — or could have done — to answer what she was actually asking, instead of just reassuring her?";
+
+// ── Utility ───────────────────────────────────────────────────────────────────
+// Second-perspective nudge phrasing — same message, varied wording per beat so it
+// doesn't read as repeated boilerplate. Shared pool used across modules; picked
+// deterministically by beat id so it's stable within a session, not re-randomized
+// on every render.
+const SECOND_PERSPECTIVE_NUDGES = [
+  "Haven't watched the second perspective yet? It's worth the extra couple minutes before you move on.",
+  "Don't skip the second perspective — a couple more minutes, and it's worth hearing.",
+  "There's a second surgeon's take above you haven't watched yet. Worth pulling up before you continue.",
+  "Still haven't caught the second perspective? It only takes a couple minutes, and it's worth it.",
+];
+function getSecondPerspectiveNudge(beatId) {
+  return SECOND_PERSPECTIVE_NUDGES[beatId % SECOND_PERSPECTIVE_NUDGES.length];
+}
+
+// Also resets window scroll, not just the inner scrollRef container —
+// carried over from the module 1/2/3 avatar precedent. On mobile (Safari in
+// particular), a video beginning to autoplay can itself scroll the page to
+// bring it into view, which undoes the scroll-to-top a phase transition just
+// did an instant earlier and leaves the learner mid-page instead of at the
+// top. This build has the same avatar-video autoplay, so it carries the same
+// belt-and-suspenders fix (paired with the .app-viewport/dvh CSS fix above).
+function scrollTop(ref) {
+  if (ref && ref.current) ref.current.scrollTo({ top: 0, behavior: "smooth" });
+  if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+// ── UI primitives ─────────────────────────────────────────────────────────────
+function PrimaryBtn({ onClick, disabled, children, style = {} }) {
+  return (
+    <button onClick={onClick} disabled={disabled} style={{
+      background: disabled ? "#C8D4E0" : B.blue,
+      color: disabled ? "#8A9AAA" : B.white,
+      border: "none", borderRadius: 10, padding: "14px 24px",
+      fontSize: 15, fontWeight: 700, width: "100%",
+      cursor: disabled ? "not-allowed" : "pointer",
+      transition: "all 0.2s ease",
+      letterSpacing: 0.3,
+      ...style,
+    }}>{children}</button>
+  );
+}
+
+function SecondaryBtn({ onClick, children, style = {} }) {
+  return (
+    <button onClick={onClick} style={{
+      background: "transparent", color: B.blue,
+      border: `1.5px solid ${B.blue}`, borderRadius: 10,
+      padding: "12px 24px", fontSize: 14, fontWeight: 600,
+      width: "100%", cursor: "pointer", transition: "all 0.2s ease",
+      ...style,
+    }}>{children}</button>
+  );
+}
+
+// ── Header ────────────────────────────────────────────────────────────────────
+function Header() {
+  return (
+    <div style={{
+      background: B.darkBlue, padding: "14px 20px",
+      display: "flex", alignItems: "center", justifyContent: "space-between",
+      position: "sticky", top: 0, zIndex: 10,
+      boxShadow: "0 2px 12px rgba(0,0,0,0.25)",
+      gap: 10,
+    }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
+        <div style={{
+          width: 8, height: 8, borderRadius: "50%",
+          background: B.copper,
+          boxShadow: `0 0 6px ${B.copper}`,
+          animation: "pulseRing 2.5s ease infinite",
+          flexShrink: 0,
+        }} />
+        <span style={{
+          color: B.white, fontSize: 12, fontWeight: 700, letterSpacing: 0.3,
+          whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+        }}>
+          {PROGRAM_TITLE}
+        </span>
+      </div>
+      <div style={{
+        background: "rgba(255,255,255,0.08)",
+        color: "rgba(255,255,255,0.6)",
+        fontSize: 11, padding: "3px 10px",
+        borderRadius: 20, letterSpacing: 1,
+        flexShrink: 0, whiteSpace: "nowrap",
+      }}>Module 4 · Avatar concept</div>
+    </div>
+  );
+}
+
+// ── Progress ──────────────────────────────────────────────────────────────────
+function ProgressDots({ beatIndex, total }) {
+  return (
+    <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 8 }}>
+      {Array.from({ length: total }).map((_, i) => (
+        <div key={i} style={{
+          width: i === beatIndex ? 24 : 8,
+          height: 8, borderRadius: 4,
+          background: i < beatIndex ? B.copper : i === beatIndex ? B.blue : "#D0D8E4",
+          transition: "all 0.3s ease",
+        }} />
+      ))}
+    </div>
+  );
+}
+
+// ── Marisol avatar video ─────────────────────────────────────────────────────
+// Per the Avatar Rollout handoff (09/08): replaces MarisolBubble for the
+// topic-question moment only — an AI avatar speaks beat.marisolAvatarSrc
+// instead of it appearing as a text card. Modeled directly on
+// ShenaeAvatarVideo in module 3 avatar/index.html (itself modeled on
+// MarisolAvatarVideo in module 2 avatar/index.html and JennyAvatarVideo in
+// module 1 avatar/index.html). Autoplay is attempted with sound on mount
+// (each beat remounts fresh via BeatScreen's key={beatIndex} in App(), so
+// this fires per beat); if the browser blocks autoplay-with-sound, a Play
+// button overlay appears instead of failing silently. A Replay control is
+// always available underneath once the clip has started.
+function MarisolAvatarVideo({ src, scrollRef }) {
+  const videoRef = useRef(null);
+  const [needsPlayButton, setNeedsPlayButton] = useState(false);
+  const [started, setStarted] = useState(false);
+
+  useEffect(() => {
+    setNeedsPlayButton(false);
+    setStarted(false);
+    const v = videoRef.current;
+    if (!v) return;
+    v.currentTime = 0;
+    // Delayed slightly, and scroll-to-top is re-asserted once playback
+    // actually starts — see the scrollTop() comment above for why.
+    const t = setTimeout(() => {
+      const playPromise = v.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => { setStarted(true); scrollTop(scrollRef); })
+          .catch(() => setNeedsPlayButton(true)); // autoplay-with-sound blocked by the browser
+      }
+    }, 150);
+    return () => clearTimeout(t);
+  }, [src]);
+
+  function handlePlayClick() {
+    const v = videoRef.current;
+    if (!v) return;
+    v.play()
+      .then(() => { setNeedsPlayButton(false); setStarted(true); })
+      .catch(() => setNeedsPlayButton(true));
+  }
+
+  function handleReplay() {
+    const v = videoRef.current;
+    if (!v) return;
+    v.currentTime = 0;
+    v.play()
+      .then(() => setNeedsPlayButton(false))
+      .catch(() => setNeedsPlayButton(true));
+  }
+
+  return (
+    <div className="slide-in" style={{
+      background: B.darkBlue, borderRadius: 14,
+      overflow: "hidden", marginBottom: 16,
+    }}>
+      <div style={{ padding: "16px" }}>
+        <div style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", letterSpacing: 0.8, marginBottom: 10 }}>
+          MARISOL
+        </div>
+        <div className="avatar-video-frame" style={{ position: "relative", aspectRatio: "16 / 9", borderRadius: 10, overflow: "hidden", background: "#000" }}>
+          <video
+            ref={videoRef}
+            src={src}
+            playsInline
+            preload="auto"
+            onEnded={() => setStarted(true)}
+            style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "contain" }}
+          />
+          {needsPlayButton && (
+            <button
+              onClick={handlePlayClick}
+              aria-label="Play Marisol's question"
+              style={{
+                position: "absolute", inset: 0, width: "100%", height: "100%",
+                background: "rgba(0,20,40,0.4)", border: "none", cursor: "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}
+            >
+              <div style={{
+                width: 52, height: 52, borderRadius: "50%",
+                background: "rgba(255,255,255,0.15)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}>
+                <div style={{
+                  width: 0, height: 0,
+                  borderTop: "13px solid transparent",
+                  borderBottom: "13px solid transparent",
+                  borderLeft: `21px solid ${B.copper}`,
+                  marginLeft: 4,
+                }} />
+              </div>
+            </button>
+          )}
+        </div>
+
+        {started && (
+          <button
+            onClick={handleReplay}
+            style={{
+              background: "transparent", border: "none", cursor: "pointer",
+              color: "rgba(255,255,255,0.65)", fontSize: 12, fontWeight: 600,
+              letterSpacing: 0.3, padding: "10px 0 2px", display: "flex",
+              alignItems: "center", gap: 6,
+            }}
+          >
+            ↻ Replay
+          </button>
+        )}
+
+        {/* AI-disclosure caption — built from Marisol's approved fictional-patient
+            line (the same sentence used on the "About this program" screen),
+            merged with the AI-avatar disclosure. Per the Avatar Rollout
+            handoff, no vendor name in this user-facing text (standing rule as
+            of 09/08, applies to every module) — the caption discloses that an
+            AI avatar is used, not which tool made it. Identical wording to
+            Module 2's caption since it's the same persona name returning. */}
+        <p style={{ fontSize: 11, color: "rgba(255,255,255,0.45)", fontStyle: "italic", lineHeight: 1.4, marginTop: started ? 4 : 12 }}>
+          Marisol is played by an AI avatar for this version of the course. Marisol is a fictional patient used for educational purposes.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ── Marisol bubble ────────────────────────────────────────────────────────────
+// Renders opt.marisolReact — the post-option reaction — per the Avatar Rollout
+// handoff (09/08): only the beat-opening topic question becomes avatar video
+// (see MarisolAvatarVideo below); the reaction stays exactly as text,
+// unchanged from the real Module 4 build's SarahBubble. Renamed to Marisol
+// here because this build's avatar persona is Marisol — reused from Module 2,
+// not a new name, mirroring the real build's "Sarah, Revisited" callback to
+// Module 2's Sarah. The approved text build (module4/index.html) keeps
+// "Sarah" unchanged.
+function MarisolBubble({ text, mood, animClass = "slide-in" }) {
+  const moodStyles = {
+    open:       { bg: B.lightBlue,   border: B.blue },
+    engaged:    { bg: "#EAF5EB",     border: "#6DBF79" },
+    quiet:      { bg: B.amber,       border: B.amberBorder },
+    anxious:    { bg: B.warning,     border: B.warningBorder },
+    vulnerable: { bg: "#FEF6FF",     border: "#C9A8D4" },
+    relieved:   { bg: "#EAF5EB",     border: "#6DBF79" },
+    uncertain:  { bg: B.amber,       border: B.amberBorder },
+  };
+  const s = moodStyles[mood] || { bg: B.cream, border: "#D0D0D0" };
+
+  return (
+    <div className={animClass} style={{
+      background: s.bg,
+      border: `1.5px solid ${s.border}`,
+      borderRadius: "4px 16px 16px 16px",
+      padding: "14px 16px", marginBottom: 16,
+    }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+        <div style={{
+          width: 28, height: 28, borderRadius: "50%",
+          background: `linear-gradient(135deg, ${B.copper} 0%, #C49060 100%)`,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          fontSize: 12, fontWeight: 700, color: B.white, flexShrink: 0,
+        }}>M</div>
+        <span style={{ fontSize: 12, fontWeight: 700, color: B.darkBlue, letterSpacing: 0.3 }}>MARISOL</span>
+      </div>
+      <p style={{ fontSize: 15, color: B.text, lineHeight: 1.55, fontStyle: "italic" }}>{text}</p>
+    </div>
+  );
+}
+
+// ── Miss callout ──────────────────────────────────────────────────────────────
+function MissNote({ text }) {
+  return (
+    <div className="slide-in" style={{
+      background: "#FFF8EE", border: `1px solid ${B.amberBorder}`,
+      borderLeft: `4px solid ${B.copper}`,
+      borderRadius: "0 10px 10px 0",
+      padding: "12px 14px", marginBottom: 16,
+    }}>
+      <div style={{ fontSize: 11, fontWeight: 700, color: "#A07020", letterSpacing: 0.8, marginBottom: 4 }}>
+        NOTICE THE SHIFT
+      </div>
+      <p style={{ fontSize: 13, color: "#705010", lineHeight: 1.5 }}>{text}</p>
+    </div>
+  );
+}
+
+// ── Strong-move callout ─────────────────────────────────────────────────────────
+function StrongNote({ text }) {
+  return (
+    <div className="slide-in" style={{
+      background: B.green, border: `1px solid ${B.greenBorder}`,
+      borderLeft: `4px solid #4FA868`,
+      borderRadius: "0 10px 10px 0",
+      padding: "12px 14px", marginBottom: 16,
+    }}>
+      <div style={{ fontSize: 11, fontWeight: 700, color: "#2E7D44", letterSpacing: 0.8, marginBottom: 4 }}>
+        STRONG MOVE
+      </div>
+      <p style={{ fontSize: 13, color: "#1F5C32", lineHeight: 1.5 }}>{text}</p>
+    </div>
+  );
+}
+
+// ── Video card — real embed or placeholder ────────────────────────────────────
+function VideoCard({ label, desc, isSecond = false, animClass = "slide-in", vimeoId = null, streamSrc = null, brightcoveUrl = null, localSrc = null }) {
+  return (
+    <div className={animClass} style={{
+      background: B.darkBlue, borderRadius: 14,
+      overflow: "hidden", marginBottom: 16,
+    }}>
+      {isSecond && (
+        <div style={{
+          background: B.copper, padding: "5px 14px",
+          fontSize: 11, fontWeight: 700, color: B.darkBlue,
+          letterSpacing: 0.8,
+        }}>SECOND PERSPECTIVE</div>
+      )}
+      <div style={{ padding: "16px" }}>
+        <div style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", letterSpacing: 0.8, marginBottom: 6 }}>
+          {isSecond ? "EXPERT VIDEO · 2 OF 2" : "EXPERT VIDEO"}
+        </div>
+        <div style={{ fontSize: 14, fontWeight: 700, color: B.white, marginBottom: 8, lineHeight: 1.4 }}>
+          {label}
+        </div>
+        <div style={{ fontSize: 12, color: "rgba(255,255,255,0.65)", lineHeight: 1.5, marginBottom: 14 }}>
+          {desc}
+        </div>
+
+        {localSrc ? (
+          // ── Native video (GitHub-hosted mp4, portrait 9:16) ──
+          <div className="video-frame" style={{ position: "relative", aspectRatio: "9 / 16", borderRadius: 10, overflow: "hidden", background: "#000" }}>
+            <video
+              src={localSrc}
+              controls
+              playsInline
+              preload="metadata"
+              style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "contain" }}
+              title={label}
+            />
+          </div>
+        ) : vimeoId ? (
+          // ── Vimeo embed (portrait 9:16) ──
+          <div className="video-frame" style={{ position: "relative", aspectRatio: "9 / 16", borderRadius: 10, overflow: "hidden" }}>
+            <iframe
+              src={`https://player.vimeo.com/video/${vimeoId}?badge=0&autopause=0&player_id=0&app_id=58479`}
+              frameBorder="0"
+              allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
+              style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
+              title={label}
+            />
+          </div>
+        ) : brightcoveUrl ? (
+          // ── Brightcove embed (portrait 9:16) ──
+          <div className="video-frame" style={{ position: "relative", aspectRatio: "9 / 16", borderRadius: 10, overflow: "hidden", background: "#000" }}>
+            <iframe
+              src={brightcoveUrl}
+              allowFullScreen
+              frameBorder="0"
+              allow="autoplay; fullscreen; encrypted-media"
+              style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: "none" }}
+              title={label}
+            />
+          </div>
+        ) : streamSrc ? (
+          // ── Stream embed (landscape 16:9) ──
+          <div style={{ position: "relative", paddingBottom: "56.25%", borderRadius: 10, overflow: "hidden", background: "#000" }}>
+            <iframe
+              src={streamSrc}
+              width="640" height="360"
+              frameBorder="0"
+              scrolling="no"
+              allowFullScreen
+              title={label}
+              style={{ border: "none", position: "absolute", top: 0, left: 0, right: 0, bottom: 0, height: "100%", maxWidth: "100%" }}
+            />
+          </div>
+        ) : (
+          // ── Placeholder (video not yet available) ──
+          <div style={{
+            background: "rgba(255,255,255,0.08)",
+            borderRadius: 10, height: 52,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            gap: 10,
+          }}>
+            <div style={{
+              width: 0, height: 0,
+              borderTop: "9px solid transparent",
+              borderBottom: "9px solid transparent",
+              borderLeft: `15px solid ${B.copper}`,
+              marginLeft: 3,
+            }} />
+            <span style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", letterSpacing: 0.5 }}>
+              Video coming soon
+            </span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Opinion-disclaimer footnote ──────────────────────────────────────────────
+// Standing component, first built in Module 2 (item Y.1) for a comment that
+// runs counter to a specific marketing claim, where the disclosures screen's
+// general "individual physician preference" language wasn't judged sufficient
+// on its own. Wording locked 08/26 (Laura, Option B) — this exact sentence is
+// the standing template for every instance across the project. Module 4's
+// instance (Beat 2, item 4.2-B per the 08/26 claims review) covers Dr.
+// Mosharrafa's speculative "probably in the range of 5%" leak-rate aside in
+// "A Different Angle on the 'Ten Years' Question." Unlike Module 2's instance
+// (attached to the PRIMARY video), this one attaches to the SECOND video —
+// Mosharrafa is the secondary surgeon on this beat — so it's driven by
+// beat.opinionFootnote2, not beat.opinionFootnote (see BeatScreen below).
+function OpinionFootnote() {
+  return (
+    <p style={{
+      fontSize: 11.5, color: B.midGrey, fontStyle: "italic",
+      lineHeight: 1.4, marginTop: -10, marginBottom: 16,
+    }}>
+      Comments reflect the opinion and clinical experience of the presenting physician.
+    </p>
+  );
+}
+
+// ── Shell ─────────────────────────────────────────────────────────────────────
+function Shell({ children, scrollRef }) {
+  return (
+    <div className="app-viewport" style={{
+      background: "linear-gradient(160deg, #f8f2ed 0%, #F0F4F8 100%)",
+      display: "flex", justifyContent: "center",
+      fontFamily: "'Segoe UI', system-ui, sans-serif",
+    }}>
+      <div className="app-shell" style={{ width: "100%", display: "flex", flexDirection: "column" }}>
+        <Header />
+        <div ref={scrollRef} style={{ padding: "24px 20px 60px", flex: 1, overflowY: "auto" }}>
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Label ─────────────────────────────────────────────────────────────────────
+function SectionLabel({ children }) {
+  return (
+    <div style={{
+      fontSize: 10, fontWeight: 700, letterSpacing: 1.2,
+      color: B.midGrey, marginBottom: 10, textTransform: "uppercase",
+    }}>{children}</div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// SCREENS
+// ══════════════════════════════════════════════════════════════════════════════
+
+// ── Course-open sequence: 1. Title ──────────────────────────────────────────────
+// Experience-register screen (per the two-register design principle) — full
+// on-brand warmth, same as the rest of the module. This is the one true
+// "cold open" of the whole program; nothing precedes it.
+function TitleScreen({ onContinue }) {
+  return (
+    <div className="fade-in">
+      <div style={{
+        background: `linear-gradient(135deg, ${B.darkBlue} 0%, #003D5C 100%)`,
+        borderRadius: 20, padding: "40px 26px", marginBottom: 24,
+        textAlign: "center",
+      }}>
+        <div style={{
+          width: 10, height: 10, borderRadius: "50%",
+          background: B.copper, margin: "0 auto 20px",
+          boxShadow: `0 0 10px ${B.copper}`,
+        }} />
+        <h1 style={{ fontSize: 24, fontWeight: 400, color: B.white, lineHeight: 1.35, marginBottom: 12 }}>
+          MENTOR&trade; Future Leaders
+        </h1>
+        <p style={{ fontSize: 15, color: "rgba(255,255,255,0.75)", lineHeight: 1.5 }}>
+          Breast Augmentation Consultation
+        </p>
+      </div>
+      <PrimaryBtn onClick={onContinue}>Continue →</PrimaryBtn>
+    </div>
+  );
+}
+
+// ── Course-open sequence: 2. Black Box Warning ──────────────────────────────────
+// Compliance register — same brand system, deliberately quieter and faster.
+// No icons, gradients, or badges. Text matches Black_Box_Warning_verbiage.docx
+// exactly; do not paraphrase or reformat this content.
+function BlackBoxScreen({ onContinue, onBack }) {
+  const bullets = [
+    "Breast implants are not lifetime devices. The longer people have them, the greater chances are that they will develop complications, some will require more surgery.",
+    "Breast implants have been associated with the development of a cancer of the immune system called breast implant-associated anaplastic large cell lymphoma (BIA-ALCL). This cancer occurs more commonly in patients with textured breast implants than smooth implants, although rates are not well defined. Some patients have died from BIA-ALCL.",
+    "Patients receiving breast implants have reported a variety of systemic symptoms such as joint pain, muscle aches, confusion, chronic fatigue, autoimmune diseases and others. Individual patient risk for developing these symptoms has not been well established. Some patients report complete resolution of symptoms when the implants are removed without replacement.",
+  ];
+  return (
+    <div className="fade-in">
+      <div style={{
+        background: B.white, border: "1px solid #D8DEE6",
+        borderRadius: 8, padding: "18px 16px", marginBottom: 20,
+      }}>
+        {/* Black box wraps ONLY the WARNING heading + 3 bullets, per the 08/24
+            copy-approval call (Jennifer/Laura): "it only goes around the bullet...
+            this part stays outside" (referring to sale/distribution, which is
+            no longer even on this screen — see DisclosuresScreen below). Fixed
+            08/27 — this screen was still on the pre-08/24 pattern (bullets and
+            the sale/distribution paragraph bundled into one plain box, no inner
+            outline), the same structural miss Module 3 had. */}
+        <div style={{ border: "2px solid #000000", borderRadius: 4, padding: "14px 14px 12px" }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: B.text, letterSpacing: 0.6, marginBottom: 10 }}>
+            WARNING:
+          </div>
+          {bullets.map((b, i) => (
+            <p key={i} style={{ fontSize: 12.5, color: "#333", lineHeight: 1.5, marginBottom: i < bullets.length - 1 ? 8 : 0 }}>
+              &bull; {b}
+            </p>
+          ))}
+        </div>
+      </div>
+      <PrimaryBtn onClick={onContinue}>Continue →</PrimaryBtn>
+      <div style={{ marginTop: 10 }}>
+        <SecondaryBtn onClick={onBack}>Back</SecondaryBtn>
+      </div>
+    </div>
+  );
+}
+
+// ── Course-open sequence: 2b. Disclosures + physician byline + sale/distribution
+// + Important Information/Caution ──────────────────────────────────────────────
+// Added 08/27 per the Aug 24 copy-approval call (Jennifer/Laura/Tara): this
+// content moves to the FRONT of the module, directly after the Black Box
+// Warning. Only the ISI proper (indications + complications language) stays at
+// the very end of the module, alone — see ISIScreenOne below. Byline trimmed to
+// Module 4's actual roster — Adams, Mohan, Mosharrafa (Yates does not appear in
+// Module 4, per MODULE_KOL_IDS above) — per the precedent Jonathan set for
+// Module 3 on 08/27 (trim to actual roster, not the full four).
+function DisclosuresScreen({ onContinue, onBack }) {
+  return (
+    <div className="fade-in">
+      <div style={{
+        background: B.white, border: "1px solid #D8DEE6",
+        borderRadius: 8, padding: "18px 16px", marginBottom: 20,
+      }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: B.text, letterSpacing: 0.6, marginBottom: 8 }}>
+          DISCLOSURES
+        </div>
+        <p style={{ fontSize: 12.5, color: "#333", lineHeight: 1.5, marginBottom: 10 }}>
+          This presentation includes a demonstration of the use of a medical device. The steps demonstrated with respect to the use of any medical device in this presentation may not be the complete steps of the procedure. Individual physician preference and experience, as well as patient needs, may dictate variation in procedure steps. Before using any medical device, review all the Instructions For Use with particular attention to the indications, contraindications, warnings and precautions.
+        </p>
+        <p style={{ fontSize: 12.5, color: "#333", lineHeight: 1.5, marginBottom: 0 }}>
+          Dr. William P. Adams Jr., Dr. Kriti Mohan, and Dr. Tamir Mosharrafa are compensated by and presenting on behalf of Mentor Worldwide LLC and must present information in accordance with applicable regulatory requirements.
+        </p>
+
+        <div style={{ borderTop: "1px solid #EEF1F5", margin: "16px 0" }} />
+
+        <p style={{ fontSize: 12.5, color: "#333", lineHeight: 1.5, marginBottom: 10 }}>
+          The sale and distribution of Mentor Breast Implant Devices are restricted to users and/or user facilities that provide information to patients about the risks and benefits of the device prior to its use in the form and manner specified in approved labeling to be provided by Mentor Worldwide LLC.
+        </p>
+        <p style={{ fontSize: 11.5, color: "#555", lineHeight: 1.5, marginBottom: 0 }}>
+          Important information: Prior to use, refer to the instructions for use supplied with this device for indications, contraindications, side effects, warnings and precautions. Caution: US law restricts this device to sale by or on the order of a physician.
+        </p>
+      </div>
+      <PrimaryBtn onClick={onContinue}>Continue →</PrimaryBtn>
+      <div style={{ marginTop: 10 }}>
+        <SecondaryBtn onClick={onBack}>Back</SecondaryBtn>
+      </div>
+    </div>
+  );
+}
+
+// ── Course-open sequence: 3. Description + Meet the surgeons ───────────────────
+// Experience register. Description text is locked, identical across all 5
+// modules. Surgeon roster is filtered per module via MODULE_KOL_IDS — Module 4
+// excludes Yates. Tapping a name opens KOLModal with the full bio (see below);
+// the intro screen itself stays compact per the front-loading pacing
+// discussion (guaranteed exposure, not profile depth).
+function DescriptionKolScreen({ onContinue, onBack }) {
+  const [openSurgeon, setOpenSurgeon] = useState(null);
+
+  return (
+    <div className="fade-in">
+      <h1 style={{ fontSize: 22, fontWeight: 400, color: B.darkBlue, lineHeight: 1.3, marginBottom: 16 }}>
+        About this program
+      </h1>
+      {PROGRAM_DESCRIPTION.map((p, i) => (
+        <p key={i} style={{ fontSize: 15, color: "#4A5568", lineHeight: 1.6, marginBottom: i < PROGRAM_DESCRIPTION.length - 1 ? 14 : 26 }}>
+          {p}
+        </p>
+      ))}
+
+      {/* Fictional-patient disclosure — per Daniel DeSpirito's approved pattern
+          (copy-approval, 08/24), added to the "About this program" screen for
+          each module. Marisol is continuing from Module 2's avatar build here
+          (reused persona, not a new name — see Avatar_Rollout_Handoff_09-08.md),
+          but per Jonathan's 08/27 decision this module still repeats the
+          disclosure — a learner shouldn't have to have seen Module 2's screen
+          for this to hold. The approved text build (module4/index.html) keeps
+          "Sarah" unchanged. */}
+      <p style={{ fontSize: 13, color: B.midGrey, fontStyle: "italic", lineHeight: 1.5, marginBottom: 26 }}>
+        Marisol is a fictional patient used for educational purposes.
+      </p>
+
+      <div style={{
+        background: B.white, borderRadius: 16,
+        border: "1.5px solid #E2E8F0", padding: "18px", marginBottom: 28,
+      }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: B.darkBlue, letterSpacing: 0.5, marginBottom: 4 }}>
+          MEET THE SURGEONS
+        </div>
+        <p style={{ fontSize: 12.5, color: B.midGrey, lineHeight: 1.5, marginBottom: 14 }}>
+          Every video in this module comes from a surgeon in practice today. Here's who you'll be learning from.
+        </p>
+        {MODULE_KOL_IDS.map((id, i) => {
+          const s = SURGEONS[id];
+          return (
+            <button
+              key={id}
+              onClick={() => setOpenSurgeon(id)}
+              style={{
+                display: "flex", alignItems: "center", gap: 12, width: "100%",
+                background: "transparent", border: "none", textAlign: "left",
+                padding: "10px 0", borderTop: i > 0 ? "1px solid #EEF1F5" : "none",
+                cursor: "pointer",
+              }}
+            >
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: B.darkBlue }}>{s.name}</div>
+                <div style={{ fontSize: 12.5, color: "#4A5568", lineHeight: 1.4 }}>{s.oneLiner}</div>
+              </div>
+              <div style={{ color: B.blue, fontSize: 18, flexShrink: 0 }}>›</div>
+            </button>
+          );
+        })}
+        <p style={{ fontSize: 12, color: B.midGrey, fontStyle: "italic", marginTop: 12 }}>
+          Want more on any of them? Tap a name to read their full bio.
+        </p>
+      </div>
+
+      <PrimaryBtn onClick={onContinue}>Continue →</PrimaryBtn>
+      <div style={{ marginTop: 10 }}>
+        <SecondaryBtn onClick={onBack}>Back</SecondaryBtn>
+      </div>
+
+      {openSurgeon && (
+        <KOLModal surgeon={SURGEONS[openSurgeon]} onClose={() => setOpenSurgeon(null)} />
+      )}
+    </div>
+  );
+}
+
+// ── Avatar — headshot with initial-circle fallback ──────────────────────────────
+// Matches PatientCard's initial-circle treatment for visual consistency. Falls
+// back automatically if a headshot file isn't present alongside the HTML.
+function Avatar({ photo, name, size = 44, focusY = 50 }) {
+  const [errored, setErrored] = useState(false);
+  if (!photo || errored) {
+    return (
+      <div style={{
+        width: size, height: size, borderRadius: "50%", flexShrink: 0,
+        background: `linear-gradient(135deg, ${B.copper} 0%, #B87840 100%)`,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        fontSize: size * 0.4, fontWeight: 800, color: B.white,
+      }}>{name.replace("Dr. ", "")[0]}</div>
+    );
+  }
+  return (
+    <img
+      src={photo}
+      alt={name}
+      onError={() => setErrored(true)}
+      style={{
+        width: size, height: size, borderRadius: "50%", flexShrink: 0,
+        objectFit: "cover", objectPosition: `50% ${focusY}%`,
+      }}
+    />
+  );
+}
+
+// ── KOL bio modal ────────────────────────────────────────────────────────────────
+// Photo appears here, not on the compact intro list. Sized larger (110px)
+// than the 44px list-row avatar since this is the "profile" view, not just a
+// name-recognition row.
+function KOLModal({ surgeon, onClose }) {
+  return (
+    <div
+      className="fade-in"
+      onClick={onClose}
+      style={{
+        position: "fixed", inset: 0, background: "rgba(0,20,40,0.5)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        padding: 20, zIndex: 100,
+      }}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          background: B.white, borderRadius: 16, padding: "28px 22px 24px",
+          maxWidth: 400, width: "100%", maxHeight: "80vh", overflowY: "auto",
+          textAlign: "center",
+        }}
+      >
+        <Avatar photo={surgeon.photo} name={surgeon.name} size={110} focusY={surgeon.photoFocusY} />
+        <div style={{ fontSize: 18, fontWeight: 700, color: B.darkBlue, marginTop: 16, marginBottom: 16 }}>
+          {surgeon.name}
+        </div>
+        <p style={{ fontSize: 14.5, color: "#4A5568", lineHeight: 1.6, marginBottom: 20, textAlign: "left" }}>
+          {surgeon.bio}
+        </p>
+        <SecondaryBtn onClick={onClose}>Close</SecondaryBtn>
+      </div>
+    </div>
+  );
+}
+
+function IntroScreen({ onStart }) {
+  return (
+    <div className="fade-in">
+      {/* Module badge */}
+      <div style={{
+        display: "inline-flex", alignItems: "center", gap: 6,
+        background: B.lightBlue, borderRadius: 20,
+        padding: "5px 12px", marginBottom: 20,
+      }}>
+        <span style={{ fontSize: 11, fontWeight: 700, color: B.blue, letterSpacing: 0.8 }}>
+          MODULE 4
+        </span>
+      </div>
+
+      {/* Title — the module's actual name, in the slot the generic "consultation simulation" heading used to occupy */}
+      <h1 style={{ fontSize: 26, fontWeight: 400, color: B.darkBlue, lineHeight: 1.25, marginBottom: 12 }}>
+        Recovery, Longevity &amp; Patient Readiness
+      </h1>
+      <p style={{ fontSize: 14, color: B.copper, lineHeight: 1.5, marginBottom: 10, fontWeight: 400 }}>
+        {/* Confirmed July 11 against the actual built Module 3 — Claire's closing deliberately doesn't mention Sarah (no-spoiler rule), so this line is the correct place for the reveal, not a duplicate of anything upstream.
+            Fixed 09/09 (Tara Lees, copy-approval feedback, round 1): the line stopped after the continuity reveal without ever
+            saying what this module covers — every other module's transition line pivots to that second half
+            ("This module is about...", "This module moves into..."), and this one didn't, which is why it read as
+            an incomplete sentence rather than a stylistic choice. Extended to match the house pattern.
+            Revised 09/09 (Tara Lees, copy-approval feedback, round 2 — Slack): "further into hers" was still reading
+            as an incomplete thought to reviewers even after the round-1 fix, per Tara's exact suggested wording —
+            swapped to "further along in her journey" and dropped the hyphen in "patient readiness" to match. */}
+        Module 3 introduced Shenae, working through her own decision. Now Marisol's back — the same patient from Module 2, further along in her journey, navigating recovery, long-term outcomes, and what patient readiness actually looks like.
+      </p>
+      <p style={{ fontSize: 15, color: "#4A5568", lineHeight: 1.6, marginBottom: 24 }}>
+        Marisol is back for a scheduled follow-up, six to eight weeks post-op. She's happy with her results. She also has a few questions she's been holding onto.
+      </p>
+
+      <div className="desktop-row">
+      {/* Marisol card */}
+      <div style={{
+        background: B.white, borderRadius: 16,
+        border: `1.5px solid #E2E8F0`,
+        padding: "18px", marginBottom: 24,
+        boxShadow: "0 2px 12px rgba(0,0,50,0.06)",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
+          <div style={{
+            width: 44, height: 44, borderRadius: "50%",
+            background: `linear-gradient(135deg, ${B.copper} 0%, #B87840 100%)`,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: 18, fontWeight: 800, color: B.white,
+          }}>M</div>
+          <div>
+            <div style={{ fontWeight: 700, color: B.darkBlue, fontSize: 16 }}>Marisol</div>
+            <div style={{ fontSize: 12, color: B.midGrey }}>Age 36 · 6–8 weeks post-op · Scheduled follow-up</div>
+          </div>
+        </div>
+        <div style={{
+          background: B.softGrey, borderRadius: 10,
+          padding: "12px 14px", marginBottom: 12,
+          borderLeft: `3px solid ${B.copper}`,
+        }}>
+          <p style={{ fontSize: 13, color: B.text, lineHeight: 1.55, fontStyle: "italic" }}>
+            "Honestly, the first couple weeks were harder than I expected — nobody really tells you what day three feels like. I'm doing so much better now, but it kind of made me realize I never really asked what 'normal' recovery actually looks like."
+          </p>
+        </div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+          {["Practical", "Follow-up questions"].map(tag => (
+            <span key={tag} style={{
+              background: B.lightBlue, color: B.blue,
+              fontSize: 11, fontWeight: 600, padding: "3px 9px",
+              borderRadius: 20, letterSpacing: 0.3,
+            }}>{tag}</span>
+          ))}
+        </div>
+      </div>
+
+      {/* How it works */}
+      <div style={{
+        background: B.white, borderRadius: 16,
+        border: `1.5px solid #E2E8F0`, padding: "18px", marginBottom: 28,
+      }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: B.darkBlue, letterSpacing: 0.5, marginBottom: 12 }}>
+          HOW THIS WORKS
+        </div>
+        {[
+          "Marisol speaks. Read carefully — not just what she says, but how she says it.",
+          "Choose your response. Three options are available.",
+          "See how Marisol reacts, then make your best guess before the surgeon video plays.",
+          "Hear from experienced surgeons, then continue the consultation.",
+        ].map((step, i) => (
+          <div key={i} style={{ display: "flex", gap: 12, marginBottom: i < 3 ? 10 : 0 }}>
+            <div style={{
+              width: 22, height: 22, borderRadius: "50%",
+              background: B.darkBlue, color: B.white,
+              fontSize: 11, fontWeight: 700,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              flexShrink: 0, marginTop: 1,
+            }}>{i + 1}</div>
+            <p style={{ fontSize: 13, color: "#4A5568", lineHeight: 1.5 }}>{step}</p>
+          </div>
+        ))}
+      </div>
+      </div>
+
+      <PrimaryBtn onClick={onStart}>Begin consultation →</PrimaryBtn>
+    </div>
+  );
+}
+
+// ── Beat screen ───────────────────────────────────────────────────────────────
+function BeatScreen({ beat, beatIndex, total, onChosen, onBack, scrollRef }) {
+  const [chosen, setChosen] = useState(null);
+  const [showVideo, setShowVideo] = useState(false);
+  const [showVideo2, setShowVideo2] = useState(false);
+  const [guess, setGuess] = useState("");
+  const [guessSubmitted, setGuessSubmitted] = useState(false);
+  const [hovered, setHovered] = useState(null);
+
+  const opt = chosen !== null ? beat.options[chosen] : null;
+  const isMiss = opt && (opt.quality === "miss" || opt.quality === "weak");
+  const isStrong = opt && opt.quality === "strong";
+  const hasTwoVideos = !!beat.videoLabel2;
+
+  function handleChoose(idx) {
+    if (chosen !== null) return;
+    setChosen(idx);
+    setTimeout(() => scrollTop(scrollRef), 100);
+  }
+
+  function handleReconsider() {
+    setChosen(null);
+    setTimeout(() => scrollTop(scrollRef), 100);
+  }
+
+  function handleSubmitGuess() {
+    setGuessSubmitted(true);
+    setShowVideo(true);
+    setTimeout(() => scrollTop(scrollRef), 100);
+  }
+
+  function handleNext() {
+    onChosen(chosen);
+  }
+
+  return (
+    <div>
+      <ProgressDots beatIndex={beatIndex} total={total} />
+      <div style={{ fontSize: 11, color: B.midGrey, textAlign: "center", marginBottom: 20 }}>
+        Topic {beatIndex + 1} of {total} · Module 4
+      </div>
+
+      {/* Marisol opens (avatar video) */}
+      <MarisolAvatarVideo src={beat.marisolAvatarSrc} scrollRef={scrollRef} />
+
+      {/* Options or reaction */}
+      {chosen === null ? (
+        <div className="slide-in-delay">
+          <SectionLabel>Your response</SectionLabel>
+          {beat.options.map((opt, idx) => (
+            <button
+              key={idx}
+              onClick={() => handleChoose(idx)}
+              onMouseEnter={() => setHovered(idx)}
+              onMouseLeave={() => setHovered(null)}
+              style={{
+                background: hovered === idx ? B.lightBlue : B.white,
+                border: `1.5px solid ${hovered === idx ? B.blue : "#D8E2EE"}`,
+                borderRadius: 12, padding: "14px 16px",
+                marginBottom: 10, width: "100%", textAlign: "left",
+                cursor: "pointer", transition: "all 0.18s ease",
+                display: "flex", gap: 12, alignItems: "flex-start",
+              }}
+            >
+              <div style={{
+                width: 24, height: 24, borderRadius: "50%",
+                background: hovered === idx ? B.blue : "#E2EAF4",
+                color: hovered === idx ? B.white : B.blue,
+                fontSize: 12, fontWeight: 700, flexShrink: 0,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                transition: "all 0.18s ease",
+              }}>{opt.label}</div>
+              <span style={{ fontSize: 14, color: B.text, lineHeight: 1.5 }}>{opt.text}</span>
+            </button>
+          ))}
+          <div style={{ marginTop: 6 }}>
+            <SecondaryBtn onClick={onBack}>
+              {beatIndex === 0 ? "Back to start" : "Back to previous topic"}
+            </SecondaryBtn>
+          </div>
+        </div>
+      ) : (
+        <div>
+          {/* Chosen option recap */}
+          <div className="slide-in" style={{
+            background: B.softGrey, borderRadius: 10,
+            border: "1.5px solid #D8E2EE",
+            padding: "12px 14px", marginBottom: 14,
+          }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: B.midGrey, letterSpacing: 0.8, marginBottom: 6 }}>
+              YOUR RESPONSE
+            </div>
+            <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+              <div style={{
+                width: 22, height: 22, borderRadius: "50%",
+                background: B.blue, color: B.white,
+                fontSize: 11, fontWeight: 700, flexShrink: 0,
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}>{opt.label}</div>
+              <p style={{ fontSize: 13, color: B.text, lineHeight: 1.5 }}>{opt.text}</p>
+            </div>
+          </div>
+
+          {/* Marisol's reaction */}
+          <MarisolBubble text={opt.marisolReact} mood={opt.marisolMood} animClass="slide-in" />
+
+          {/* Miss note */}
+          {isMiss && opt.missNote && <MissNote text={opt.missNote} />}
+
+          {/* Strong-move note */}
+          {isStrong && opt.strongNote && <StrongNote text={opt.strongNote} />}
+
+          {/* Option to handle this moment differently, before committing to the videos */}
+          {!guessSubmitted && (
+            <div className="slide-in-delay" style={{ marginBottom: 16 }}>
+              <SecondaryBtn onClick={handleReconsider}>
+                Handle this differently
+              </SecondaryBtn>
+            </div>
+          )}
+
+          {/* Guess or video */}
+          {!guessSubmitted ? (
+            <div className="slide-in-delay" style={{
+              background: B.white, borderRadius: 14,
+              border: `1.5px solid #D8E2EE`, padding: "16px", marginBottom: 16,
+            }}>
+              <SectionLabel>Before the video plays</SectionLabel>
+              <p style={{ fontSize: 14, color: B.text, lineHeight: 1.55, marginBottom: 12 }}>
+                {beat.predictionPrompt}
+              </p>
+              <textarea
+                value={guess}
+                onChange={e => setGuess(e.target.value)}
+                placeholder="Write your answer here..."
+                rows={3}
+                style={{
+                  width: "100%", padding: "10px 12px",
+                  border: `1.5px solid ${guess.trim().length > 0 ? B.blue : "#D8E2EE"}`,
+                  borderRadius: 10, fontSize: 14, lineHeight: 1.5,
+                  resize: "none", outline: "none", color: B.text,
+                  transition: "border-color 0.2s",
+                  background: B.softGrey,
+                }}
+              />
+              {guess.trim().length > 0 && guess.trim().length < 3 && (
+                <p style={{ fontSize: 12, color: "#E57373", marginTop: 4 }}>
+                  Add a few more words to continue.
+                </p>
+              )}
+              {/* Free-text field disclaimer — per copy-approval item 2.5 (global,
+                  confirmed 08/24 call: "field used for reflection only," "non-archived,"
+                  applies to every free-text field across all modules). Wording locked
+                  08/26 (Jonathan). */}
+              <p style={{ fontSize: 12, color: B.midGrey, fontStyle: "italic", marginTop: 6 }}>
+                This is a private reflection space. Your response isn't stored, archived, or graded.
+              </p>
+              <div style={{ marginTop: 12 }}>
+                <PrimaryBtn
+                  onClick={handleSubmitGuess}
+                  disabled={guess.trim().length < 3}
+                >
+                  {hasTwoVideos ? "Watch the surgeon videos →" : "Watch the surgeon video →"}
+                </PrimaryBtn>
+              </div>
+            </div>
+          ) : (
+            <div>
+              {/* Guess recap */}
+              <div className="fade-in" style={{
+                background: B.softGrey, borderRadius: 10,
+                border: "1.5px solid #D8E2EE",
+                padding: "12px 14px", marginBottom: 14,
+              }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: B.midGrey, letterSpacing: 0.8, marginBottom: 5 }}>
+                  YOUR ANSWER
+                </div>
+                <p style={{ fontSize: 13, color: B.text, lineHeight: 1.5, fontStyle: "italic" }}>
+                  "{guess}"
+                </p>
+              </div>
+
+              {/* Video 1 */}
+              {showVideo && (
+                <VideoCard
+                  label={beat.videoLabel}
+                  desc={beat.videoDesc}
+                  vimeoId={beat.vimeoId || null}
+                  streamSrc={beat.streamSrc || null}
+                  brightcoveUrl={beat.brightcoveUrl || null}
+                  localSrc={beat.localSrc || null}
+                  animClass="slide-in"
+                />
+              )}
+
+              {/* Video 2 trigger or card */}
+              {hasTwoVideos && showVideo && !showVideo2 && (
+                <div className="slide-in-delay" style={{
+                  background: B.white, borderRadius: 12,
+                  border: `1.5px solid ${B.copper}`,
+                  padding: "14px 16px", marginBottom: 16,
+                }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: "#A06020", letterSpacing: 0.5, marginBottom: 6 }}>
+                    ANOTHER PERSPECTIVE
+                  </div>
+                  <p style={{ fontSize: 13, color: B.text, lineHeight: 1.5, marginBottom: 12 }}>
+                    {beat.videoDesc2}
+                  </p>
+                  <SecondaryBtn onClick={() => { setShowVideo2(true); setTimeout(() => scrollTop(scrollRef), 100); }}>
+                    Watch second perspective →
+                  </SecondaryBtn>
+                </div>
+              )}
+
+              {hasTwoVideos && showVideo2 && (
+                <VideoCard
+                  label={beat.videoLabel2}
+                  desc={beat.videoDesc2}
+                  vimeoId={beat.vimeoId2 || null}
+                  brightcoveUrl={beat.brightcoveUrl2 || null}
+                  localSrc={beat.localSrc2 || null}
+                  isSecond={true}
+                  animClass="slide-in"
+                />
+              )}
+
+              {/* Opinion-disclaimer footnote — item 4.2-B, this video only (Dr.
+                  Mosharrafa's "A Different Angle on the 'Ten Years' Question").
+                  See OpinionFootnote's definition above for the full context.
+                  Driven by opinionFootnote2 (not opinionFootnote) since this
+                  instance attaches to the SECOND video, not the first. */}
+              {showVideo2 && beat.opinionFootnote2 && <OpinionFootnote />}
+
+              {/* Nudge if a second perspective exists but hasn't been watched yet — same visual weight as the miss/strong callouts, since this matters as much as they do */}
+              {hasTwoVideos && showVideo && !showVideo2 && (
+                <div className="slide-in" style={{
+                  background: "#FFF8EE", border: `1.5px solid ${B.amberBorder}`,
+                  borderLeft: `4px solid ${B.copper}`,
+                  borderRadius: "0 10px 10px 0",
+                  padding: "12px 14px", marginBottom: 16,
+                }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: "#A07020", letterSpacing: 0.8, marginBottom: 4 }}>
+                    WORTH A LOOK
+                  </div>
+                  <p style={{ fontSize: 13, color: "#705010", lineHeight: 1.5 }}>
+                    {getSecondPerspectiveNudge(beat.id)}
+                  </p>
+                </div>
+              )}
+
+              {/* Advance button — first video is enough to continue; second perspective is offered, not required */}
+              {showVideo ? (
+                <div className="slide-in-delay">
+                  <PrimaryBtn onClick={handleNext}>
+                    {beatIndex < total - 1 ? "Continue consultation →" : "Finish the consultation →"}
+                  </PrimaryBtn>
+                  <div style={{ marginTop: 10 }}>
+                    <SecondaryBtn onClick={handleReconsider}>
+                      Go back over this topic
+                    </SecondaryBtn>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Closing screen ────────────────────────────────────────────────────────────
+// (Named "closing," not "reflection" — resident-facing copy avoids ID vocabulary.)
+function ClosingScreen({ onFinish, onBack, scrollRef }) {
+  const [response, setResponse] = useState("");
+
+  return (
+    <div className="fade-in">
+      <div style={{
+        background: B.darkBlue, borderRadius: 16,
+        padding: "20px", marginBottom: 24,
+      }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: B.copper, letterSpacing: 0.8, marginBottom: 8 }}>
+          THE CONSULTATION ENDS
+        </div>
+        <div style={{
+          background: "rgba(255,255,255,0.07)",
+          borderRadius: 10, padding: "12px 14px",
+          borderLeft: `3px solid ${B.copper}`,
+        }}>
+          <p style={{ fontSize: 14, color: "rgba(255,255,255,0.85)", lineHeight: 1.55, fontStyle: "italic" }}>
+            "Okay — I think that covers everything I was going to ask about. It helps to actually know instead of just guessing."
+          </p>
+          <div style={{ fontSize: 12, color: B.copper, marginTop: 6, fontWeight: 600 }}>— Marisol</div>
+        </div>
+      </div>
+
+      <div style={{ marginBottom: 24 }}>
+        <h2 style={{ fontSize: 20, fontWeight: 400, color: B.darkBlue, marginBottom: 10 }}>
+          One last question
+        </h2>
+        <p style={{ fontSize: 15, color: "#4A5568", lineHeight: 1.6, marginBottom: 16 }}>
+          {CLOSING_PROMPT}
+        </p>
+        <textarea
+          value={response}
+          onChange={e => setResponse(e.target.value)}
+          placeholder="Write your answer here..."
+          rows={5}
+          style={{
+            width: "100%", padding: "12px 14px",
+            border: `1.5px solid ${response.trim().length > 0 ? B.blue : "#D8E2EE"}`,
+            borderRadius: 12, fontSize: 14, lineHeight: 1.6,
+            resize: "none", outline: "none", color: B.text,
+            background: B.softGrey, transition: "border-color 0.2s",
+          }}
+        />
+        {response.trim().length > 0 && response.trim().length < 3 && (
+          <p style={{ fontSize: 12, color: "#E57373", marginTop: 4 }}>
+            Add a few more words to continue.
+          </p>
+        )}
+        {/* Free-text field disclaimer — see the identical note on the per-beat
+            prediction field above; same item 2.5, same locked wording. */}
+        <p style={{ fontSize: 12, color: B.midGrey, fontStyle: "italic", marginTop: 6 }}>
+          This is a private reflection space. Your response isn't stored, archived, or graded.
+        </p>
+      </div>
+
+      <PrimaryBtn onClick={onFinish} disabled={response.trim().length < 3}>
+        Finish Module 4 →
+      </PrimaryBtn>
+      <div style={{ marginTop: 10 }}>
+        <SecondaryBtn onClick={onBack}>Back to previous topic</SecondaryBtn>
+      </div>
+    </div>
+  );
+}
+
+// ── Course-open sequence: 4. Disclosures + ISI + AMP ────────────────────────────
+// Compliance register — quiet and fast, dense plain text, no decoration.
+// Text confirmed against Mentor_Future_Leaders_ELearning_Journey.pdf (Disclosures
+// + ISI) and the disclosures workbook. AMP number is the one line that changes
+// per module (MODULE_AMP, defined at top).
+// Per Standard v1.7 (Section 1.7): Disclosures/ISI/AMP moved from the front
+// of this sequence to the end. Per the Aug 24 08/27-implemented copy-approval
+// correction: the Disclosures/byline/sale-distribution/Important-Info content
+// moved back to the front (new "disclosures" phase, right after "blackbox" —
+// see DisclosuresScreen above). The ISI itself stays at the end, per Standard
+// v1.7 — only that one block moved back. This screen previously still had the
+// DISCLOSURES heading/byline/Caution paragraph bundled in here too (the same
+// structural miss Module 3 had) — trimmed 08/27 to the ISI proper only.
+function ISIScreenOne({ onContinue, onBack }) {
+  return (
+    <div className="fade-in">
+      <div style={{
+        background: B.lightBlue, borderRadius: 10,
+        padding: "14px 18px", marginBottom: 18,
+      }}>
+        <p style={{ fontSize: 14, fontWeight: 600, color: B.darkBlue, lineHeight: 1.4, margin: 0 }}>
+          Before you finish Module 4, please review the following required information:
+        </p>
+      </div>
+
+      <div style={{
+        background: B.white, border: "1px solid #D8DEE6",
+        borderRadius: 8, padding: "18px 16px", marginBottom: 20,
+      }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: B.text, letterSpacing: 0.6, marginBottom: 8 }}>
+          IMPORTANT SAFETY INFORMATION
+        </div>
+        <p style={{ fontSize: 11.5, color: "#555", lineHeight: 1.5, marginBottom: 8 }}>
+          MENTOR&trade; MemoryGel&trade; Breast Implants, MENTOR&trade; MemoryShape&trade; Breast Implants, and MENTOR&trade; Saline-filled Breast Implants are indicated for breast augmentation in women (at least 22 years old for MemoryGel&trade; Implants and MemoryShape&trade; Implants, and 18 years old for Saline Implants) or for breast reconstruction. Breast implant surgery should not be performed in women with active infection anywhere in their body, with existing cancer or pre-cancer of their breast who have not received adequate treatment for those conditions, or who are currently pregnant or nursing.
+        </p>
+        <p style={{ fontSize: 11.5, color: "#555", lineHeight: 1.5, marginBottom: 0 }}>
+          Breast implants are not lifetime devices and breast implantation may not be a one-time surgery. The chance of developing complications increases over time. The most common complications for breast augmentation and reconstruction with MemoryGel&trade; Implants include any reoperation, capsular contracture, and implant removal with or without replacement. The most common complications with MemoryShape&trade; Implants for breast augmentation include reoperation for any reason, implant removal with or without replacement, and ptosis. The most common complications with MemoryShape&trade; Implants for breast reconstruction include reoperation for any reason, implant removal with or without replacement, and capsular contracture. A lower risk of complication is rupture. The health consequences of a ruptured silicone gel breast implant have not been fully established. MRI screenings are recommended three years after initial implant surgery and then every two years after to detect silent rupture. Breast implants are also associated with the risk of breast implant-associated anaplastic large cell lymphoma (BIA-ALCL), an uncommon type of lymphoma. An individual's risk of developing BIA-ALCL with MENTOR&trade; Breast Implants is low based on the incidence of worldwide cases. The most common complications with MENTOR&trade; Saline-filled Implants include reoperation, implant removal, capsular contracture, breast pain, and implant deflation.
+        </p>
+      </div>
+
+      <PrimaryBtn onClick={onContinue}>Continue →</PrimaryBtn>
+      <div style={{ marginTop: 10 }}>
+        <SecondaryBtn onClick={onBack}>Back</SecondaryBtn>
+      </div>
+    </div>
+  );
+}
+
+function ISIScreenTwo({ onClose, onBack }) {
+  return (
+    <div className="fade-in">
+      <div style={{
+        background: B.white, border: "1px solid #D8DEE6",
+        borderRadius: 8, padding: "18px 16px", marginBottom: 20,
+      }}>
+        <p style={{ fontSize: 11.5, color: "#555", lineHeight: 1.5, marginBottom: 20 }}>
+          For MemoryGel&trade; Implants, patients should receive a copy of Important Information for Augmentation Patients about MENTOR&trade; MemoryGel&trade; Breast Implants or Important Information for Reconstruction Patients about MENTOR&trade; MemoryGel&trade; Breast Implants. For MemoryShape&trade; Implants, patients should receive a copy of Patient Educational Brochure – Breast Augmentation with MENTOR&trade; MemoryShape&trade; Breast Implants or Patient Educational Brochure – Breast Reconstruction with MENTOR&trade; MemoryShape&trade; Breast Implants, and a copy of Quick Facts about Breast Augmentation &amp; Reconstruction with MENTOR&trade; MemoryShape&trade; Breast Implants. For MENTOR&trade; Saline-filled Implants, patients should receive a copy of Saline-Filled Breast Implants: Making an Informed Decision. Your patient needs to read and understand the information regarding the risks and benefits of breast implants, with an opportunity to consult with you prior to deciding on surgery.
+        </p>
+
+        <div style={{ fontSize: 10.5, color: B.midGrey, letterSpacing: 0.3, borderTop: "1px solid #EEF1F5", paddingTop: 10, marginBottom: 20 }}>
+          &copy; Johnson &amp; Johnson and its affiliates 2026 · {MODULE_AMP}
+        </div>
+
+        <p style={{
+          fontSize: 14, fontWeight: 600, color: B.darkBlue, lineHeight: 1.5,
+          textAlign: "center", margin: 0, paddingTop: 16, borderTop: "1px solid #EEF1F5",
+        }}>
+          This concludes Module 4: Recovery, Longevity &amp; Patient Readiness.
+        </p>
+      </div>
+
+      <PrimaryBtn onClick={onClose}>Close Module 4 →</PrimaryBtn>
+      <div style={{ marginTop: 10 }}>
+        <SecondaryBtn onClick={onBack}>Back</SecondaryBtn>
+      </div>
+    </div>
+  );
+}
+
+// ── Terminal screen — reached only via "Close Module 4." Mirrors the old
+// CompleteScreen's role as the true resting state (no further action besides
+// what's offered here); real SCORM completion firing is a build item for the
+// LMS integration phase, not this demo.
+function ClosedScreen() {
+  return (
+    <div className="fade-in" style={{ textAlign: "center", paddingTop: 40 }}>
+      <div style={{
+        width: 52, height: 52, borderRadius: "50%",
+        background: B.copper, margin: "0 auto 18px",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        fontSize: 22,
+      }}>✓</div>
+      <h2 style={{ fontSize: 20, fontWeight: 400, color: B.darkBlue, marginBottom: 10 }}>
+        Module 4 complete
+      </h2>
+      <p style={{ fontSize: 14, color: "#4A5568", lineHeight: 1.5 }}>
+        You may now close this window or return to your course list.
+      </p>
+    </div>
+  );
+}
+
+// ── Complete screen ───────────────────────────────────────────────────────────
+function CompleteScreen({ onContinue, onReplay }) {
+  const topics = [
+    "Confirming a normal recovery instead of just reassuring her",
+    "Correcting the 'ten years' claim with real data and a monitoring plan",
+    "Reframing safety honestly, using a real number instead of a flat reassurance",
+    "Answering a practical logistics question with an actual next step",
+  ];
+
+  return (
+    <div className="fade-in">
+      <div style={{
+        background: `linear-gradient(135deg, ${B.darkBlue} 0%, #003D5C 100%)`,
+        borderRadius: 20, padding: "24px 20px", marginBottom: 24,
+        textAlign: "center",
+      }}>
+        <div style={{
+          width: 52, height: 52, borderRadius: "50%",
+          background: B.copper, margin: "0 auto 14px",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          fontSize: 22,
+        }}>✓</div>
+        <h2 style={{ fontSize: 22, fontWeight: 400, color: B.white, marginBottom: 8 }}>
+          Module 4 complete
+        </h2>
+        <p style={{ fontSize: 14, color: "rgba(255,255,255,0.7)", lineHeight: 1.5 }}>
+          Recovery, Longevity &amp; Patient Readiness
+        </p>
+      </div>
+
+      <div style={{
+        background: B.white, borderRadius: 16,
+        border: "1.5px solid #E2E8F0", padding: "18px", marginBottom: 20,
+      }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: B.darkBlue, letterSpacing: 0.5, marginBottom: 14 }}>
+          TOPICS COVERED IN THIS MODULE
+        </div>
+        {topics.map((t, i) => (
+          <div key={i} style={{ display: "flex", gap: 10, alignItems: "flex-start", marginBottom: i < topics.length - 1 ? 10 : 0 }}>
+            <div style={{
+              width: 20, height: 20, borderRadius: "50%",
+              background: "#EDF7EE", border: "1.5px solid #6DBF79",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 10, color: "#3A8A46", fontWeight: 800, flexShrink: 0,
+            }}>✓</div>
+            <p style={{ fontSize: 13, color: B.text, lineHeight: 1.5 }}>{t}</p>
+          </div>
+        ))}
+      </div>
+
+      <div style={{
+        background: B.lightBlue, borderRadius: 14,
+        border: `1.5px solid ${B.blue}`,
+        padding: "14px 16px", marginBottom: 24,
+      }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: B.blue, letterSpacing: 0.5, marginBottom: 6 }}>
+          COMING UP IN MODULE 5
+        </div>
+        <p style={{ fontSize: 13, color: B.text, lineHeight: 1.5 }}>
+          Becoming Practice-Ready — stepping back from a single patient to build your own practice.
+        </p>
+      </div>
+
+      <p style={{ fontSize: 13, color: B.midGrey, textAlign: "center", fontStyle: "italic", margin: "0 0 14px" }}>
+        One more step — required safety information before you're finished.
+      </p>
+      <PrimaryBtn onClick={onContinue}>Continue →</PrimaryBtn>
+
+      {/* Full-width bottom button, not a small text link — per the Module 1/2 audit */}
+      <div style={{ marginTop: 10 }}>
+        <SecondaryBtn onClick={onReplay}>Replay Module 4</SecondaryBtn>
+      </div>
+
+      <div style={{ fontSize: 11, color: B.midGrey, textAlign: "center", marginTop: 20, letterSpacing: 0.5 }}>
+        {PROGRAM_TITLE} · Module 4
+      </div>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// APP
+// ══════════════════════════════════════════════════════════════════════════════
+
+function App() {
+  // title | blackbox | disclosures | descKol | intro | beat | closing | complete | isi1 | isi2 | closed
+  // Per Standard v1.7 (Section 1.7): Disclosures/ISI/AMP moved from the front
+  // of this sequence to the end. Per the Aug 24 08/27-implemented copy-approval
+  // correction: the Disclosures/byline/sale-distribution/Important-Info content
+  // moved back to the front (new "disclosures" phase, right after "blackbox").
+  // The ISI itself stays at the end, per Standard v1.7 — only that one block
+  // moved back. Title, Black Box, Disclosures, and Description+KOL are all part
+  // of the one-time front gate — shown once on first entry, bypassed by replay()
+  // and by the beat-1 back button, both of which still return to "intro."
+  // The isi1/isi2/closed phases are NOT part of that front gate; they're only
+  // reached once, forward, after a learner finishes all beats and the closing
+  // reflection. Replay still bypasses them entirely.
+  const [phase, setPhase] = useState("title");
+  const [beatIndex, setBeatIndex] = useState(0);
+  const scrollRef = useRef(null);
+
+  function goto(nextPhase) {
+    setPhase(nextPhase);
+    scrollTop(scrollRef);
+  }
+
+  function start() {
+    setPhase("beat");
+    setBeatIndex(0);
+    scrollTop(scrollRef);
+  }
+
+  function handleBeatDone() {
+    scrollTop(scrollRef);
+    if (beatIndex < BEATS.length - 1) {
+      setBeatIndex(i => i + 1);
+    } else {
+      setPhase("closing");
+    }
+  }
+
+  function handleBeatBack() {
+    scrollTop(scrollRef);
+    if (beatIndex > 0) {
+      setBeatIndex(i => i - 1);
+    } else {
+      setPhase("intro");
+    }
+  }
+
+  function handleClosingDone() {
+    setPhase("complete");
+    scrollTop(scrollRef);
+  }
+
+  function handleClosingBack() {
+    setPhase("beat");
+    setBeatIndex(BEATS.length - 1);
+    scrollTop(scrollRef);
+  }
+
+  function replay() {
+    setPhase("intro");
+    setBeatIndex(0);
+    scrollTop(scrollRef);
+  }
+
+  // Complete screen is no longer terminal — "Continue" advances into the
+  // relocated ISI screens instead of ending here.
+  function handleCompleteContinue() {
+    setPhase("isi1");
+    scrollTop(scrollRef);
+  }
+
+  function handleIsi1Continue() {
+    setPhase("isi2");
+    scrollTop(scrollRef);
+  }
+
+  function handleIsi1Back() {
+    setPhase("complete");
+    scrollTop(scrollRef);
+  }
+
+  function handleIsi2Back() {
+    setPhase("isi1");
+    scrollTop(scrollRef);
+  }
+
+  // "Close Module 4" — advances the phase to a final resting screen, no
+  // further action beyond that (real SCORM completion firing is LMS-
+  // integration work, not this demo).
+  function handleClose() {
+    setPhase("closed");
+    scrollTop(scrollRef);
+  }
+
+  return (
+    <Shell scrollRef={scrollRef}>
+      {phase === "title" && <TitleScreen onContinue={() => goto("blackbox")} />}
+      {phase === "blackbox" && (
+        <BlackBoxScreen onContinue={() => goto("disclosures")} onBack={() => goto("title")} />
+      )}
+      {phase === "disclosures" && (
+        <DisclosuresScreen onContinue={() => goto("descKol")} onBack={() => goto("blackbox")} />
+      )}
+      {phase === "descKol" && (
+        <DescriptionKolScreen onContinue={() => goto("intro")} onBack={() => goto("disclosures")} />
+      )}
+      {phase === "intro" && <IntroScreen onStart={start} />}
+      {phase === "beat" && (
+        <BeatScreen
+          key={beatIndex}
+          beat={BEATS[beatIndex]}
+          beatIndex={beatIndex}
+          total={BEATS.length}
+          onChosen={handleBeatDone}
+          onBack={handleBeatBack}
+          scrollRef={scrollRef}
+        />
+      )}
+      {phase === "closing" && (
+        <ClosingScreen onFinish={handleClosingDone} onBack={handleClosingBack} scrollRef={scrollRef} />
+      )}
+      {phase === "complete" && (
+        <CompleteScreen onContinue={handleCompleteContinue} onReplay={replay} />
+      )}
+      {phase === "isi1" && (
+        <ISIScreenOne onContinue={handleIsi1Continue} onBack={handleIsi1Back} />
+      )}
+      {phase === "isi2" && (
+        <ISIScreenTwo onClose={handleClose} onBack={handleIsi2Back} />
+      )}
+      {phase === "closed" && <ClosedScreen />}
+    </Shell>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+
+</script>
+</body>
+</html>
