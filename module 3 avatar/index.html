@@ -41,19 +41,20 @@
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: #C0C8D4; border-radius: 4px; }
 
-  /* Root viewport height — EXPERIMENT-ONLY FIX (08/28). Real Module 3 uses a
-     plain inline minHeight:"100vh" on Shell's outer div, same as every other
-     module. On mobile, 100vh is computed against the LARGEST possible
-     viewport (address bar hidden), not the actually-visible one (address bar
-     showing) — so the shell renders taller than the real visible window,
-     leaving genuine window-level scroll distance between the top of the page
-     and content the app already scrolled its own inner container to "the
-     top" of. That's what Jonathan hit: the avatar-video screen looked like
-     it "didn't know where the top of the page was" on his phone, in both
-     Edge and Chrome (i.e. not a single-browser quirk — the classic 100vh
-     mobile-viewport bug). 100dvh tracks the real, current visible viewport;
-     kept as a second declaration (not @supports) so a browser without dvh
-     support just keeps the 100vh line above it, per normal CSS cascade. */
+  /* Root viewport height — carried over from the module 1 avatar / module 3
+     avatar (Ellie concept) precedent (08/28 fix, re-confirmed 09/08 and
+     09/10). The real Module 3 build uses a plain inline minHeight:"100vh" on
+     Shell's outer div, same as every other non-avatar module. On mobile,
+     100vh is computed against the LARGEST possible viewport (address bar
+     hidden), not the actually-visible one (address bar showing) — so the
+     shell renders taller than the real visible window, leaving genuine
+     window-level scroll distance between the top of the page and content the
+     app already scrolled its own inner container to "the top" of. This
+     build has the same avatar-video autoplay behavior that motivated the
+     original fix, so it carries the same one. 100dvh tracks the real,
+     current visible viewport; kept as a second declaration (not @supports)
+     so a browser without dvh support just keeps the 100vh line above it, per
+     normal CSS cascade. */
   .app-viewport { min-height: 100vh; min-height: 100dvh; }
 
   /* Desktop breakpoint — matches Module 1 / shared components reference */
@@ -67,10 +68,9 @@
        see MENTOR_Residency_Pitfalls.md #8 for why that trick breaks here). */
     .video-frame { max-width: 340px; margin: 0 auto; }
     /* Avatar-video desktop cap — separate from .video-frame above because the
-       Claire avatar clips are landscape (16:9, Synthesia export) rather than
-       the portrait 9:16 surgeon clips .video-frame is sized for. Experiment-
-       only component (ClaireAvatarVideo below) — does not exist in the real
-       Module 3 build. */
+       Shenae avatar clips are landscape (16:9, Synthesia export) rather than
+       the portrait 9:16 surgeon clips .video-frame is sized for. Matches the
+       module 1 avatar / module 2 avatar precedent exactly. */
     .avatar-video-frame { max-width: 480px; margin: 0 auto; }
   }
 </style>
@@ -186,35 +186,34 @@ const BEATS = [
     localSrc: "Adams_3.1.mp4",
     localSrc2: "Yates_3.1.mp4",
     predictionPrompt: "Before the video plays: what do you think an experienced surgeon says when a patient asks directly whether the scar will really be invisible?",
-    claireOpen: `"I've been doing my research, and I keep coming back to one thing: I really don't want a visible scar. I know there are different options for where the incision goes — can you walk me through what those are and what the tradeoffs look like?"`,
-    claireMood: "open",
-    // Experiment-only field — AI avatar (Synthesia) delivering claireOpen as
-    // video instead of the ClaireBubble text card. Does not exist in the real
-    // Module 3 build. See ClaireAvatarVideo below.
-    claireAvatarSrc: "Ellie_M3Q1.mp4",
+    shenaeOpen: `"I've been doing my research, and I keep coming back to one thing: I really don't want a visible scar. I know there are different options for where the incision goes — can you walk me through what those are and what the tradeoffs look like?"`,
+    shenaeMood: "open",
+    // Beat 1: no visible scar / incision placement. See MarisolAvatarVideo's
+    // precedent — ShenaeAvatarVideo below.
+    shenaeAvatarSrc: "Shenae_M3Q1.mp4",
     options: [
       {
         label: "A",
         text: "Honestly, you won't really be able to see it at all once you've healed — for the vast majority of patients, it basically disappears completely, so it's not something you need to spend much more time worrying about.",
         quality: "miss",
-        claireReact: `"...Okay."`,
-        claireMoodReact: "quiet",
+        shenaeReact: `"...Okay."`,
+        shenaeMoodReact: "quiet",
         missNote: "This overpromises — no augmentation is scar-free, and claiming otherwise skips the honest conversation she specifically asked for. If she notices the scar later, this answer won't hold up.",
       },
       {
         label: "B",
         text: "Scars from this type of surgery tend to fade a lot over time, and most patients end up really happy with how they look. I wouldn't spend too much energy worrying about it — it's just not something that comes up much later.",
         quality: "weak",
-        claireReact: `"Okay... but is that just, like, a general thing people say? I guess I was hoping for something more specific to what actually happens."`,
-        claireMoodReact: "quiet",
+        shenaeReact: `"Okay... but is that just, like, a general thing people say? I guess I was hoping for something more specific to what actually happens."`,
+        shenaeMoodReact: "quiet",
         missNote: "Technically true, but generic. She already knows scars fade — she's asking for the specific, technique-level picture, and this doesn't give her one.",
       },
       {
         label: "C",
         text: "I want to be upfront: there's always a scar. But I plan the incision to fall precisely in your natural crease using measurements taken beforehand, and by full healing — usually around two years — it's genuinely difficult to find, even on close exam.",
         quality: "strong",
-        claireReact: `"Okay — that actually helps. That's so much more specific than 'it'll fade,' which is honestly all anyone's told me so far."`,
-        claireMoodReact: "engaged",
+        shenaeReact: `"Okay — that actually helps. That's so much more specific than 'it'll fade,' which is honestly all anyone's told me so far."`,
+        shenaeMoodReact: "engaged",
         strongNote: "Names the real technique (crease placement via pre-surgery planning) and gives an honest, specific timeline instead of a flat reassurance — the level of detail the persona doc identifies as what earns her trust.",
       },
     ],
@@ -229,40 +228,40 @@ const BEATS = [
     localSrc: "Mosh_3.2.mp4",
     localSrc2: "Yates_3.2.mp4",
     predictionPrompt: "Before the video plays: what do you think an experienced surgeon says when a patient's friend told her one placement is simply 'better' than the other?",
-    claireOpen: `"I've heard some people go over the muscle and some go under — which is better? My friend mentioned it like it was a big decision, but I don't really understand what the difference actually is."`,
-    claireMood: "open",
-    // Experiment-only field — see the note on Beat 1's claireAvatarSrc above.
-    claireAvatarSrc: "Ellie_M3Q2.mp4",
+    shenaeOpen: `"I've heard some people go over the muscle and some go under — which is better? My friend mentioned it like it was a big decision, but I don't really understand what the difference actually is."`,
+    shenaeMood: "open",
+    // Beat 2: over vs. under the muscle / implant placement.
+    shenaeAvatarSrc: "Shenae_M3Q2.mp4",
     options: [
       {
         label: "A",
         text: "For most of my patients, I recommend placing the implant under the muscle — that placement tends to give the most natural, well-concealed result, and it's generally what I'd suggest for you as well.",
         quality: "weak",
-        claireReact: `"Okay, good to know. So that's just the standard approach, then?"`,
-        claireMoodReact: "quiet",
+        shenaeReact: `"Okay, good to know. So that's just the standard approach, then?"`,
+        shenaeMoodReact: "quiet",
         missNote: "This gives a real recommendation but no reasoning behind it — she's left with a decision, not an understanding, exactly the pattern the persona doc flags as leaving her to comply in the room and second-guess later.",
       },
       {
         label: "B",
         text: "Most patients do better with the implant under the muscle — better concealment, less rippling, more stable positioning long-term. But for someone with very little natural tissue, that can risk visible movement when you flex, so the right placement really depends on your own anatomy.",
         quality: "strong",
-        claireReact: `"Okay, that makes sense — so it's not that one is just better, it depends on what my own tissue is actually like?"`,
-        claireMoodReact: "engaged",
+        shenaeReact: `"Okay, that makes sense — so it's not that one is just better, it depends on what my own tissue is actually like?"`,
+        shenaeMoodReact: "engaged",
         strongNote: "States the real default and the real counterargument (tissue-dependent animation deformity risk), and frames the decision as anatomy-specific rather than a fixed rule — the 'framework, not a verdict' her persona doc says she needs.",
       },
       {
         label: "C",
         text: "Honestly, it's mostly just personal preference at this point — whichever placement you feel more comfortable with is completely fine, since there's not a huge difference in how things turn out either way.",
         quality: "miss",
-        claireReact: `"...Okay."`,
-        claireMoodReact: "quiet",
+        shenaeReact: `"...Okay."`,
+        shenaeMoodReact: "quiet",
         missNote: "This flattens a genuine clinical tradeoff into 'it doesn't really matter,' which isn't accurate and skips the reasoning she's specifically asking for.",
       },
     ],
   },
 ];
 
-const CLOSING_PROMPT = "Claire came in with one clear, specific worry — the scar — and left having worked through two of the biggest decisions in this consultation: incision and placement. Looking back, what's one moment where you did more than answer her question — where you actually helped her build the framework she came in for?";
+const CLOSING_PROMPT = "Shenae came in with one clear, specific worry — the scar — and left having worked through two of the biggest decisions in this consultation: incision and placement. Looking back, what's one moment where you did more than answer her question — where you actually helped her build the framework she came in for?";
 
 // ── Utility ───────────────────────────────────────────────────────────────────
 // Second-perspective nudge phrasing — same message, varied wording per beat so it
@@ -279,10 +278,14 @@ function getSecondPerspectiveNudge(beatId) {
   return SECOND_PERSPECTIVE_NUDGES[beatId % SECOND_PERSPECTIVE_NUDGES.length];
 }
 
-// EXPERIMENT-ONLY: also resets window scroll, not just the inner scrollRef
-// container. Belt-and-suspenders alongside the .app-viewport/dvh fix above —
-// if anything still leaves the window itself scrolled (address-bar
-// transitions, a video nudging focus, etc.), this catches it too.
+// Also resets window scroll, not just the inner scrollRef container —
+// carried over from the module 1 avatar / module 3 avatar (Ellie concept)
+// precedent. On mobile (Safari in particular), a video beginning to
+// autoplay can itself scroll the page to bring it into view, which undoes
+// the scroll-to-top a phase transition just did an instant earlier and
+// leaves the learner mid-page instead of at the top. This build has the
+// same avatar-video autoplay, so it carries the same belt-and-suspenders fix
+// (paired with the .app-viewport/dvh CSS fix above).
 function scrollTop(ref) {
   if (ref && ref.current) ref.current.scrollTo({ top: 0, behavior: "smooth" });
   if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
@@ -368,50 +371,19 @@ function ProgressDots({ beatIndex, total }) {
   );
 }
 
-// ── Claire bubble ─────────────────────────────────────────────────────────────
-// Claire's tell (per persona doc) parallels Sarah's, not Maya's: she doesn't
-// challenge out loud when a beat leaves her unsatisfied — she nods, asks one
-// clarifying question at most, then goes quiet. "quiet" carries that withdrawal;
-// "engaged" is reserved for the check-in moment the persona doc identifies as
-// what actually earns her trust.
-function ClaireBubble({ text, mood, animClass = "slide-in" }) {
-  const moodStyles = {
-    open:     { bg: B.lightBlue, border: B.blue },
-    engaged:  { bg: "#EAF5EB",   border: "#6DBF79" },
-    quiet:    { bg: B.amber,     border: B.amberBorder },
-  };
-  const s = moodStyles[mood] || { bg: B.cream, border: "#D0D0D0" };
-
-  return (
-    <div className={animClass} style={{
-      background: s.bg,
-      border: `1.5px solid ${s.border}`,
-      borderRadius: "4px 16px 16px 16px",
-      padding: "14px 16px", marginBottom: 16,
-    }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
-        <div style={{
-          width: 28, height: 28, borderRadius: "50%",
-          background: `linear-gradient(135deg, ${B.copper} 0%, #C49060 100%)`,
-          display: "flex", alignItems: "center", justifyContent: "center",
-          fontSize: 12, fontWeight: 700, color: B.white, flexShrink: 0,
-        }}>C</div>
-        <span style={{ fontSize: 12, fontWeight: 700, color: B.darkBlue, letterSpacing: 0.3 }}>CLAIRE</span>
-      </div>
-      <p style={{ fontSize: 15, color: B.text, lineHeight: 1.55, fontStyle: "italic" }}>{text}</p>
-    </div>
-  );
-}
-
-// ── Claire avatar video — EXPERIMENT ONLY, not part of the real Module 3 build ──
-// Replaces ClaireBubble for the topic-question moment: an AI avatar (Synthesia)
-// speaks beat.claireOpen instead of it appearing as a text card. Autoplay is
-// attempted with sound on mount (each beat remounts fresh via BeatScreen's
-// key={beatIndex} in App(), so this fires per beat); if the browser blocks
-// autoplay-with-sound, a Play button overlay appears instead of failing
-// silently. A Replay control is always available underneath once the clip
-// has started, per the "play it again if they want" requirement.
-function ClaireAvatarVideo({ src, scrollRef }) {
+// ── Shenae avatar video ──────────────────────────────────────────────────────
+// Per the Avatar Rollout handoff (09/08): replaces ShenaeBubble for the
+// topic-question moment only — an AI avatar speaks beat.shenaeAvatarSrc
+// instead of it appearing as a text card. Modeled directly on
+// MarisolAvatarVideo in module 2 avatar/index.html (itself modeled on
+// JennyAvatarVideo in module 1 avatar/index.html, in turn modeled on
+// ClaireAvatarVideo in the original module 3 avatar/index.html concept
+// experiment). Autoplay is attempted with sound on mount (each beat remounts
+// fresh via BeatScreen's key={beatIndex} in App(), so this fires per beat);
+// if the browser blocks autoplay-with-sound, a Play button overlay appears
+// instead of failing silently. A Replay control is always available
+// underneath once the clip has started.
+function ShenaeAvatarVideo({ src, scrollRef }) {
   const videoRef = useRef(null);
   const [needsPlayButton, setNeedsPlayButton] = useState(false);
   const [started, setStarted] = useState(false);
@@ -423,11 +395,7 @@ function ClaireAvatarVideo({ src, scrollRef }) {
     if (!v) return;
     v.currentTime = 0;
     // Delayed slightly, and scroll-to-top is re-asserted once playback
-    // actually starts: on mobile (Safari in particular), a video beginning
-    // to autoplay can itself scroll the page to bring it into view, which
-    // undoes the scroll-to-top the phase transition already did an instant
-    // earlier and leaves the learner mid-page instead of at the top. Caught
-    // 08/28 (Jonathan, testing on his phone).
+    // actually starts — see the scrollTop() comment above for why.
     const t = setTimeout(() => {
       const playPromise = v.play();
       if (playPromise !== undefined) {
@@ -463,7 +431,7 @@ function ClaireAvatarVideo({ src, scrollRef }) {
     }}>
       <div style={{ padding: "16px" }}>
         <div style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", letterSpacing: 0.8, marginBottom: 10 }}>
-          CLAIRE
+          SHENAE
         </div>
         <div className="avatar-video-frame" style={{ position: "relative", aspectRatio: "16 / 9", borderRadius: 10, overflow: "hidden", background: "#000" }}>
           <video
@@ -477,7 +445,7 @@ function ClaireAvatarVideo({ src, scrollRef }) {
           {needsPlayButton && (
             <button
               onClick={handlePlayClick}
-              aria-label="Play Claire's question"
+              aria-label="Play Shenae's question"
               style={{
                 position: "absolute", inset: 0, width: "100%", height: "100%",
                 background: "rgba(0,20,40,0.4)", border: "none", cursor: "pointer",
@@ -515,12 +483,60 @@ function ClaireAvatarVideo({ src, scrollRef }) {
           </button>
         )}
 
-        {/* AI-disclosure caption — required for this experiment (not needed in
-            the real build, which uses real surgeon footage throughout). */}
+        {/* AI-disclosure caption — built from Shenae's approved fictional-patient
+            line (the same sentence used on the "About this program" screen),
+            merged with the AI-avatar disclosure. Per the Avatar Rollout
+            handoff, no vendor name in this user-facing text (standing rule as
+            of 09/08, applies to every module) — the caption discloses that an
+            AI avatar is used, not which tool made it. */}
         <p style={{ fontSize: 11, color: "rgba(255,255,255,0.45)", fontStyle: "italic", lineHeight: 1.4, marginTop: started ? 4 : 12 }}>
-          Claire is played by an AI avatar (Synthesia) for this concept build — not a real patient, and not part of the approved Module 3 course.
+          Shenae is played by an AI avatar for this version of the course. Shenae is a fictional patient used for educational purposes.
         </p>
       </div>
+    </div>
+  );
+}
+
+// ── Shenae bubble ─────────────────────────────────────────────────────────────
+// Renders opt.shenaeReact — the post-option reaction — per the Avatar Rollout
+// handoff (09/08): only the beat-opening topic question becomes avatar video
+// (see ShenaeAvatarVideo below); the reaction stays exactly as text, unchanged
+// from the real Module 3 build's ClaireBubble. Renamed to Shenae here because
+// this build's avatar persona is Shenae, not Claire — every module gets its
+// own distinct avatar name (standing rule as of 09/08); the approved text
+// build (module3/index.html) keeps "Claire" unchanged.
+//
+// Claire's tell (per persona doc) parallels Sarah's, not Maya's: she doesn't
+// challenge out loud when a beat leaves her unsatisfied — she nods, asks one
+// clarifying question at most, then goes quiet. "quiet" carries that withdrawal;
+// "engaged" is reserved for the check-in moment the persona doc identifies as
+// what actually earns her trust. Same tell, same mood mechanics — only the
+// on-screen name and avatar likeness change in this build.
+function ShenaeBubble({ text, mood, animClass = "slide-in" }) {
+  const moodStyles = {
+    open:     { bg: B.lightBlue, border: B.blue },
+    engaged:  { bg: "#EAF5EB",   border: "#6DBF79" },
+    quiet:    { bg: B.amber,     border: B.amberBorder },
+  };
+  const s = moodStyles[mood] || { bg: B.cream, border: "#D0D0D0" };
+
+  return (
+    <div className={animClass} style={{
+      background: s.bg,
+      border: `1.5px solid ${s.border}`,
+      borderRadius: "4px 16px 16px 16px",
+      padding: "14px 16px", marginBottom: 16,
+    }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+        <div style={{
+          width: 28, height: 28, borderRadius: "50%",
+          background: `linear-gradient(135deg, ${B.copper} 0%, #C49060 100%)`,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          fontSize: 12, fontWeight: 700, color: B.white, flexShrink: 0,
+        }}>S</div>
+        <span style={{ fontSize: 12, fontWeight: 700, color: B.darkBlue, letterSpacing: 0.3 }}>SHENAE</span>
+      </div>
+      <p style={{ fontSize: 15, color: B.text, lineHeight: 1.55, fontStyle: "italic" }}>{text}</p>
     </div>
   );
 }
@@ -836,7 +852,7 @@ function DisclosuresScreen({ onContinue, onBack }) {
           The sale and distribution of Mentor Breast Implant Devices are restricted to users and/or user facilities that provide information to patients about the risks and benefits of the device prior to its use in the form and manner specified in approved labeling to be provided by Mentor Worldwide LLC.
         </p>
         <p style={{ fontSize: 11.5, color: "#555", lineHeight: 1.5, marginBottom: 0 }}>
-          Prior to use, refer to the instructions for use supplied with this device for indications, contraindications, side effects, warnings and precautions. Caution: US law restricts this device to sale by or on the order of a physician.
+          Important information: Prior to use, refer to the instructions for use supplied with this device for indications, contraindications, side effects, warnings and precautions. Caution: US law restricts this device to sale by or on the order of a physician.
         </p>
       </div>
       <PrimaryBtn onClick={onContinue}>Continue →</PrimaryBtn>
@@ -866,9 +882,11 @@ function DescriptionKolScreen({ onContinue, onBack }) {
 
       {/* Fictional-patient disclosure — per Daniel DeSpirito's approved pattern
           (copy-approval, 08/24), added to the "About this program" screen for
-          each module. Claire is Module 3's persona. */}
+          each module. Shenae is this Module 3 avatar build's persona — the
+          approved text build (module3/index.html) keeps "Claire" unchanged;
+          see Avatar_Rollout_Handoff_09-08.md for the naming rationale. */}
       <p style={{ fontSize: 13, color: B.midGrey, fontStyle: "italic", lineHeight: 1.5, marginBottom: 26 }}>
-        Claire is a fictional patient used for educational purposes.
+        Shenae is a fictional patient used for educational purposes.
       </p>
 
       <div style={{
@@ -1088,12 +1106,12 @@ function IntroScreen({ onStart }) {
         Module 2 covered how anatomy drives implant choice and how measurements become decisions. This module moves into the conversation itself — where the incision goes, and where the implant sits.
       </p>
       <p style={{ fontSize: 15, color: "#4A5568", lineHeight: 1.6, marginBottom: 24 }}>
-        You're about to meet Claire — a 47-year-old patient in her first consultation, about eighteen months past her divorce and finally making decisions for herself. She's done enough research to know the vocabulary, but she's here because she wants to actually understand her options, not just be handed a recommendation.
+        You're about to meet Shenae — a 47-year-old patient in her first consultation, about eighteen months past her divorce and finally making decisions for herself. She's done enough research to know the vocabulary, but she's here because she wants to actually understand her options, not just be handed a recommendation.
       </p>
 
       <div className="desktop-row">
       <PatientCard
-        name="Claire"
+        name="Shenae"
         age={47}
         occupation="Recently promoted"
         quote="I've been doing my research, and I keep coming back to one thing: I really don't want a visible scar. I know there are different options for where the incision goes — can you walk me through what those are and what the tradeoffs look like?"
@@ -1109,9 +1127,9 @@ function IntroScreen({ onStart }) {
           HOW THIS WORKS
         </div>
         {[
-          "Claire speaks. Read carefully — not just what she says, but how she says it.",
+          "Shenae speaks. Read carefully — not just what she says, but how she says it.",
           "Choose your response. Three options are available.",
-          "See how Claire reacts, then make your best guess before the surgeon video plays.",
+          "See how Shenae reacts, then make your best guess before the surgeon video plays.",
           "Hear from experienced surgeons, then continue the consultation.",
         ].map((step, i) => (
           <div key={i} style={{ display: "flex", gap: 12, marginBottom: i < 3 ? 10 : 0 }}>
@@ -1175,12 +1193,8 @@ function BeatScreen({ beat, beatIndex, total, onChosen, onBack, scrollRef }) {
         Topic {beatIndex + 1} of {total} · Module 3
       </div>
 
-      {/* Claire opens — EXPERIMENT: AI avatar video instead of the text bubble.
-          beat.claireOpen/claireMood are left in the data unused here (still
-          referenced by ClaireBubble elsewhere in this file, e.g. the reaction
-          bubbles below) rather than removed, so this stays a minimal, isolated
-          change from the real Module 3 build. */}
-      <ClaireAvatarVideo src={beat.claireAvatarSrc} scrollRef={scrollRef} />
+      {/* Shenae opens (avatar video) */}
+      <ShenaeAvatarVideo src={beat.shenaeAvatarSrc} scrollRef={scrollRef} />
 
       {/* Options or reaction */}
       {chosen === null ? (
@@ -1240,8 +1254,8 @@ function BeatScreen({ beat, beatIndex, total, onChosen, onBack, scrollRef }) {
             </div>
           </div>
 
-          {/* Claire's reaction */}
-          <ClaireBubble text={opt.claireReact} mood={opt.claireMoodReact} animClass="slide-in" />
+          {/* Shenae's reaction */}
+          <ShenaeBubble text={opt.shenaeReact} mood={opt.shenaeMoodReact} animClass="slide-in" />
 
           {/* Miss note */}
           {isMiss && opt.missNote && <MissNote text={opt.missNote} />}
@@ -1423,7 +1437,7 @@ function ClosingScreen({ onFinish, onBack, scrollRef }) {
           <p style={{ fontSize: 14, color: "rgba(255,255,255,0.85)", lineHeight: 1.55, fontStyle: "italic" }}>
             "Okay. I think I can actually explain this to myself now — not just remember what you said, but why it makes sense for me."
           </p>
-          <div style={{ fontSize: 12, color: B.copper, marginTop: 6, fontWeight: 600 }}>— Claire</div>
+          <div style={{ fontSize: 12, color: B.copper, marginTop: 6, fontWeight: 600 }}>— Shenae</div>
         </div>
       </div>
 
