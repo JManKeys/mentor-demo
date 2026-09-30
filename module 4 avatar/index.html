@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>MENTOR™ Future Leaders: Breast Augmentation Consultation · Module 4 (Avatar Concept)</title>
+<title>MENTOR™ Future Leaders: Breast Augmentation Consultation · Module 4</title>
+<meta name="robots" content="noindex, nofollow">
 <!-- React/ReactDOM CDN — pinned per project standard (see MENTOR_Residency_Pitfalls.md
      #5). Found unpinned during the 08/27 copy-approval edit pass — the same gap
      Modules 1, 2, and 3 all had. Pinned to 18.3.1, the final 18.x release, to match
@@ -437,7 +438,7 @@ function Header() {
         fontSize: 11, padding: "3px 10px",
         borderRadius: 20, letterSpacing: 1,
         flexShrink: 0, whiteSpace: "nowrap",
-      }}>Module 4 · Avatar concept</div>
+      }}>Module 4</div>
     </div>
   );
 }
@@ -1186,6 +1187,7 @@ function BeatScreen({ beat, beatIndex, total, onChosen, onBack, scrollRef }) {
   const [guess, setGuess] = useState("");
   const [guessSubmitted, setGuessSubmitted] = useState(false);
   const [hovered, setHovered] = useState(null);
+  const video2Ref = useRef(null);
 
   const opt = chosen !== null ? beat.options[chosen] : null;
   const isMiss = opt && (opt.quality === "miss" || opt.quality === "weak");
@@ -1386,22 +1388,24 @@ function BeatScreen({ beat, beatIndex, total, onChosen, onBack, scrollRef }) {
                   <p style={{ fontSize: 13, color: B.text, lineHeight: 1.5, marginBottom: 12 }}>
                     {beat.videoDesc2}
                   </p>
-                  <SecondaryBtn onClick={() => { setShowVideo2(true); setTimeout(() => scrollTop(scrollRef), 100); }}>
+                  <SecondaryBtn onClick={() => { setShowVideo2(true); setTimeout(() => { if (video2Ref.current) video2Ref.current.scrollIntoView({ behavior: "smooth", block: "start" }); }, 100); }}>
                     Watch second perspective →
                   </SecondaryBtn>
                 </div>
               )}
 
               {hasTwoVideos && showVideo2 && (
-                <VideoCard
-                  label={beat.videoLabel2}
-                  desc={beat.videoDesc2}
-                  vimeoId={beat.vimeoId2 || null}
-                  brightcoveUrl={beat.brightcoveUrl2 || null}
-                  localSrc={beat.localSrc2 || null}
-                  isSecond={true}
-                  animClass="slide-in"
-                />
+                <div ref={video2Ref}>
+                  <VideoCard
+                    label={beat.videoLabel2}
+                    desc={beat.videoDesc2}
+                    vimeoId={beat.vimeoId2 || null}
+                    brightcoveUrl={beat.brightcoveUrl2 || null}
+                    localSrc={beat.localSrc2 || null}
+                    isSecond={true}
+                    animClass="slide-in"
+                  />
+                </div>
               )}
 
               {/* Opinion-disclaimer footnote — item 4.2-B, this video only (Dr.
