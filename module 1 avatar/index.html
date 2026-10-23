@@ -525,7 +525,11 @@ const BEATS = [
     // Avatar Rollout handoff (09/08) — AI avatar (Synthesia) delivering
     // jennyOpen as video instead of the JennyBubble text card. Beat 1: silicone
     // vs. saline. See JennyAvatarVideo below.
-    jennyAvatarSrc: "Jenny_M1Q1.mp4",
+    // Swapped to Brightcove (10/23) — AMP US_MNT_AMNT_418936 "Jenny_M1Q1", the
+    // first clip J&J publishing has returned. Beats 2–4 still use local mp4s
+    // (jennyAvatarSrc) until their Brightcove links come back. Jenny_M1Q1.mp4
+    // is left in the folder, no longer referenced.
+    jennyBrightcoveUrl: "https://players.brightcove.net/5716634431001/default_default/index.html?videoId=6407244329112",
     options: [
       {
         label: "A",
@@ -845,7 +849,7 @@ function JennyBubble({ text, mood, animClass = "slide-in" }) {
 // autoplay-with-sound, a Play button overlay appears instead of failing
 // silently. A Replay control is always available underneath once the clip
 // has started.
-function JennyAvatarVideo({ src, scrollRef }) {
+function JennyAvatarVideo({ src, brightcoveUrl = null, scrollRef }) {
   const videoRef = useRef(null);
   const [needsPlayButton, setNeedsPlayButton] = useState(false);
   const [started, setStarted] = useState(false);
@@ -853,6 +857,10 @@ function JennyAvatarVideo({ src, scrollRef }) {
   useEffect(() => {
     setNeedsPlayButton(false);
     setStarted(false);
+    // Brightcove path (added 10/23): the embedded player owns playback, so
+    // there is no <video> element to autoplay, and the custom Play overlay and
+    // Replay control below are not used — the player's own controls cover both.
+    if (brightcoveUrl) return;
     const v = videoRef.current;
     if (!v) return;
     v.currentTime = 0;
@@ -867,7 +875,7 @@ function JennyAvatarVideo({ src, scrollRef }) {
       }
     }, 150);
     return () => clearTimeout(t);
-  }, [src]);
+  }, [src, brightcoveUrl]);
 
   function handlePlayClick() {
     const v = videoRef.current;
@@ -896,15 +904,26 @@ function JennyAvatarVideo({ src, scrollRef }) {
           JENNY
         </div>
         <div className="avatar-video-frame" style={{ position: "relative", aspectRatio: "16 / 9", borderRadius: 10, overflow: "hidden", background: "#000" }}>
-          <video
-            ref={videoRef}
-            src={src}
-            playsInline
-            preload="auto"
-            onEnded={() => setStarted(true)}
-            style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "contain" }}
-          />
-          {needsPlayButton && (
+          {brightcoveUrl ? (
+            <iframe
+              src={brightcoveUrl}
+              allowFullScreen
+              frameBorder="0"
+              allow="autoplay; fullscreen; encrypted-media"
+              style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: "none" }}
+              title="Jenny's question"
+            />
+          ) : (
+            <video
+              ref={videoRef}
+              src={src}
+              playsInline
+              preload="auto"
+              onEnded={() => setStarted(true)}
+              style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "contain" }}
+            />
+          )}
+          {!brightcoveUrl && needsPlayButton && (
             <button
               onClick={handlePlayClick}
               aria-label="Play Jenny's question"
@@ -1645,7 +1664,7 @@ function BeatScreen({ beat, beatIndex, total, onChosen, onBack, scrollRef }) {
           data unused here (still referenced nowhere else in this file, since
           this build's reaction bubbles use jennyReact/jennyMoodReact instead)
           rather than removed, so the two builds stay easy to diff. */}
-      <JennyAvatarVideo src={beat.jennyAvatarSrc} scrollRef={scrollRef} />
+      <JennyAvatarVideo src={beat.jennyAvatarSrc} brightcoveUrl={beat.jennyBrightcoveUrl || null} scrollRef={scrollRef} />
 
       {/* Options or reaction */}
       {chosen === null ? (
