@@ -507,6 +507,12 @@ const MODULE_KOL_IDS = ["mosharrafa", "adams", "yates", "mohan"];
 // downstream if reviewers disagree. No special handling needed in this build.
 // Strong-option position varies per beat (Beat1=A, Beat2=B, Beat3=C, Beat4=B) so
 // the strong answer isn't reliably in one letter position.
+// Brightcove (10/29): all 12 Module 1 clips are hosted. Account 5716634431001
+// (Mike Chen), player ID oPYIol555 (capital I after the Y, lowercase l after
+// the o), the J&J player with the title overlay turned off. Allison Middleton
+// sent the links 10/29. To change the player, edit only this line.
+// The local mp4s stay in the folder but are no longer referenced.
+const bc = (videoId) => `https://players.brightcove.net/5716634431001/oPYIol555_default/index.html?videoId=${videoId}`;
 const BEATS = [
   {
     id: 1,
@@ -518,21 +524,19 @@ const BEATS = [
     predictionPrompt: "Before the video plays: what do you think an experienced surgeon says when a patient who's already decided on silicone asks him to walk her through the difference anyway?",
     // Beat 1.1 — Primary Mosharrafa / Secondary Yates, per the tracker mapping
     // in the comment above.
-    localSrc: "Mosh_1.1.mp4",
-    localSrc2: "Yates_1.1.mp4",
+    brightcoveUrl: bc("6407244226112"),   // Mosh 1.1
+    brightcoveUrl2: bc("6407245342112"),  // Yates 1.1
     jennyOpen: `"I've done a ton of research — probably more than I should have, honestly. I know I want silicone, but I keep reading things that make me second-guess myself. Can you just walk me through the difference so I know I'm making the right call?"`,
     jennyMood: "open",
     // Avatar Rollout handoff (09/08) — AI avatar (Synthesia) delivering
     // jennyOpen as video instead of the JennyBubble text card. Beat 1: silicone
     // vs. saline. See JennyAvatarVideo below.
-    // Swapped to Brightcove (10/23) — AMP US_MNT_AMNT_418936 "Jenny_M1Q1", the
-    // first clip J&J publishing has returned. Beats 2–4 still use local mp4s
-    // (jennyAvatarSrc) until their Brightcove links come back. Jenny_M1Q1.mp4
-    // is left in the folder, no longer referenced.
-    // Player (10/27): J&J's player "JNJ MDC - DEFAULT", ID nBKI6uwiA, per Sabrina
-    // Heady (J&J web content). The first link J&J sent used Brightcove's stock
-    // "default_default" player, which showed the asset name over the video.
-    jennyBrightcoveUrl: "https://players.brightcove.net/5716634431001/nBKI6uwiA_default/index.html?videoId=6407244329112",
+    // Swapped to Brightcove (10/23) — AMP US_MNT_AMNT_418936 "Jenny_M1Q1".
+    // All four Jenny clips are on Brightcove as of 10/29 (see bc() above).
+    // The first link J&J sent used Brightcove's stock "default_default" player,
+    // which showed the asset name over the video; the 10/27 player nBKI6uwiA
+    // was replaced 10/29 by oPYIol555 with the title off.
+    jennyBrightcoveUrl: bc("6407244329112"),
     options: [
       {
         label: "A",
@@ -569,13 +573,13 @@ const BEATS = [
     videoDesc2: "Her approach: patients use the same word to mean different, sometimes opposite things (natural slope vs. proportionate/augmented), and inspiration photos are the tool for surfacing which one a given patient actually means.",
     predictionPrompt: "Before the video plays: what do you think an experienced surgeon means by 'natural,' clinically, when a patient shows him a photo that's clearly augmented?",
     // Beat 1.2 — Primary Mosharrafa / Secondary Mohan.
-    localSrc: "Mosh_1.2.mp4",
-    localSrc2: "Mohan_1.2.mp4",
+    brightcoveUrl: bc("6407246297112"),   // Mosh 1.2
+    brightcoveUrl2: bc("6407243840112"),  // Mohan 1.2
     jennyOpen: `"Okay — so I have this picture. [She turns her phone toward you. The result is clearly augmented — fuller upper pole, visible projection.] This is kind of the look I'm going for. Is that natural? Because when I say natural, I think I mean something specific, but everyone looks at me weird when I show them this."`,
     jennyMood: "open",
     // Beat 2: the augmented reference photo / what "natural" means. See the
     // note on Beat 1's jennyAvatarSrc above.
-    jennyAvatarSrc: "Jenny_M1Q2.mp4",
+    jennyBrightcoveUrl: bc("6407243437112"),
     options: [
       {
         label: "A",
@@ -612,13 +616,13 @@ const BEATS = [
     videoDesc2: "More technical companion: base diameter and desired volume determine profile (not the reverse), and round implants typically retain more upper-pole volume than teardrop — relevant to patients who want fuller upper pole vs. those who don't.",
     predictionPrompt: "Before the video plays: what do you think an experienced surgeon says when a patient repeats a belief she picked up online — that round implants look fake?",
     // Beat 1.3 — Primary Adams / Secondary Mosharrafa.
-    localSrc: "Adams_1.3.mp4",
-    localSrc2: "Mosh_1.3.mp4",
+    brightcoveUrl: bc("6407244426112"),   // Adams 1.3
+    brightcoveUrl2: bc("6407245498112"),  // Mosh 1.3
     jennyOpen: `"Someone I follow just got the teardrop ones and said they're more natural-looking. Is that true? Because I've seen people say round ones look fake, and I really don't want that round-ball thing at the top."`,
     jennyMood: "open",
     // Beat 3: teardrop vs. round implant shape. See the note on Beat 1's
     // jennyAvatarSrc above.
-    jennyAvatarSrc: "Jenny_M1Q3.mp4",
+    jennyBrightcoveUrl: bc("6407244725112"),
     options: [
       {
         label: "A",
@@ -655,13 +659,13 @@ const BEATS = [
     videoDesc2: "Complementary: soft-tissue evaluation and cohesivity matching are what make an implant undetectable by feel — framed as the explicit goal of the surgery, not just a possible outcome.",
     predictionPrompt: "Before the video plays: what do you think an experienced surgeon says determines whether an implant actually feels real?",
     // Beat 1.4 — Primary Mohan / Secondary Mosharrafa.
-    localSrc: "Mohan_1.4.mp4",
-    localSrc2: "Mosh_1.4.mp4",
+    brightcoveUrl: bc("6407244123112"),   // Mohan 1.4
+    brightcoveUrl2: bc("6407244824112"),  // Mosh 1.4
     jennyOpen: `"Last thing — my friend said hers feel completely real. Like, she says people can't tell unless she tells them. Is that actually possible? Because I've touched some at like a fitting thing and they felt… firm. Not bad, just not what I expected."`,
     jennyMood: "vulnerable",
     // Beat 4: what implants actually feel like. See the note on Beat 1's
     // jennyAvatarSrc above.
-    jennyAvatarSrc: "Jenny_M1Q4.mp4",
+    jennyBrightcoveUrl: bc("6407244122112"),
     options: [
       {
         label: "A",
