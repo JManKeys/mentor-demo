@@ -387,6 +387,77 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
 </head>
 <body>
 <div id="root"></div>
+<script>
+/* SCORM 2004 (3rd Edition) runtime for Absorb.
+   Finds the LMS API (API_1484_11) in a parent frame or the opener, initializes the
+   session on load, and reports completion when the learner reaches "Close Module 1".
+   Outside an LMS (the GitHub preview) no API is found and every call is a no-op.
+   No resume: cmi.exit is always "normal", and nothing the learner types is sent. */
+(function () {
+  var api = null, initialized = false, finished = false, startTime = Date.now();
+
+  function findAPI(win) {
+    var hops = 0;
+    while (win && hops < 500) {
+      try { if (win.API_1484_11) return win.API_1484_11; } catch (e) {}
+      try { if (win.parent && win.parent !== win) { win = win.parent; hops++; continue; } } catch (e) {}
+      break;
+    }
+    return null;
+  }
+  function set(key, value) {
+    try { return api.SetValue(key, String(value)) === "true"; } catch (e) { return false; }
+  }
+  function sessionTime() {
+    var s = Math.max(0, Math.round((Date.now() - startTime) / 1000));
+    var h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+    return "PT" + h + "H" + m + "M" + sec + "S";
+  }
+  function close() {
+    if (!initialized || finished) return;
+    finished = true;
+    try {
+      set("cmi.exit", "normal");
+      set("cmi.session_time", sessionTime());
+      api.Commit("");
+      api.Terminate("");
+    } catch (e) {}
+  }
+
+  window.MentorScorm = {
+    init: function () {
+      if (initialized || finished) return;
+      try { api = findAPI(window) || (window.opener ? findAPI(window.opener) : null); } catch (e) { api = null; }
+      if (!api) return;
+      try { initialized = api.Initialize("") === "true"; } catch (e) { initialized = false; }
+      if (!initialized) return;
+      try {
+        if (api.GetValue("cmi.completion_status") !== "completed") set("cmi.completion_status", "incomplete");
+        api.Commit("");
+      } catch (e) {}
+    },
+    // Called once, from handleClose ("Close Module 1"). Score values are fixed
+    // pass-through numbers for LMS compatibility; the module has no scoring.
+    complete: function () {
+      if (!initialized || finished) return;
+      set("cmi.completion_status", "completed");
+      set("cmi.success_status", "passed");
+      set("cmi.score.min", 0);
+      set("cmi.score.max", 100);
+      set("cmi.score.raw", 100);
+      set("cmi.score.scaled", 1);
+      try { api.Commit(""); } catch (e) {}
+      close();
+    },
+    // If the learner leaves early the status stays "incomplete".
+    exit: close
+  };
+
+  window.MentorScorm.init();
+  window.addEventListener("beforeunload", function () { window.MentorScorm.exit(); });
+  window.addEventListener("pagehide", function () { window.MentorScorm.exit(); });
+})();
+</script>
 <script type="text/babel">
 
 const { useState, useRef, useEffect } = React;
@@ -1536,8 +1607,8 @@ function ISIScreenTwo({ onClose, onBack }) {
 
 // ── Terminal screen — reached only via "Close Module 1." Mirrors the old
 // CompleteScreen's role as the true resting state (no further action besides
-// what's offered here); real SCORM completion firing is a build item for the
-// LMS integration phase, not this demo.
+// what's offered here). SCORM completion fires from handleClose, just before
+// this screen renders.
 function ClosedScreen() {
   return (
     <div className="fade-in" style={{ textAlign: "center", paddingTop: 40 }}>
@@ -2132,11 +2203,12 @@ function App() {
     scrollTop(scrollRef);
   }
 
-  // "Close Module 1" — functions the same way "Finish Module 1" always did:
-  // advances the phase to a final resting screen, no further action beyond
-  // that (real SCORM completion firing is LMS-integration work, not this
-  // demo). Confirmed with Jonathan.
+  // "Close Module 1" — advances to the final resting screen and reports
+  // completion to the LMS through window.MentorScorm (defined in the plain
+  // script above the Babel block; a no-op when no LMS API is present, such as
+  // on the GitHub preview).
   function handleClose() {
+    if (window.MentorScorm) window.MentorScorm.complete();
     setPhase("closed");
     scrollTop(scrollRef);
   }
