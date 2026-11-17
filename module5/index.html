@@ -1291,6 +1291,8 @@ function BeatScreen({ beat, beatIndex, total, onChosen, onBack, scrollRef }) {
   const [guessSubmitted, setGuessSubmitted] = useState(false);
   const [hovered, setHovered] = useState(null);
   const video2Ref = useRef(null);
+  const video1Ref = useRef(null);
+  const reactionRef = useRef(null);
 
   const opt = chosen !== null ? beat.options[chosen] : null;
   const isMiss = opt && (opt.quality === "miss" || opt.quality === "weak");
@@ -1300,7 +1302,9 @@ function BeatScreen({ beat, beatIndex, total, onChosen, onBack, scrollRef }) {
   function handleChoose(idx) {
     if (chosen !== null) return;
     setChosen(idx);
-    setTimeout(() => scrollTop(scrollRef), 100);
+    // Land on the learner's response and the patient's reaction, not back at the
+    // avatar video at the top of the screen.
+    setTimeout(() => { if (reactionRef.current) reactionRef.current.scrollIntoView({ behavior: "smooth", block: "start" }); }, 100);
   }
 
   function handleReconsider() {
@@ -1311,7 +1315,9 @@ function BeatScreen({ beat, beatIndex, total, onChosen, onBack, scrollRef }) {
   function handleSubmitGuess() {
     setGuessSubmitted(true);
     setShowVideo(true);
-    setTimeout(() => scrollTop(scrollRef), 100);
+    // Take the learner to the expert video they just unlocked. Scrolling to the top
+    // put them back on the avatar video and made them scroll down to find it.
+    setTimeout(() => { if (video1Ref.current) video1Ref.current.scrollIntoView({ behavior: "smooth", block: "start" }); }, 100);
   }
 
   function handleNext() {
@@ -1367,7 +1373,7 @@ function BeatScreen({ beat, beatIndex, total, onChosen, onBack, scrollRef }) {
       ) : (
         <div>
           {/* Chosen option recap */}
-          <div className="slide-in" style={{
+          <div ref={reactionRef} className="slide-in" style={{
             background: B.softGrey, borderRadius: 10,
             border: "1.5px solid #D8E2EE",
             padding: "12px 14px", marginBottom: 14,
@@ -1465,6 +1471,7 @@ function BeatScreen({ beat, beatIndex, total, onChosen, onBack, scrollRef }) {
 
               {/* Video 1 */}
               {showVideo && (
+                <div ref={video1Ref}>
                 <VideoCard
                   label={beat.videoLabel}
                   desc={beat.videoDesc}
@@ -1474,6 +1481,7 @@ function BeatScreen({ beat, beatIndex, total, onChosen, onBack, scrollRef }) {
                   brightcoveUrl={beat.brightcoveUrl || null}
                   animClass="slide-in"
                 />
+                </div>
               )}
 
               {/* Opinion-disclaimer footnote — item 5.3-A, this (primary)
