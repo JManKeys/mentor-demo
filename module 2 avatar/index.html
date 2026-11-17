@@ -483,6 +483,12 @@ const MODULE_KOL_IDS = ["mosharrafa", "adams", "yates", "mohan"];
 // renamed sarah*→marisol* for consistency with the module1 avatar's jenny*
 // renaming. Five avatar clips (Marisol_M2Q1–5.mp4) wired 1:1 in beat order,
 // matching Jonathan's own filenames — same convention as the four Jenny clips.
+// Brightcove: all 14 Module 2 clips (nine surgeon, five Marisol) are on J&J's
+// account, played through the J&J player with the title overlay off. Allison
+// Middleton sent the links 11/17 (Marisol Q5 is a later upload than the rest,
+// ID 6408510894112). To change the player, edit only this line. The local mp4s
+// stay in the folder but are no longer referenced.
+const bc = (videoId) => `https://players.brightcove.net/5716634431001/oPYIol555_default/index.html?videoId=${videoId}`;
 const BEATS = [
   {
     id: 1,
@@ -491,15 +497,14 @@ const BEATS = [
     videoLabel2: "A Second Perspective: The High Five Process",
     videoDesc: "The key measurements taken at consultation — base width, sternal notch to nipple, nipple to IMF — and what each one tells you about MENTOR™ implant sizing and surgical planning.",
     videoDesc2: "A second surgeon's take on the same three core measurements, citing the landmark 2006 publication that established this approach.",
-    localSrc: "Mosh_2.1.mp4",
-    localSrc2: "Adams_2.1.mp4",
     vimeoId: null,
-    brightcoveUrl: "https://players.brightcove.net/3627127443001/ry1wjwONX_default/index.html?videoId=6073409883001",
+    brightcoveUrl: bc("6407656632112"),   // Mosh 2.1
+    brightcoveUrl2: bc("6407656221112"),  // Adams 2.1
     predictionPrompt: "Before the video plays: what do you think an experienced surgeon will emphasize most when explaining measurements to a patient like Marisol?",
     marisolOpen: `"So — my friend mentioned that you do a lot of measuring before you even talk about implants. I guess I always thought the size was just... what you asked for? What are you actually looking at when you measure someone?"`,
     marisolMood: "open",
     // Beat 1: measurements. See JennyAvatarVideo's precedent — MarisolAvatarVideo below.
-    marisolAvatarSrc: "Marisol_M2Q1.mp4",
+    marisolBrightcoveUrl: bc("6407656837112"),   // Marisol Q1
     options: [
       {
         label: "A",
@@ -532,12 +537,12 @@ const BEATS = [
     topicQuestion: `"My friend has 400cc and looks incredible — I'm pretty sure that's what I want. But she said we might need something different. Why would the same number look different on two people?"`,
     videoLabel: "Redirecting the Volume Fixation",
     videoDesc: "How to redirect a patient fixated on a specific cc number toward a goal-based conversation about proportion and outcome, using 3D imaging to bridge the gap between expectation and anatomy.",
-    localSrc: "Mosh_2.2.mp4",
+    brightcoveUrl: bc("6407658183112"),   // Mosh 2.2
     predictionPrompt: "Before the video plays: how do you think an experienced surgeon redirects the cc conversation without making Marisol feel like her research was wrong?",
     marisolOpen: `"So my friend had her augmentation done about a year ago — she got 400cc and honestly looks incredible. I'm pretty sure that's what I want, but she mentioned I might need something different because we're built differently? I just want to make sure I end up with the right size."`,
     marisolMood: "open",
     // Beat 2: the 400cc reference / redirecting the volume fixation.
-    marisolAvatarSrc: "Marisol_M2Q2.mp4",
+    marisolBrightcoveUrl: bc("6407656914112"),   // Marisol Q2
     options: [
       {
         label: "A",
@@ -572,8 +577,8 @@ const BEATS = [
     videoLabel2: "A Second Perspective: Documenting Asymmetry",
     videoDesc: "Why true symmetry is rare, and how using a different implant size on each side is often the better approach than treating both breasts identically.",
     videoDesc2: "A second surgeon's approach to identifying asymmetry early, documenting it, and discussing a possible lift if the difference isn't one a patient wants to keep.",
-    localSrc: "Yates_2.3.mp4",
-    localSrc2: "Mosh_2.3.mp4",
+    brightcoveUrl: bc("6407656838112"),   // Yates 2.3
+    brightcoveUrl2: bc("6407657967112"),  // Mosh 2.3
     // Item Y.1 — see OpinionFootnote's definition for full context. Applies to
     // this primary video only (Dr. Yates), not the secondary Mosharrafa video.
     opinionFootnote: true,
@@ -582,7 +587,7 @@ const BEATS = [
     marisolOpen: `"Can I ask — my nipples have always been slightly uneven. Like, one sits a little higher than the other. I've always kind of known that but I wasn't sure if it was... something I should mention. Does that affect anything with this?"`,
     marisolMood: "vulnerable",
     // Beat 3: nipple asymmetry.
-    marisolAvatarSrc: "Marisol_M2Q3.mp4",
+    marisolBrightcoveUrl: bc("6407656629112"),   // Marisol Q3
     options: [
       {
         label: "A",
@@ -617,13 +622,13 @@ const BEATS = [
     videoLabel2: "A Second Perspective: Using 3D Simulation to Show, Not Just Tell",
     videoDesc: "How to communicate a complex anatomical finding to a patient without giving her anxiety about the procedure — and why each finding requires a different surgical approach and MENTOR™ implant selection.",
     videoDesc2: "A second surgeon's approach — using measurements and 3D simulation to show a patient what an implant will and won't change about her anatomy.",
-    localSrc: "Mosh_2.4.mp4",
-    localSrc2: "Mohan_2.4.mp4",
+    brightcoveUrl: bc("6407657895112"),   // Mosh 2.4
+    brightcoveUrl2: bc("6407656631112"),  // Mohan 2.4
     predictionPrompt: "Before the video plays: how do you think an experienced surgeon explains a complex anatomical finding to a patient in a way that informs rather than alarms?",
     marisolOpen: `"So when you were looking at my measurements — you mentioned something about breast shape and how it might change which implant you'd recommend. I didn't totally follow that. What does that mean for me?"`,
     marisolMood: "open",
     // Beat 4: communicating a complex anatomical finding.
-    marisolAvatarSrc: "Marisol_M2Q4.mp4",
+    marisolBrightcoveUrl: bc("6407656628112"),   // Marisol Q4
     options: [
       {
         label: "A",
@@ -658,14 +663,14 @@ const BEATS = [
     videoLabel2: "A Second Perspective: 3D Breast Simulation",
     videoDesc: "How to involve the patient in the sizing decision without ceding clinical judgment — and why that balance matters for satisfaction outcomes.",
     videoDesc2: "A second surgeon's approach to using a 3D breast simulator, rather than a sizer alone, to give a patient a clearer picture of herself at different sizes.",
-    localSrc: "Mosh_2.5.mp4",
-    localSrc2: "Mohan_2.5.mp4",
+    brightcoveUrl: bc("6407656332112"),   // Mosh 2.5
+    brightcoveUrl2: bc("6407656630112"),  // Mohan 2.5
     streamSrc: "https://jnj-my.sharepoint.com/personal/jworkma1_its_jnj_com/_layouts/15/embed.aspx?UniqueId=3c082e5f-41e9-4c8a-8844-fbb4fb8d4960&embed=%7B%22ust%22%3Afalse%2C%22hv%22%3A%22CopyEmbedCode%22%7D&referrer=StreamWebApp&referrerScenario=EmbedDialog.Create",
     predictionPrompt: "Before the video plays: how do you think an experienced surgeon keeps the patient involved in the sizing decision while maintaining clinical authority?",
     marisolOpen: `"Okay — so after all of this, the measurements, the shape stuff, my friend's 400cc... how do you actually land on a number? Like what's the actual process for deciding what's right for me?"`,
     marisolMood: "open",
     // Beat 5: the sizing decision process.
-    marisolAvatarSrc: "Marisol_M2Q5.mp4",
+    marisolBrightcoveUrl: bc("6408510894112"),   // Marisol Q5 (later upload; see AMP correction)
     options: [
       {
         label: "A",
@@ -857,7 +862,7 @@ function MarisolBubble({ text, mood, animClass = "slide-in" }) {
 // autoplay-with-sound, a Play button overlay appears instead of failing
 // silently. A Replay control is always available underneath once the clip
 // has started.
-function MarisolAvatarVideo({ src, scrollRef }) {
+function MarisolAvatarVideo({ src, brightcoveUrl = null, scrollRef }) {
   const videoRef = useRef(null);
   const [needsPlayButton, setNeedsPlayButton] = useState(false);
   const [started, setStarted] = useState(false);
@@ -865,6 +870,10 @@ function MarisolAvatarVideo({ src, scrollRef }) {
   useEffect(() => {
     setNeedsPlayButton(false);
     setStarted(false);
+    // Brightcove path: the embedded player owns playback, so there is no
+    // <video> element to autoplay, and the custom Play overlay and Replay
+    // control below are not used. The player's own controls cover both.
+    if (brightcoveUrl) return;
     const v = videoRef.current;
     if (!v) return;
     v.currentTime = 0;
@@ -879,7 +888,7 @@ function MarisolAvatarVideo({ src, scrollRef }) {
       }
     }, 150);
     return () => clearTimeout(t);
-  }, [src]);
+  }, [src, brightcoveUrl]);
 
   function handlePlayClick() {
     const v = videoRef.current;
@@ -908,15 +917,26 @@ function MarisolAvatarVideo({ src, scrollRef }) {
           MARISOL
         </div>
         <div className="avatar-video-frame" style={{ position: "relative", aspectRatio: "16 / 9", borderRadius: 10, overflow: "hidden", background: "#000" }}>
-          <video
-            ref={videoRef}
-            src={src}
-            playsInline
-            preload="auto"
-            onEnded={() => setStarted(true)}
-            style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "contain" }}
-          />
-          {needsPlayButton && (
+          {brightcoveUrl ? (
+            <iframe
+              src={brightcoveUrl}
+              allowFullScreen
+              frameBorder="0"
+              allow="autoplay; fullscreen; encrypted-media"
+              style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: "none" }}
+              title="Marisol's question"
+            />
+          ) : (
+            <video
+              ref={videoRef}
+              src={src}
+              playsInline
+              preload="auto"
+              onEnded={() => setStarted(true)}
+              style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "contain" }}
+            />
+          )}
+          {!brightcoveUrl && needsPlayButton && (
             <button
               onClick={handlePlayClick}
               aria-label="Play Marisol's question"
@@ -1641,7 +1661,7 @@ function BeatScreen({ beat, beatIndex, total, onChosen, onBack, scrollRef }) {
           data unused here (still referenced nowhere else in this file, since
           the post-option reaction uses marisolReact/marisolMood instead)
           rather than removed, so the two builds stay easy to diff. */}
-      <MarisolAvatarVideo src={beat.marisolAvatarSrc} scrollRef={scrollRef} />
+      <MarisolAvatarVideo src={beat.marisolAvatarSrc} brightcoveUrl={beat.marisolBrightcoveUrl || null} scrollRef={scrollRef} />
 
       {/* Options or reaction */}
       {chosen === null ? (
